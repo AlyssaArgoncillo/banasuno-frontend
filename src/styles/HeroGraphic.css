@@ -1,0 +1,273 @@
+.hero-graphic {
+  width: 100%;
+  height: 100%;
+  min-height: 650px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.graphic-container {
+  position: relative;
+  width: 100%;
+  max-width: 700px;
+  aspect-ratio: 1 / 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.layer {
+  position: absolute;
+  border-radius: 50% 40% 55% 45% / 45% 55% 45% 55%;
+  filter: drop-shadow(0 2px 10px rgba(0, 0, 0, 0.08));
+  transition: transform 0.3s ease;
+  animation: pulse 5s ease-in-out infinite;
+}
+
+/* Stagger the animation from inner to outer (reversed) */
+.layer-center { animation-delay: 0s; }
+.layer-10 { animation-delay: 0.15s; }
+.layer-9 { animation-delay: 0.3s; }
+.layer-8 { animation-delay: 0.45s; }
+.layer-7 { animation-delay: 0.6s; }
+.layer-6 { animation-delay: 0.75s; }
+.layer-5 { animation-delay: 0.9s; }
+.layer-4 { animation-delay: 1.05s; }
+.layer-3 { animation-delay: 1.2s; }
+.layer-2 { animation-delay: 1.35s; }
+.layer-1 { animation-delay: 1.5s; }
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.04);
+    opacity: 0.92;
+  }
+}
+
+/* Outermost layers - light yellow with vein texture */
+.layer-1 {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, #FFDBA0 0%, #FFDDA8 50%, #FFE0B2 100%);
+  border-radius: 48% 52% 53% 47% / 44% 49% 51% 56%;
+  position: relative;
+  overflow: hidden;
+  filter: drop-shadow(0 3px 12px rgba(255, 184, 0, 0.3)) brightness(1.08);
+}
+
+.layer-1::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: 
+    repeating-linear-gradient(
+      45deg,
+      transparent,
+      transparent 100px,
+      rgba(255, 255, 255, 0.4) 100px,
+      rgba(255, 255, 255, 0.4) 102px
+    ),
+    repeating-linear-gradient(
+      -45deg,
+      transparent,
+      transparent 80px,
+      rgba(255, 255, 255, 0.3) 80px,
+      rgba(255, 255, 255, 0.3) 82px
+    ),
+    repeating-linear-gradient(
+      120deg,
+      transparent,
+      transparent 90px,
+      rgba(255, 220, 120, 0.2) 90px,
+      rgba(255, 220, 120, 0.2) 91px
+    );
+}
+
+.layer-2 {
+  width: 94%;
+  height: 94%;
+  background: linear-gradient(135deg, #FFCE94 0%, #FFCE99 50%, #FFCD9E 100%);
+  border-radius: 45% 55% 50% 50% / 50% 48% 52% 50%;
+  filter: drop-shadow(0 2px 10px rgba(255, 184, 0, 0.25)) brightness(1.06);
+}
+
+/* Pale orange layers */
+.layer-3 {
+  width: 87%;
+  height: 87%;
+  background: linear-gradient(135deg, #FFCC8F 0%, #FFC98A 50%, #FFC585 100%);
+  border-radius: 50% 50% 48% 52% / 48% 52% 48% 52%;
+  filter: drop-shadow(0 2px 10px rgba(255, 149, 89, 0.2)) brightness(1.05);
+}
+
+.layer-4 {
+  width: 80%;
+  height: 80%;
+  background: linear-gradient(135deg, #FFC285 0%, #FFBB80 50%, #FFB47A 100%);
+  border-radius: 52% 48% 50% 50% / 50% 50% 50% 50%;
+  filter: drop-shadow(0 2px 10px rgba(255, 149, 89, 0.18)) brightness(1.04);
+}
+
+/* Light orange layers */
+.layer-5 {
+  width: 72%;
+  height: 72%;
+  background: linear-gradient(135deg, #FFAD66 0%, #FFB375 50%, #FFBA85 100%);
+  border-radius: 48% 52% 51% 49% / 51% 49% 51% 49%;
+}
+
+.layer-6 {
+  width: 64%;
+  height: 64%;
+  background: linear-gradient(135deg, var(--orange-300) 0%, #FFB87A 50%, var(--orange-300) 100%);
+  border-radius: 50% 50% 52% 48% / 48% 52% 48% 52%;
+}
+
+/* Core orange/yellow layers */
+.layer-7 {
+  width: 55%;
+  height: 55%;
+  background: linear-gradient(135deg, #FF8533 0%, var(--orange-300) 50%, var(--orange-500) 100%);
+  border-radius: 51% 49% 50% 50% / 50% 50% 50% 50%;
+}
+
+.layer-8 {
+  width: 46%;
+  height: 46%;
+  background: linear-gradient(135deg, var(--orange-500) 0%, #FF7A33 50%, var(--orange-500) 100%);
+  border-radius: 49% 51% 48% 52% / 52% 48% 52% 48%;
+}
+
+/* Deep orange layers */
+.layer-9 {
+  width: 36%;
+  height: 36%;
+  background: linear-gradient(135deg, var(--orange-700) 0%, #CC5500 50%, #D96A1A 100%);
+  border-radius: 50% 50% 50% 50% / 50% 50% 50% 50%;
+}
+
+.layer-10 {
+  width: 27%;
+  height: 27%;
+  background: linear-gradient(135deg, var(--orange-900) 0%, #A64400 50%, var(--orange-700) 100%);
+  border-radius: 48% 52% 50% 50% / 50% 50% 48% 52%;
+}
+
+/* Center - dark void with mascot */
+.layer-center {
+  width: 18%;
+  height: 18%;
+  background: radial-gradient(circle, #1A1A1A 0%, var(--primary-900) 100%);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 
+    inset 0 3px 20px rgba(0, 0, 0, 0.8),
+    0 0 50px rgba(255, 107, 26, 0.5);
+  overflow: visible;
+  z-index: 10;
+}
+
+/* BanasUno Mascot Container */
+.mascot-container {
+  position: absolute;
+  width: 140%;
+  height: 140%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: float 6s ease-in-out infinite;
+}
+
+.banasuno-mascot {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 4px 20px rgba(255, 107, 26, 0.5));
+  animation: glow 3s ease-in-out infinite alternate;
+}
+
+/* Float animation for mascot */
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0) rotate(0deg);
+  }
+  25% {
+    transform: translateY(-15px) rotate(2deg);
+  }
+  50% {
+    transform: translateY(0) rotate(0deg);
+  }
+  75% {
+    transform: translateY(-10px) rotate(-2deg);
+  }
+}
+
+/* Glow animation for mascot */
+@keyframes glow {
+  0% {
+    filter: drop-shadow(0 4px 20px rgba(255, 107, 26, 0.4));
+  }
+  100% {
+    filter: drop-shadow(0 4px 30px rgba(255, 107, 26, 0.7));
+  }
+}
+
+/* Hover effects on the entire graphic */
+.graphic-container:hover .layer {
+  animation-play-state: paused;
+}
+
+.graphic-container:hover .mascot-container {
+  animation-play-state: paused;
+}
+
+@media (max-width: 1024px) {
+  .hero-graphic {
+    min-height: 550px;
+  }
+  
+  .graphic-container {
+    max-width: 550px;
+  }
+}
+
+@media (max-width: 768px) {
+  .hero-graphic {
+    min-height: 450px;
+  }
+  
+  .graphic-container {
+    max-width: 450px;
+  }
+  
+  .mascot-container {
+    width: 180%;
+    height: 180%;
+  }
+}
+
+@media (max-width: 480px) {
+  .hero-graphic {
+    min-height: 350px;
+  }
+  
+  .graphic-container {
+    max-width: 350px;
+  }
+  
+  .mascot-container {
+    width: 160%;
+    height: 160%;
+  }
+}
