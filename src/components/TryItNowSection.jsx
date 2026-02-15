@@ -1,5 +1,5 @@
 import '../styles/TryItNowSection.css';
-import HeatZonePreview from './HeatZonePreview';
+import HeatMap from './HeatMap';
 
 function TryItNowSection() {
   return (
@@ -18,7 +18,7 @@ function TryItNowSection() {
           <div className="monitor-screen">
             {/* Display area */}
             <div className="display-area">
-              <HeatZonePreview />
+              <HeatMap />
             </div>
           </div>
           {/* Bottom center controls inside the monitor frame */}
