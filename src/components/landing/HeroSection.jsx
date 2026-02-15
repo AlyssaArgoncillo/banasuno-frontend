@@ -1,6 +1,6 @@
 import HeroContent from './HeroContent';
 import HeroGraphic from './HeroGraphic';
-import '../styles/HeroSection.css';
+import '../../styles/HeroSection.css';
 
 function HeroSection() {
   return (

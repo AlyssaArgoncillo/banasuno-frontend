@@ -19,6 +19,32 @@
   z-index: 1;
 }
 
+.heatmap-loading,
+.heatmap-error {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  padding: 12px 20px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 500;
+  z-index: 1000;
+  pointer-events: none;
+}
+
+.heatmap-loading {
+  background: rgba(255, 255, 255, 0.95);
+  color: #333;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+}
+
+.heatmap-error {
+  background: rgba(254, 226, 226, 0.95);
+  color: #991b1b;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+}
+
 .zoom-indicator {
   position: absolute;
   bottom: 20px;
@@ -33,6 +59,62 @@
   z-index: 1000;
   transition: all 0.3s ease;
   backdrop-filter: blur(4px);
+}
+
+.heatmap-legend {
+  position: absolute;
+  bottom: 20px;
+  left: 20px;
+  background: rgba(255, 255, 255, 0.92);
+  padding: 10px 14px;
+  border-radius: 10px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.12);
+  z-index: 1000;
+  backdrop-filter: blur(6px);
+  font-family: system-ui, -apple-system, sans-serif;
+}
+
+.heatmap-legend-title {
+  display: block;
+  font-size: 11px;
+  font-weight: 700;
+  color: #333;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 6px;
+}
+
+.heatmap-legend-gradient {
+  width: 140px;
+  height: 10px;
+  border-radius: 5px;
+  margin-bottom: 4px;
+  background: linear-gradient(
+    to right,
+    #206bcb 0%,
+    #4299e1 20%,
+    #48bb78 40%,
+    #ecc94b 55%,
+    #ed8936 70%,
+    #e53e3e 85%,
+    #9b2c2c 100%
+  );
+}
+
+.heatmap-legend-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  font-weight: 600;
+  color: #555;
+  margin-bottom: 4px;
+}
+
+.heatmap-legend-area {
+  display: block;
+  font-size: 10px;
+  color: #666;
+  font-style: italic;
 }
 
 .temp-marker {

@@ -1,28 +1,21 @@
-import Header from './components/Header'
-import HeroSection from './components/HeroSection'
-import ProblemSection from './components/ProblemSection'
-import PhenoSection from './components/PhenoSection'
-import HealthRisksSection from './components/HealthRisksSection'
-import LocalSection from './components/LocalSection'
-import CreativeSeparator from './components/CreativeSeparator'
-import SolutionSection from './components/SolutionSection'
-import TryItNowSection from './components/TryItNowSection'
-import './styles/App.css'
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import LandingPage from './pages/LandingPage';
+import HomePage from './pages/HomePage';
+import AboutPage from './pages/AboutPage';
+import './styles/App.css';
 
 function App() {
   return (
     <div className="app">
-      <Header />
-      <HeroSection />
-      <ProblemSection />
-      <PhenoSection />
-      <HealthRisksSection />
-      <LocalSection />
-      <CreativeSeparator />
-      <SolutionSection />
-      <TryItNowSection />
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<LandingPage />} />
+          <Route path="/home" element={<HomePage />} />
+          <Route path="/about" element={<AboutPage />} />
+        </Routes>
+      </BrowserRouter>
     </div>
-  )
+  );
 }
 
-export default App
+export default App;
