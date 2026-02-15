@@ -1,0 +1,276 @@
+.try-it-now-section {
+  width: 100%;
+  padding: 8rem 2rem 4rem 2rem;
+  margin-top: 6rem;
+  background-color: var(--primary-50);
+}
+
+.try-it-now-heading {
+  font-family: 'Outfit', sans-serif;
+  font-size: 8rem;
+  font-weight: 700;
+  text-align: center;
+  margin: 0 0 3rem 0;
+  color: var(--primary-900);
+  letter-spacing: -0.02em;
+}
+
+.smp-container {
+  max-width: 900px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.monitor-frame {
+  width: 100%;
+  max-width: 900px;
+  background-color: #303030;
+  border-radius: 14px;
+  padding: 40px;
+  position: relative;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.5);
+}
+
+.monitor-frame { margin-bottom: 0; }
+
+/* Bottom center controls inside the monitor frame */
+.monitor-controls {
+  position: absolute;
+  left: 50%;
+  bottom: 22px;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 12px;
+  z-index: 5;
+}
+
+.control-btn {
+  width: 44px;
+  height: 14px;
+  background: #bdbdbd;
+  border: none;
+  border-radius: 6px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2) inset;
+  cursor: pointer;
+}
+
+/* Map bar below the smp frame, intentionally wider than the frame */
+.map-bar-wrapper {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  margin-top: 0;
+}
+
+.map-bar {
+  background: #4A4A4A;
+  width: 110%;
+  max-width: 1100px;
+  height: 140px;
+  position: relative;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto;
+}
+
+.map-bar::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  height: 12px;
+  width: 100%;
+  background: #938f8f;
+  border-bottom-left-radius: 10px;
+  border-bottom-right-radius: 10px;
+}
+
+/* Parallelogram launch button */
+.launch-btn {
+  background: #9e9e9e;
+  color: #fff;
+  border: none;
+  padding: 12px 30px;
+  cursor: pointer;
+  transform: skew(-20deg);
+  box-shadow: 0 6px 18px rgba(0,0,0,0.15);
+}
+
+.launch-btn span {
+  display: inline-block;
+  transform: skew(20deg);
+  font-weight: 600;
+}
+
+.screw {
+  width: 16px;
+  height: 16px;
+  background-color: #A9A9A9;
+  border-radius: 50%;
+  position: absolute;
+  box-shadow: inset -1px -1px 3px rgba(0, 0, 0, 0.3), inset 1px 1px 3px rgba(255, 255, 255, 0.5);
+}
+
+.screw-top-left {
+  top: 20px;
+  left: 20px;
+}
+
+.screw-top-right {
+  top: 20px;
+  right: 20px;
+}
+
+.screw-bottom-left {
+  bottom: 20px;
+  left: 20px;
+}
+
+.screw-bottom-right {
+  bottom: 20px;
+  right: 20px;
+}
+
+.monitor-screen {
+  width: 100%;
+  background-color: #000000;
+  border-radius: 0;
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  aspect-ratio: 16 / 10;
+  box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.8);
+}
+
+.display-area {
+  width: 95%;
+  height: 95%;
+  background-color: transparent;
+  border-radius: 8px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.06);
+  overflow: hidden;
+}
+
+@media (max-width: 1024px) {
+  .try-it-now-section {
+    padding: 3rem 2rem;
+    margin-top: 3rem;
+  }
+
+  .try-it-now-heading {
+    font-size: 8rem;
+    margin-bottom: 3rem;
+  }
+
+  .monitor-frame {
+    max-width: 800px;
+    padding: 25px;
+  }
+  .monitor-controls { bottom: 18px; }
+  .map-bar { height: 120px; }
+}
+
+@media (max-width: 768px) {
+  .try-it-now-section {
+    padding: 2.5rem 1.5rem;
+    margin-top: 2rem;
+  }
+
+  .try-it-now-heading {
+    font-size: 8rem;
+    margin-bottom: 3rem;
+  }
+
+  .monitor-frame {
+    max-width: 650px;
+    padding: 20px;
+  }
+
+  .screw {
+    width: 12px;
+    height: 12px;
+  }
+
+  .screw-top-left {
+    top: 15px;
+    left: 15px;
+  }
+
+  .screw-top-right {
+    top: 15px;
+    right: 15px;
+  }
+
+  .screw-bottom-left {
+    bottom: 15px;
+    left: 15px;
+  }
+
+  .screw-bottom-right {
+    bottom: 15px;
+    right: 15px;
+  }
+
+  .monitor-screen {
+    padding: 15px;
+  }
+  .monitor-controls { bottom: 14px; }
+  .control-btn { width: 36px; height: 12px; border-radius: 5px; }
+  .map-bar { height: 100px; }
+  .launch-btn { padding: 10px 22px; }
+}
+
+@media (max-width: 480px) {
+  .try-it-now-section {
+    padding: 2rem 1rem;
+    margin-top: 1.5rem;
+  }
+
+  .try-it-now-heading {
+    font-size: 8rem;
+    margin-bottom: 3rem;
+  }
+
+  .monitor-frame {
+    max-width: 100%;
+    padding: 15px;
+  }
+
+  .screw {
+    width: 10px;
+    height: 10px;
+  }
+
+  .screw-top-left {
+    top: 10px;
+    left: 10px;
+  }
+
+  .screw-top-right {
+    top: 10px;
+    right: 10px;
+  }
+
+  .screw-bottom-left {
+    bottom: 10px;
+    left: 10px;
+  }
+
+  .screw-bottom-right {
+    bottom: 10px;
+    right: 10px;
+  }
+
+  .monitor-screen {
+    padding: 12px;
+  }
+  .monitor-controls { bottom: 12px; }
+  .control-btn { width: 32px; height: 10px; border-radius: 4px; }
+  .map-bar { height: 84px; }
+  .launch-btn { padding: 9px 20px; }
+}

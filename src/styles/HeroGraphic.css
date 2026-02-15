@@ -223,14 +223,7 @@
   }
 }
 
-/* Hover effects on the entire graphic */
-.graphic-container:hover .layer {
-  animation-play-state: paused;
-}
 
-.graphic-container:hover .mascot-container {
-  animation-play-state: paused;
-}
 
 @media (max-width: 1024px) {
   .hero-graphic {

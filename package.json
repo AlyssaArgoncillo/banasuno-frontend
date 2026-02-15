@@ -10,6 +10,10 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@react-spring/web": "^10.0.3",
+    "pigeon-maps": "^0.22.1",
+    "pigeon-marker": "^0.3.4",
+    "pigeon-overlay": "^0.2.3",
     "react": "^19.2.0",
     "react-dom": "^19.2.0"
   },

@@ -1,0 +1,73 @@
+.problem-section {
+  width: 100%;
+  padding: 9rem 2rem;
+  background-color: var(--primary-50);
+}
+
+.problem-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  align-items: center;
+  text-align: center;
+}
+
+.problem-heading {
+  font-family: 'Outfit', sans-serif;
+  font-size: 3.5rem;
+  font-weight: 700;
+  line-height: 1.2;
+  margin: 0;
+  color: var(--primary-900);
+  letter-spacing: -0.02em;
+}
+
+.problem-description {
+  font-family: 'Manrope', sans-serif;
+  font-size: 1.125rem;
+  line-height: 1.75;
+  color: var(--primary-500);
+  margin: 0;
+  max-width: 800px;
+  font-weight: 400;
+}
+
+@media (max-width: 1024px) {
+  .problem-section {
+    padding: 4rem 2rem;
+  }
+
+  .problem-heading {
+    font-size: 2.75rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .problem-section {
+    padding: 3rem 1.5rem;
+  }
+
+  .problem-heading {
+    font-size: 2.25rem;
+  }
+
+  .problem-description {
+    font-size: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .problem-section {
+    padding: 2rem 1rem;
+  }
+
+  .problem-heading {
+    font-size: 1.75rem;
+  }
+
+  .problem-description {
+    font-size: 0.95rem;
+  }
+}

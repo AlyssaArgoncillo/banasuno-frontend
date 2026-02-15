@@ -10,4 +10,14 @@ export default defineConfig({
       },
     }),
   ],
+  optimizeDeps: {
+    include: ['pigeon-maps', 'pigeon-overlay', 'pigeon-marker']
+  }
+  ,
+  resolve: {
+    alias: {
+      'pigeon-overlay': 'pigeon-overlay/lib/react',
+      'pigeon-marker': 'pigeon-marker/lib/react'
+    }
+  }
 })
