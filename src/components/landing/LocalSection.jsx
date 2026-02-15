@@ -1,4 +1,4 @@
-import '../styles/LocalSection.css';
+import '../../styles/LocalSection.css';
 
 function LocalSection() {
   return (

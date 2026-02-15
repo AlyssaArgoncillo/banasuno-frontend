@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useSpring, animated, to } from '@react-spring/web';
-import '../styles/HealthRisksSection.css';
+import '../../styles/HealthRisksSection.css';
 
 function HealthCard({ image, title, description }) {
   const [picked, setPicked] = useState(false);
@@ -15,10 +15,10 @@ function HealthCard({ image, title, description }) {
       <animated.div
         className="card-front"
         style={{
-          transform: to([rotateY, y], (rot, yVal) => 
+          transform: to([rotateY, y], (rot, yVal) =>
             `perspective(1000px) rotateY(${rot}deg) translateY(${yVal}px)`
           ),
-          boxShadow: y.to((yVal) => 
+          boxShadow: y.to((yVal) =>
             `0 ${Math.abs(yVal) * 0.4}px ${Math.abs(yVal) * 0.8}px rgba(255, 107, 26, ${Math.abs(yVal) * 0.008})`
           ),
         }}
@@ -29,10 +29,10 @@ function HealthCard({ image, title, description }) {
       <animated.div
         className="card-back"
         style={{
-          transform: to([rotateY, y], (rot, yVal) => 
+          transform: to([rotateY, y], (rot, yVal) =>
             `perspective(1000px) rotateY(${rot + 180}deg) translateY(${yVal}px)`
           ),
-          boxShadow: y.to((yVal) => 
+          boxShadow: y.to((yVal) =>
             `0 ${Math.abs(yVal) * 0.4}px ${Math.abs(yVal) * 0.8}px rgba(255, 107, 26, ${Math.abs(yVal) * 0.008})`
           ),
         }}

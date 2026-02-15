@@ -1,4 +1,4 @@
-import '../styles/CreativeSeparator.css';
+import '../../styles/CreativeSeparator.css';
 
 function CreativeSeparator() {
   return (

@@ -1,4 +1,4 @@
-import '../styles/SolutionSection.css';
+import '../../styles/SolutionSection.css';
 
 function SolutionSection() {
   return (

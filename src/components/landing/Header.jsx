@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import '../styles/Header.css';
+import { Link } from 'react-router-dom';
+import '../../styles/Header.css';
 
 function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -15,24 +16,24 @@ function Header() {
   return (
     <header className="header">
       <div className="header-container">
-        <div className="logo">
+        <Link to="/" className="logo" onClick={closeMenu}>
           <img src="/BanasUno Text Colored.png" alt="BanasUno" className="logo-image" />
-        </div>
-        
-        <nav className={`nav-links ${isMenuOpen ? 'active' : ''}`}>
-          <a href="#about" className="nav-link" onClick={closeMenu}>About Us</a>
-          <a href="#features" className="nav-link" onClick={closeMenu}>Features</a>
-          <a href="#data" className="nav-link" onClick={closeMenu}>Data</a>
-          <button className="cta-button mobile-cta" onClick={closeMenu}>
-            Access BanasUno→
-          </button>
-        </nav>
-        
-        <button className="cta-button desktop-cta">
-          Access BanasUno→
-        </button>
+        </Link>
 
-        <button 
+        <nav className={`nav-links ${isMenuOpen ? 'active' : ''}`}>
+          <Link to="/about" className="nav-link" onClick={closeMenu}>About Us</Link>
+          <a href="/#features" className="nav-link" onClick={closeMenu}>Features</a>
+          <a href="/#data" className="nav-link" onClick={closeMenu}>Data</a>
+          <Link to="/home" className="cta-button mobile-cta" onClick={closeMenu}>
+            Access BanasUno→
+          </Link>
+        </nav>
+
+        <Link to="/home" className="cta-button desktop-cta">
+          Access BanasUno→
+        </Link>
+
+        <button
           className={`hamburger ${isMenuOpen ? 'active' : ''}`}
           onClick={toggleMenu}
           aria-label="Toggle menu"

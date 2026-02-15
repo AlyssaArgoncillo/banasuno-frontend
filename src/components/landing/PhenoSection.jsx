@@ -1,4 +1,4 @@
-import '../styles/PhenoSection.css';
+import '../../styles/PhenoSection.css';
 
 function PhenoSection() {
   return (
