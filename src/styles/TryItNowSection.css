@@ -137,19 +137,17 @@
 
 .monitor-screen {
   width: 100%;
-  background-color: #000000;
+  background-color: #6d6767;
   border-radius: 0;
-  padding: 20px;
+  padding: 12px;
   display: flex;
-  align-items: center;
-  justify-content: center;
   aspect-ratio: 16 / 10;
   box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.8);
 }
 
 .display-area {
-  width: 95%;
-  height: 95%;
+  width: 100%;
+  height: 100%;
   background-color: transparent;
   border-radius: 8px;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.06);
