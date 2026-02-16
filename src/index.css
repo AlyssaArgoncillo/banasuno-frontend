@@ -26,7 +26,14 @@
   --yellow-300: #FFCF4D;
   --yellow-100: #FFEAB3;
   --yellow-50: #FFF9E6;
-  
+
+  /* Surfaces (Cards, modals, page background, alerts) */
+  --surface-primary: #FFFFFF;   /* Cards, modals */
+  --surface-secondary: #FAFAFA;  /* Page background */
+  --surface-accent: #FFF9E6;    /* Warm highlighted sections */
+  --surface-warning: #FFF4ED;   /* Alert backgrounds */
+  --overlay: rgba(26, 26, 26, 0.6);  /* Modal backdrop */
+
   /* Typography */
   --font-header: 'Outfit', sans-serif;
   --font-body: 'Manrope', sans-serif;
@@ -48,7 +55,7 @@ body {
   margin: 0;
   font-family: var(--font-body);
   color: var(--primary-900);
-  background-color: var(--primary-50);
+  background-color: var(--surface-secondary);
   min-width: 320px;
   min-height: 100vh;
   -webkit-font-smoothing: antialiased;

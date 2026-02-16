@@ -69,6 +69,7 @@ export async function getBarangayHeatData(barangayFeatures) {
     intensityPoints,
     points,
     tempMin: tempRange.min,
-    tempMax: tempRange.max
+    tempMax: tempRange.max,
+    tempByBarangayId
   };
 }

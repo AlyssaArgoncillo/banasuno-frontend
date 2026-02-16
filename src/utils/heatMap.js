@@ -9,6 +9,17 @@ import { getPolygonRing, ringCentroid } from './geo.js';
 export const DEFAULT_TEMP_MIN = 26;
 export const DEFAULT_TEMP_MAX = 39;
 
+/** Gradient stops [t, hex] for temperature intensity 0–1 (same as heat layer). */
+const HEAT_GRADIENT = [
+  [0, '#206bcb'],
+  [0.2, '#4299e1'],
+  [0.4, '#48bb78'],
+  [0.55, '#ecc94b'],
+  [0.7, '#ed8936'],
+  [0.85, '#e53e3e'],
+  [1, '#9b2c2c']
+];
+
 /**
  * Normalize temperature to 0–1 for Leaflet heat layer intensity.
  * @param {number} temp - Temperature (°C)
@@ -20,6 +31,37 @@ export function normalizeTempToIntensity(temp, min = DEFAULT_TEMP_MIN, max = DEF
   const range = max - min;
   if (range <= 0 || !Number.isFinite(range)) return 0.5;
   return Math.max(0, Math.min(1, (temp - min) / range));
+}
+
+/**
+ * Get fill color for a normalized intensity 0–1 (for polygon fill).
+ * @param {number} t - 0–1
+ * @returns {string} hex color
+ */
+export function getColorForIntensity(t) {
+  const v = Math.max(0, Math.min(1, t));
+  for (let i = 0; i < HEAT_GRADIENT.length - 1; i++) {
+    const [t0, c0] = HEAT_GRADIENT[i];
+    const [t1, c1] = HEAT_GRADIENT[i + 1];
+    if (v <= t1) {
+      const f = (v - t0) / (t1 - t0);
+      return lerpHex(c0, c1, f);
+    }
+  }
+  return HEAT_GRADIENT[HEAT_GRADIENT.length - 1][1];
+}
+
+function parseHex(hex) {
+  const n = parseInt(hex.slice(1), 16);
+  return [(n >> 16) & 0xff, (n >> 8) & 0xff, n & 0xff];
+}
+function lerpHex(hex0, hex1, f) {
+  const a = parseHex(hex0);
+  const b = parseHex(hex1);
+  const r = Math.round(a[0] + (b[0] - a[0]) * f);
+  const g = Math.round(a[1] + (b[1] - a[1]) * f);
+  const bl = Math.round(a[2] + (b[2] - a[2]) * f);
+  return '#' + [r, g, bl].map((x) => x.toString(16).padStart(2, '0')).join('');
 }
 
 /**

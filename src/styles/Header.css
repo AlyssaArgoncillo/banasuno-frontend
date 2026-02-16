@@ -1,7 +1,7 @@
 .header {
   width: 100%;
   padding: 1.5rem 0;
-  background-color: var(--primary-50);
+  background-color: var(--surface-primary);
   position: sticky;
   top: 0;
   z-index: 100;
@@ -51,7 +51,7 @@
 
 .cta-button {
   background-color: var(--orange-500);
-  color: var(--primary-50);
+  color: var(--surface-primary);
   font-family: 'Outfit', sans-serif;
   font-size: 1rem;
   font-weight: 600;
@@ -159,7 +159,7 @@
     left: 0;
     right: 0;
     flex-direction: column;
-    background-color: var(--primary-50);
+    background-color: var(--surface-primary);
     padding: 2rem 1.5rem;
     gap: 1.5rem;
     box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
@@ -189,7 +189,7 @@
   }
   
   .nav-link:active {
-    background-color: var(--orange-50);
+    background-color: var(--surface-warning);
     padding-left: 1rem;
   }
 }
