@@ -1,5 +1,6 @@
+import { Link } from 'react-router-dom';
 import '../../styles/TryItNowSection.css';
-import HeatMap from './HeatMap';
+import HeatMap from '../HeatMap';
 
 function TryItNowSection() {
   return (
@@ -15,7 +16,7 @@ function TryItNowSection() {
 
           <div className="monitor-screen">
             <div className="display-area">
-              <HeatMap />
+              <HeatMap compact />
             </div>
           </div>
           <div className="monitor-controls">
@@ -28,7 +29,7 @@ function TryItNowSection() {
 
       <div className="map-bar-wrapper">
         <div className="map-bar">
-          <button className="launch-btn"><span>Launch Full Map →</span></button>
+          <Link to="/home" className="launch-btn"><span>Launch Full Map →</span></Link>
         </div>
       </div>
     </section>
