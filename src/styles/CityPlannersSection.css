@@ -1,0 +1,160 @@
+.city-planners-section {
+  width: 100%;
+  padding: 4rem 2rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.city-planners-image-section {
+  width: 100vw;
+  display: flex;
+  justify-content: center;
+  margin-bottom: 3rem;
+  margin-left: calc(-50vw + 50%);
+}
+
+.city-planners-title {
+  font-size: 5rem;
+  font-weight: 700;
+  color: #FD6F00;
+  text-align: center;
+  margin: 1.5rem 0 1.25rem 0;
+  position: relative;
+  z-index: 10;
+}
+
+.outer-rectangle {
+  background-color: #FF6B1A;
+  padding: 5.5rem;
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 750px;
+  height: 420px;
+  max-width: 90%;
+}
+
+.inner-rectangle {
+  background-color: #FF7E1E;
+  position: absolute;
+  top: 50px;
+  left: 50px;
+  right: 50px;
+  bottom: 50px;
+  z-index: 1;
+}
+
+.city-hall-image {
+  position: absolute;
+  z-index: 2;
+  width: 60vw;
+  max-width: 60vw;
+  height: auto;
+  object-fit: contain;
+  display: block;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.planners-table {
+  width: 100%;
+  max-width: 1000px;
+  border-collapse: collapse;
+  background-color: #999999;
+  margin-top: 0.5rem;
+}
+
+.planners-table {
+  width: 100%;
+  max-width: 1000px;
+  border-collapse: collapse;
+  background-color: #999999;
+}
+
+.planners-table thead th {
+  background-color: #FD6F00;
+  padding: 1.5rem;
+  text-align: center;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #FFF;
+  border-right: 1px solid #808080;
+  border-bottom: 2px solid #000;
+}
+
+.planners-table thead th:last-child {
+  border-right: none;
+}
+
+.planners-table tbody td {
+  padding: 1.5rem;
+  text-align: center;
+  font-size: 1rem;
+  color: #000;
+  background-color: #FF9559;
+  border-right: 1px solid #808080;
+  line-height: 1.5;
+}
+
+.planners-table tbody td:last-child {
+  border-right: none;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .city-planners-section {
+    padding: 2rem 1rem;
+  }
+
+  .city-planners-image-section {
+    width: 100%;
+    margin-left: 0;
+    margin-bottom: 2rem;
+  }
+
+  .city-planners-title {
+    margin: 1.25rem 0 1rem 0;
+  }
+
+  .outer-rectangle {
+    width: 90%;
+    height: 220px;
+    padding: 0;
+    max-width: 90%;
+    position: relative;
+  }
+
+  .inner-rectangle {
+    top: 24px;
+    left: 24px;
+    right: 24px;
+    bottom: 24px;
+  }
+
+  .city-hall-image {
+    width: 100%;
+    max-width: 100%;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+  }
+
+  .planners-table {
+    max-width: 100%;
+  }
+
+  .planners-table thead th {
+    font-size: 1rem;
+    padding: 1rem;
+  }
+
+  .planners-table tbody td {
+    font-size: 0.9rem;
+    padding: 1rem;
+  }
+}

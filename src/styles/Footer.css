@@ -1,0 +1,142 @@
+.footer {
+  width: 100%;
+  background-color: #333;
+  color: #fff;
+  padding: 3rem 2rem 2rem 2rem;
+}
+
+.footer-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  gap: 4rem;
+}
+
+.footer-left {
+  flex: 1;
+  max-width: 500px;
+  text-align: left;
+}
+
+.footer-brand {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #FD6F00;
+  margin: 0 0 1rem 0;
+  letter-spacing: 0.05em;
+}
+
+.footer-description {
+  font-size: 0.95rem;
+  color: #ccc;
+  line-height: 1.6;
+  margin: 0 0 1.5rem 0;
+}
+
+.footer-social {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+.social-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: #555;
+  border: 2px solid #666;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.social-icon:hover {
+  background-color: #FD6F00;
+  border-color: #FD6F00;
+  transform: scale(1.1);
+}
+
+.footer-right {
+  display: flex;
+  gap: 3rem;
+}
+
+.footer-column {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.footer-heading {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #FD6F00;
+  margin: 0 0 0.5rem 0;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.footer-links {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.footer-links li {
+  margin: 0;
+}
+
+.footer-links a {
+  color: #ccc;
+  text-decoration: none;
+  font-size: 0.9rem;
+  transition: color 0.3s ease;
+}
+
+.footer-links a:hover {
+  color: #FD6F00;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .footer {
+    padding: 2.5rem 1.5rem 2rem 1.5rem;
+  }
+
+  .footer-container {
+    flex-direction: column;
+    gap: 2.5rem;
+  }
+
+  .footer-left {
+    max-width: 100%;
+  }
+
+  .footer-brand {
+    font-size: 1.5rem;
+  }
+
+  .footer-description {
+    font-size: 0.9rem;
+  }
+
+  .footer-right {
+    flex-direction: row;
+    gap: 2rem;
+    justify-content: flex-start;
+  }
+
+  .footer-column {
+    flex: 1;
+  }
+}
+
+@media (max-width: 480px) {
+  .footer-right {
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+}

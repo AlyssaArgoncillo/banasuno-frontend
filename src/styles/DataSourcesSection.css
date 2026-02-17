@@ -1,0 +1,140 @@
+.data-sources-section {
+  width: 100%;
+  padding: 6rem 2rem 4rem 2rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background-color: #f9f9f9;
+}
+
+.data-sources-title {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #FD6F00;
+  text-align: center;
+  margin: 0 0 3rem 0;
+}
+
+.view-switcher {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.view-switcher input {
+  width: 0;
+  overflow: hidden;
+  opacity: 0;
+  position: absolute;
+}
+
+.switcher-label {
+  background-color: #fff;
+  padding: 0.5rem;
+  cursor: pointer;
+  border: 2px solid #ddd;
+  border-radius: 4px;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.switcher-label:hover {
+  border-color: #FD6F00;
+  box-shadow: 0 2px 8px rgba(253, 111, 0, 0.2);
+}
+
+.view-switcher input:checked + .switcher-label {
+  background-color: #FD6F00;
+  color: #fff;
+  border-color: #FD6F00;
+}
+
+.view-switcher input:checked + .switcher-label svg {
+  stroke: #fff;
+}
+
+.data-sources-container {
+  width: 100%;
+  max-width: 1200px;
+}
+
+.source-list {
+  display: grid;
+  gap: 1.5rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  grid-template-columns: 1fr;
+  transition: grid-template-columns 0.3s ease;
+}
+
+/* List view (default) */
+.data-sources-section:has(#list-view:checked) .source-list {
+  grid-template-columns: 1fr;
+}
+
+/* Grid view */
+.data-sources-section:has(#grid-view:checked) .source-list {
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+}
+
+.source-card {
+  background-color: #fff;
+  padding: 2rem;
+  border: 2px solid #ddd;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.source-card:hover {
+  border-color: #FD6F00;
+  box-shadow: 0 4px 12px rgba(253, 111, 0, 0.2);
+  transform: translateY(-2px);
+}
+
+.source-card h3 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #333;
+  margin: 0 0 1rem 0;
+}
+
+.source-card p {
+  font-size: 1rem;
+  color: #666;
+  line-height: 1.6;
+  margin: 0;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .data-sources-section {
+    padding: 4rem 1rem 3rem 1rem;
+  }
+
+  .data-sources-title {
+    font-size: 1.75rem;
+    margin-bottom: 2rem;
+  }
+
+  /* Adjust grid to 2 columns on mobile when grid view is active */
+  .data-sources-section:has(#grid-view:checked) .source-list {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .source-card {
+    padding: 1.5rem;
+  }
+
+  .source-card h3 {
+    font-size: 1.25rem;
+  }
+
+  .source-card p {
+    font-size: 0.95rem;
+  }
+}
