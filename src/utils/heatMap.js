@@ -5,6 +5,17 @@
 
 import { getPolygonRing, ringCentroid } from './geo.js';
 
+/**
+ * Get a stable barangay id from a GeoJSON feature (for temperature lookup and polygon styling).
+ * @param {import('geojson').Feature} feature
+ * @returns {string|number|null}
+ */
+export function getBarangayId(feature) {
+  if (feature == null) return null;
+  const id = feature.id ?? feature.properties?.adm4_psgc ?? feature.properties?.ADM4_PSGC;
+  return id != null ? id : null;
+}
+
 /** Default display range for temperature legend (°C). BACKEND: can be overridden by API response min/max. */
 export const DEFAULT_TEMP_MIN = 26;
 export const DEFAULT_TEMP_MAX = 39;
@@ -33,22 +44,42 @@ export function normalizeTempToIntensity(temp, min = DEFAULT_TEMP_MIN, max = DEF
   return Math.max(0, Math.min(1, (temp - min) / range));
 }
 
+/** Heat index risk levels for zone info card tag and score; also used for map fill colors. */
+export const HEAT_RISK_LEVELS = [
+  { level: 1, label: 'Safe', color: '#48bb78' },
+  { level: 2, label: 'Moderate', color: '#ecc94b' },
+  { level: 3, label: 'Elevated', color: '#ed8936' },
+  { level: 4, label: 'High', color: '#f97316' },
+  { level: 5, label: 'Very High', color: '#ea580c' },
+  { level: 6, label: 'Critical', color: '#dc2626' }
+];
+
+/** Intensity thresholds 0–1 for the 6 heat index levels (map and zone info use these). */
+export const HEAT_INDEX_THRESHOLDS = [0, 0.4, 0.55, 0.7, 0.85, 0.95, 1];
+
+/**
+ * Map normalized intensity 0–1 to heat risk level 1–6 and metadata.
+ */
+export function intensityToHeatRiskLevel(intensity) {
+  const v = Math.max(0, Math.min(1, intensity));
+  for (let i = 0; i < HEAT_RISK_LEVELS.length; i++) {
+    if (v <= HEAT_INDEX_THRESHOLDS[i + 1]) return HEAT_RISK_LEVELS[i];
+  }
+  return HEAT_RISK_LEVELS[HEAT_RISK_LEVELS.length - 1];
+}
+
 /**
  * Get fill color for a normalized intensity 0–1 (for polygon fill).
+ * Uses only the 6 heat index legend colors so map coloring strictly matches the legend.
  * @param {number} t - 0–1
  * @returns {string} hex color
  */
 export function getColorForIntensity(t) {
   const v = Math.max(0, Math.min(1, t));
-  for (let i = 0; i < HEAT_GRADIENT.length - 1; i++) {
-    const [t0, c0] = HEAT_GRADIENT[i];
-    const [t1, c1] = HEAT_GRADIENT[i + 1];
-    if (v <= t1) {
-      const f = (v - t0) / (t1 - t0);
-      return lerpHex(c0, c1, f);
-    }
+  for (let i = 0; i < HEAT_RISK_LEVELS.length; i++) {
+    if (v <= HEAT_INDEX_THRESHOLDS[i + 1]) return HEAT_RISK_LEVELS[i].color;
   }
-  return HEAT_GRADIENT[HEAT_GRADIENT.length - 1][1];
+  return HEAT_RISK_LEVELS[HEAT_RISK_LEVELS.length - 1].color;
 }
 
 function parseHex(hex) {
@@ -86,7 +117,7 @@ export function buildHeatPointsFromBarangays(barangayFeatures, tempByBarangayId,
     if (!ring || ring.length < 3) continue;
 
     const [lng, lat] = ringCentroid(ring);
-    const id = feature.id ?? feature.properties?.adm4_psgc;
+    const id = getBarangayId(feature);
     const temp = tempByBarangayId != null && id != null && Number.isFinite(tempByBarangayId[id])
       ? tempByBarangayId[id]
       : null;
@@ -134,7 +165,7 @@ export function simulateBarangayTemperatures(barangayFeatures, options = {}) {
         (tempMin + (1 - Math.min(dist * 0.4, 1)) * (tempMax - tempMin) * noise) * 10
       ) / 10;
     const clamped = Math.max(tempMin, Math.min(tempMax, temp));
-    const id = feature.id ?? feature.properties?.adm4_psgc;
+    const id = getBarangayId(feature);
     if (id != null) out[id] = clamped;
   });
 

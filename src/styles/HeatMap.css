@@ -22,7 +22,7 @@
   min-height: 0;
   width: 100%;
   border-radius: 12px;
-  overflow: hidden;
+  overflow: visible;
   border: 3px dashed var(--primary-200, var(--primary-100));
   box-shadow: none;
   background: var(--surface-primary);
@@ -35,6 +35,8 @@
   width: 100%;
   z-index: 0;
   background: var(--surface-primary);
+  border-radius: 12px;
+  overflow: hidden;
 }
 
 .heatmap-container .leaflet-container {
@@ -50,9 +52,43 @@
   background: transparent !important;
   pointer-events: none;
 }
+/* Barangay layer must receive clicks for zone info popup */
 .heatmap-container .leaflet-overlay-pane svg,
-.heatmap-container .leaflet-overlay-pane canvas {
-  pointer-events: auto;
+.heatmap-container .leaflet-overlay-pane canvas,
+.heatmap-container .leaflet-overlay-pane path,
+.heatmap-container .leaflet-overlay-pane .leaflet-interactive {
+  pointer-events: auto !important;
+}
+
+/* Zone info popup card – positioned over map when a barangay is clicked */
+.heatmap-container .zone-info-card-wrapper {
+  position: absolute;
+  right: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 2000;
+  max-height: calc(100% - 24px);
+  overflow: auto;
+}
+
+/* Location indicator pin (search result or device location) */
+.heatmap-container .heatmap-location-indicator {
+  background: none !important;
+  border: none !important;
+}
+
+.heatmap-container .heatmap-location-pin {
+  display: block;
+  width: 20px;
+  height: 20px;
+  background: var(--orange-500, #e53e3e);
+  border: 3px solid white;
+  border-radius: 50% 50% 50% 0;
+  transform: rotate(-45deg);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35);
+  position: absolute;
+  left: 2px;
+  top: 4px;
 }
 
 .heatmap-error {
@@ -71,20 +107,201 @@
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
 }
 
-/* Top-right overlay: only the panels block the map; bar itself is non-blocking */
-.heatmap-overlay-bar {
+/* Desktop vs mobile layout visibility */
+/* UI overlays must not block map clicks; only their interactive children receive events */
+.heatmap-desktop-ui {
+  display: block;
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 100;
+}
+.heatmap-desktop-ui > *,
+.heatmap-desktop-ui .heatmap-search-block,
+.heatmap-desktop-ui .heatmap-panel,
+.heatmap-desktop-ui .heatmap-legend,
+.heatmap-desktop-ui .heatmap-zoom-controls,
+.heatmap-desktop-ui .zoom-indicator {
+  pointer-events: auto;
+}
+.heatmap-mobile-ui {
+  display: none;
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 100;
+}
+.heatmap-mobile-ui > *,
+.heatmap-mobile-ui .heatmap-temp-simple,
+.heatmap-mobile-ui .heatmap-overlay-bar-mobile,
+.heatmap-mobile-ui .heatmap-search-block,
+.heatmap-mobile-ui .heatmap-bottom-legend,
+.heatmap-mobile-ui .heatmap-zoom-controls {
+  pointer-events: auto;
+}
+@media (max-width: 768px) {
+  .heatmap-container:not(.heatmap-compact) .heatmap-desktop-ui {
+    display: none;
+  }
+  .heatmap-container:not(.heatmap-compact) .heatmap-mobile-ui {
+    display: block;
+  }
+}
+.heatmap-container.heatmap-compact .heatmap-desktop-ui {
+  display: none;
+}
+.heatmap-container.heatmap-compact .heatmap-mobile-ui {
+  display: block;
+}
+
+/* Try-it-now preview: simplified mobile view – map + legend only */
+.heatmap-container.heatmap-compact .heatmap-mobile-ui .heatmap-temp-simple,
+.heatmap-container.heatmap-compact .heatmap-mobile-ui .heatmap-overlay-bar-mobile,
+.heatmap-container.heatmap-compact .heatmap-mobile-ui .heatmap-zoom-controls-mobile {
+  display: none;
+}
+.heatmap-container.heatmap-compact .heatmap-mobile-ui .heatmap-bottom-legend {
+  max-width: 70%;
+  padding: 6px 10px 8px;
+  font-size: 0.9em;
+}
+
+/* Desktop: overlay top-right – search block and heat index legend side by side on the right */
+.heatmap-overlay-bar-desktop {
   position: absolute;
   top: 10px;
-  right: 10px;
+  left: 10px;
+  right: auto;
   display: flex;
   flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: flex-start;
   align-items: flex-start;
   gap: 8px;
   z-index: 1000;
   pointer-events: none;
 }
-.heatmap-overlay-bar .heatmap-search-block,
-.heatmap-overlay-bar .heatmap-panel {
+.heatmap-overlay-bar-desktop .heatmap-search-block,
+.heatmap-overlay-bar-desktop .heatmap-panel {
+  pointer-events: auto;
+}
+.heatmap-overlay-bar-desktop .heatmap-search-block,
+.heatmap-overlay-bar-desktop .heatmap-search-block-desktop {
+  background: var(--surface-primary);
+  border-radius: 8px;
+  border: 1px solid var(--primary-200);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+  overflow: visible;
+  min-width: 200px;
+}
+
+/* Desktop: gradient temp legend + zoom indicator + horizontal zoom controls */
+.heatmap-desktop-ui .heatmap-legend {
+  position: absolute;
+  bottom: 12px;
+  left: 12px;
+  width: 200px;
+  max-width: calc(100% - 190px);
+  background: var(--surface-primary);
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--primary-200);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+  z-index: 1000;
+  backdrop-filter: blur(4px);
+  font-family: var(--font-body);
+}
+.heatmap-desktop-ui .heatmap-legend-title {
+  display: block;
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--primary-800);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 4px;
+}
+.heatmap-desktop-ui .heatmap-legend-gradient {
+  width: 100%;
+  height: 6px;
+  border-radius: 3px;
+  margin-bottom: 3px;
+  background: linear-gradient(to right, #206bcb 0%, #4299e1 20%, #48bb78 40%, #ecc94b 55%, #ed8936 70%, #e53e3e 85%, #9b2c2c 100%);
+}
+.heatmap-desktop-ui .heatmap-legend-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--primary-600);
+  margin-bottom: 2px;
+}
+.heatmap-desktop-ui .heatmap-legend-area {
+  display: block;
+  font-size: 9px;
+  color: var(--primary-500);
+  font-style: italic;
+}
+.heatmap-desktop-ui .zoom-indicator {
+  position: absolute;
+  bottom: 12px;
+  right: 184px;
+  background: var(--surface-primary);
+  padding: 5px 10px;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 11px;
+  color: var(--primary-700);
+  border: 1px solid var(--primary-200);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+  z-index: 1000;
+}
+.heatmap-zoom-controls-desktop {
+  position: absolute;
+  bottom: 12px;
+  right: 12px;
+  display: flex;
+  flex-direction: row;
+  gap: 12px;
+}
+.heatmap-zoom-controls-desktop .heatmap-zoom-btn {
+  width: 32px;
+  height: 32px;
+}
+
+/* Mobile overlay: full width with side margins so content doesn’t get cut off on thin screens */
+.heatmap-overlay-bar-mobile {
+  position: absolute;
+  top: 14px;
+  left: 10px;
+  right: 10px;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: flex-end;
+  gap: 8px;
+  z-index: 1000;
+  pointer-events: none;
+  max-width: calc(100% - 20px);
+  box-sizing: border-box;
+}
+.heatmap-overlay-bar-mobile .heatmap-search-block {
+  pointer-events: auto;
+}
+
+/* Generic overlay bar (exclude desktop and mobile; mobile has its own row layout) */
+.heatmap-overlay-bar:not(.heatmap-overlay-bar-desktop):not(.heatmap-overlay-bar-mobile) {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0;
+  z-index: 1000;
+  pointer-events: none;
+}
+.heatmap-overlay-bar:not(.heatmap-overlay-bar-desktop):not(.heatmap-overlay-bar-mobile) .heatmap-search-block {
   pointer-events: auto;
 }
 
@@ -92,17 +309,88 @@
   display: flex;
   flex-direction: column;
   min-width: 0;
+  background: var(--surface-primary);
+  border-radius: 8px;
+  border: 1px solid var(--primary-200);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+  overflow: visible;
+}
+
+.heatmap-search-block-mobile {
+  overflow: visible;
+  max-width: min(240px, 82vw);
+  padding: 6px 8px 6px 0;
+}
+.heatmap-mobile-ui .heatmap-search-block-mobile .heatmap-search-row {
+  min-height: 32px;
+}
+.heatmap-mobile-ui .heatmap-search-block-mobile .heatmap-search-input {
+  font-size: 12px;
+  padding: 5px 6px;
+  min-width: 0;
+}
+.heatmap-mobile-ui .heatmap-search-block-mobile .heatmap-search-input::placeholder {
+  font-size: 11px;
+  opacity: 0.9;
+}
+.heatmap-mobile-ui .heatmap-search-block-mobile .heatmap-search-budget-row {
+  padding: 4px 8px 4px 10px;
+}
+.heatmap-mobile-ui .heatmap-search-block-mobile .heatmap-budget-inline .heatmap-budget-trigger {
+  padding: 3px 6px;
+  font-size: 10px;
+}
+
+.heatmap-search-budget-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  border-top: 1px solid var(--primary-200, #e5e7eb);
+}
+
+.heatmap-search-budget-label {
+  font-family: var(--font-body);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--primary-600);
+  flex-shrink: 0;
+}
+
+.heatmap-budget-inline .heatmap-budget-trigger {
+  padding: 4px 8px;
+  font-size: 11px;
+  border-radius: 6px;
+  min-height: auto;
+}
+
+.heatmap-budget-inline {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+}
+
+/* Center the budget options dropdown under the filter trigger */
+.heatmap-budget-inline .heatmap-budget-options {
+  top: calc(100% + 4px);
+  left: 50%;
+  right: auto;
+  transform: translateX(-50%);
+  margin-top: 0;
+  max-height: 180px;
+  width: max-content;
+  min-width: 100%;
 }
 
 .heatmap-search-row {
   display: flex;
   align-items: stretch;
   gap: 0;
-  border-radius: 8px;
+  border-radius: 0;
   overflow: hidden;
-  background: var(--surface-primary);
-  border: 1px solid var(--primary-200);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  background: transparent;
+  border: none;
+  box-shadow: none;
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
@@ -208,6 +496,7 @@
   min-width: 0;
   max-width: 200px;
   overflow: visible;
+  position: relative;
 }
 
 .heatmap-feature-label {
@@ -284,7 +573,7 @@
   border: 1px solid var(--primary-200);
   border-radius: 8px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-  z-index: 1100;
+  z-index: 1200;
   max-height: 220px;
   overflow-y: auto;
   width: max-content;
@@ -379,36 +668,95 @@
   flex-shrink: 0;
 }
 
-.zoom-indicator {
+/* Mobile only: simplified temperature – inside overlay so it stacks and doesn’t get cut off on narrow screens */
+.heatmap-mobile-ui .heatmap-temp-simple {
   position: absolute;
-  bottom: 12px;
-  right: 150px;
-  background: var(--surface-primary);
+  top: 10px;
+  right: 12px;
+  left: auto;
+  bottom: auto;
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
   padding: 5px 10px;
   border-radius: 6px;
-  font-weight: 600;
-  font-size: 11px;
-  color: var(--primary-700);
+  background: var(--surface-primary);
   border: 1px solid var(--primary-200);
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
   z-index: 1000;
-  transition: all 0.2s ease;
+  font-family: var(--font-body);
   backdrop-filter: blur(4px);
 }
+.heatmap-mobile-ui .heatmap-temp-in-overlay {
+  position: static;
+  margin-top: 0;
+  border-top: 1px solid var(--primary-200);
+  border-radius: 0 0 8px 8px;
+  flex-shrink: 0;
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
+}
 
-.heatmap-zoom-controls {
+/* Mobile: temperature panel at top left (separate from search panel) */
+.heatmap-mobile-ui .heatmap-temp-simple.heatmap-temp-top-left {
   position: absolute;
-  bottom: 12px;
-  right: 12px;
-  display: flex;
-  gap: 5px;
+  top: 14px;
+  left: 10px;
+  bottom: auto;
+  right: auto;
   z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  padding: 6px 10px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.94);
+  border: 1px solid var(--primary-200);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  backdrop-filter: blur(8px);
+}
+.heatmap-mobile-ui .heatmap-temp-simple.heatmap-temp-top-left .heatmap-temp-label {
+  display: block;
+  line-height: 1.2;
+}
+.heatmap-mobile-ui .heatmap-temp-simple.heatmap-temp-top-left .heatmap-temp-range {
+  display: block;
+  line-height: 1.2;
+}
+
+.heatmap-temp-label {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--primary-600);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.heatmap-temp-range {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--primary-800);
+}
+
+/* Mobile only: vertical stack of map controls – inset from edges so they don’t get cut off */
+.heatmap-mobile-ui .heatmap-zoom-controls-mobile {
+  position: absolute;
+  bottom: 8px;
+  right: calc(10px + env(safe-area-inset-right, 0px));
+  left: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  z-index: 1001;
+  max-width: calc(100% - 24px);
 }
 
 .heatmap-zoom-btn {
-  width: 32px;
-  height: 32px;
-  border-radius: 8px;
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
   background: var(--surface-primary);
   border: 1px solid var(--primary-200);
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
@@ -435,63 +783,77 @@
   height: 14px;
 }
 
-.heatmap-legend {
+/* Mobile only: heat index legend at bottom – compact panel (not full width) */
+.heatmap-mobile-ui .heatmap-bottom-legend {
   position: absolute;
-  bottom: 12px;
-  left: 12px;
-  width: 200px;
-  max-width: calc(100% - 190px);
-  background: var(--surface-primary);
-  padding: 8px 12px;
-  border-radius: 8px;
-  border: 1px solid var(--primary-200);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+  bottom: 8px;
+  left: 10px;
+  right: auto;
+  width: auto;
+  max-width: 55%;
+  padding: 8px 12px 10px;
+  background: rgba(255, 255, 255, 0.96);
+  backdrop-filter: blur(8px);
+  border: 1px solid var(--primary-100);
   z-index: 1000;
-  backdrop-filter: blur(4px);
-  font-family: var(--font-body);
+  border-radius: 10px;
 }
 
-.heatmap-legend-title {
-  display: block;
+.heatmap-mobile-ui .heatmap-bottom-legend-title {
+  font-family: var(--font-header);
+  font-size: 9px;
+  font-weight: 700;
+  color: var(--primary-800);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin: 0 0 6px 0;
+}
+
+.heatmap-mobile-ui .heatmap-bottom-legend-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 4px 12px;
+  font-family: var(--font-body);
+  font-size: 9px;
+  color: var(--primary-700);
+}
+
+.heatmap-bottom-legend-title {
+  font-family: var(--font-header);
   font-size: 10px;
   font-weight: 700;
   color: var(--primary-800);
   text-transform: uppercase;
   letter-spacing: 0.04em;
-  margin-bottom: 4px;
+  margin: 0 0 6px 0;
 }
 
-.heatmap-legend-gradient {
-  width: 100%;
-  height: 6px;
-  border-radius: 3px;
-  margin-bottom: 3px;
-  background: linear-gradient(
-    to right,
-    #206bcb 0%,
-    #4299e1 20%,
-    #48bb78 40%,
-    #ecc94b 55%,
-    #ed8936 70%,
-    #e53e3e 85%,
-    #9b2c2c 100%
-  );
-}
-
-.heatmap-legend-labels {
-  display: flex;
-  justify-content: space-between;
+.heatmap-bottom-legend-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 4px 12px;
+  font-family: var(--font-body);
   font-size: 10px;
-  font-weight: 600;
-  color: var(--primary-600);
-  margin-bottom: 2px;
+  color: var(--primary-700);
 }
 
-.heatmap-legend-area {
-  display: block;
-  font-size: 9px;
-  color: var(--primary-500);
-  font-style: italic;
+.heatmap-bottom-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 0;
+}
+
+.heatmap-bottom-legend-item .heatmap-index-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
 }
 
 .temp-marker {
@@ -535,8 +897,164 @@
   text-overflow: ellipsis;
 }
 
+/* Tablet (e.g. iPad): desktop layout with slightly larger touch targets */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .heatmap-overlay-bar-desktop {
+    top: 12px;
+    left: 12px;
+    gap: 10px;
+  }
+  .heatmap-zoom-controls-desktop .heatmap-zoom-btn {
+    width: 36px;
+    height: 36px;
+    min-width: 36px;
+    min-height: 36px;
+  }
+  .heatmap-desktop-ui .zoom-indicator {
+    right: 200px;
+  }
+}
+
+/* Mobile: map overlays and controls (mobile UI); allow map to fill and page to scroll */
+@media (max-width: 768px) {
+  .heatmap-wrapper {
+    padding: 6px;
+    min-height: min(400px, calc(100vh - 56px - 2rem - 12px));
+  }
+
+  .heatmap-mobile-ui .heatmap-overlay-bar-mobile {
+    top: 12px;
+    right: 10px;
+    left: 10px;
+    gap: 8px;
+    max-width: calc(100% - 16px);
+    width: calc(100% - 16px);
+    box-sizing: border-box;
+  }
+
+  .heatmap-mobile-ui .heatmap-search-block-mobile {
+    max-width: min(220px, 85vw);
+    min-width: 0;
+    border-radius: 8px;
+    padding: 5px 6px 5px 0;
+  }
+  .heatmap-mobile-ui .heatmap-search-block-mobile .heatmap-search-input {
+    font-size: 11px;
+    padding: 5px 6px;
+  }
+  .heatmap-mobile-ui .heatmap-search-block-mobile .heatmap-search-input::placeholder {
+    font-size: 10px;
+  }
+  .heatmap-mobile-ui .heatmap-search-block-mobile .heatmap-search-budget-row {
+    padding: 3px 6px 3px 8px;
+  }
+  .heatmap-mobile-ui .heatmap-search-block-mobile .heatmap-budget-inline .heatmap-budget-trigger {
+    font-size: 10px;
+    padding: 2px 5px;
+  }
+
+  .heatmap-mobile-ui .heatmap-search-row {
+    max-width: 100%;
+    min-width: 0;
+  }
+
+  .heatmap-mobile-ui .heatmap-search-input {
+    min-width: 0;
+    max-width: 100%;
+    font-size: 14px;
+    padding: 8px 10px;
+    box-sizing: border-box;
+  }
+
+  .heatmap-mobile-ui .heatmap-temp-label {
+    font-size: 9px;
+  }
+
+  .heatmap-mobile-ui .heatmap-temp-range {
+    font-size: 11px;
+  }
+
+  .heatmap-mobile-ui .heatmap-bottom-legend {
+    left: 8px;
+    max-width: 58%;
+    padding: 6px 10px 8px;
+  }
+
+  .heatmap-mobile-ui .heatmap-bottom-legend-list {
+    font-size: 9px;
+    gap: 2px 8px;
+  }
+
+  .heatmap-mobile-ui .heatmap-zoom-controls-mobile {
+    bottom: 8px;
+    right: calc(10px + env(safe-area-inset-right, 0px));
+    gap: 3px;
+  }
+
+  .heatmap-mobile-ui .heatmap-zoom-btn {
+    width: 32px;
+    height: 32px;
+    min-width: 32px;
+    min-height: 32px;
+  }
+
+  .heatmap-mobile-ui .heatmap-zoom-btn svg {
+    width: 12px;
+    height: 12px;
+  }
+}
+
+/* Small mobile (e.g. Samsung Galaxy ~360–412px) */
 @media (max-width: 480px) {
   .heatmap-wrapper {
-    padding: 10px;
+    padding: 4px;
+    min-height: min(360px, calc(100vh - 56px - 1.5rem - 8px));
+  }
+
+  .heatmap-mobile-ui .heatmap-overlay-bar-mobile {
+    top: 10px;
+    left: 6px;
+    right: 6px;
+    max-width: calc(100% - 12px);
+    width: calc(100% - 12px);
+  }
+
+  .heatmap-mobile-ui .heatmap-search-block-mobile {
+    max-width: min(200px, 88vw);
+    padding: 4px 6px 4px 0;
+  }
+  .heatmap-mobile-ui .heatmap-search-block-mobile .heatmap-search-input {
+    font-size: 10px;
+    padding: 4px 5px;
+  }
+  .heatmap-mobile-ui .heatmap-search-block-mobile .heatmap-search-input::placeholder {
+    font-size: 9px;
+  }
+
+  .heatmap-mobile-ui .heatmap-temp-range {
+    font-size: 10px;
+  }
+
+  .heatmap-mobile-ui .heatmap-bottom-legend {
+    left: 6px;
+    max-width: 60%;
+    padding: 5px 8px 6px;
+  }
+
+  .heatmap-mobile-ui .heatmap-bottom-legend-list {
+    font-size: 8px;
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .heatmap-mobile-ui .heatmap-zoom-controls-mobile {
+    bottom: 8px;
+    right: calc(8px + env(safe-area-inset-right, 0px));
+  }
+
+  .heatmap-mobile-ui .heatmap-zoom-btn {
+    width: 28px;
+    height: 28px;
+    min-width: 28px;
+    min-height: 28px;
   }
 }
