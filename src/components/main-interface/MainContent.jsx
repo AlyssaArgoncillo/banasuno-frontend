@@ -1,13 +1,9 @@
 import HeatMap from '../HeatMap';
+import Dashboard from './Dashboard';
 
 function MainContent({ view }) {
   if (view === 'dashboard') {
-    return (
-      <div className="main-interface-dashboard-placeholder">
-        <h2>Dashboard</h2>
-        <p>Charts and analytics will go here.</p>
-      </div>
-    );
+    return <Dashboard />;
   }
   return (
     <div className="main-interface-map-area">

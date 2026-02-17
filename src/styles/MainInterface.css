@@ -1,9 +1,10 @@
-/* Main interface – reference layout with Banasuno light palette */
+/* Main interface – reference layout with Banasuno light palette; allow full-page scrolling */
 .main-interface {
   min-height: 100vh;
   display: flex;
   background-color: var(--primary-50);
   position: relative;
+  overflow-x: hidden;
 }
 
 .main-interface-body {
@@ -13,6 +14,9 @@
   min-width: 0;
   min-height: 100vh;
   background: var(--surface-secondary);
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
 }
 
 /* Slight padding so map container spans close to edges */
@@ -26,7 +30,7 @@
 
 /* Main content panel – no dashed border; just holds the map */
 .main-interface-content-card {
-  flex: 1;
+  flex: 1 1 auto;
   display: flex;
   flex-direction: column;
   min-height: 0;
@@ -37,8 +41,8 @@
 }
 
 .main-interface-map-area {
-  flex: 1;
-  min-height: 0;
+  flex: 1 1 auto;
+  min-height: 400px;
   width: 100%;
   overflow: visible;
 }
@@ -64,7 +68,10 @@
   padding: 1.25rem 0;
   position: sticky;
   top: 0;
+  align-self: flex-start;
   height: 100vh;
+  max-height: 100vh;
+  overflow-y: auto;
   box-shadow: 2px 0 8px rgba(0, 0, 0, 0.04);
 }
 
@@ -324,7 +331,19 @@
   visibility: visible;
 }
 
-/* Mobile: hide sidebar, show mobile header and overlay */
+/* Tablet: iPad Air, iPad Pro, etc. – same as desktop but ensure scrolling and touch-friendly spacing */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .main-interface-body {
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .main-interface-map-area {
+    min-height: 420px;
+  }
+}
+
+/* Mobile: hide sidebar, show mobile header and overlay; allow full page scrolling */
 @media (max-width: 768px) {
   .main-interface-sidebar {
     display: none;
@@ -332,10 +351,19 @@
 
   .main-interface-body {
     padding-top: 56px;
+    min-height: 100vh;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
   }
 
   .main-interface-content {
     padding: 1rem;
+    min-height: min-content;
+  }
+
+  .main-interface-map-area {
+    min-height: min(calc(100vh - 56px - 2rem), 520px);
+    flex: 1 1 auto;
   }
 
   .main-interface-mobile-header {
@@ -348,5 +376,16 @@
 
   .main-interface-mobile-backdrop {
     display: block;
+  }
+}
+
+/* Small mobile: Samsung Galaxy, etc. */
+@media (max-width: 480px) {
+  .main-interface-content {
+    padding: 0.75rem;
+  }
+
+  .main-interface-map-area {
+    min-height: min(calc(100vh - 56px - 1.5rem), 480px);
   }
 }
