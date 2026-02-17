@@ -1,13 +1,13 @@
 .solution-section {
   width: 100%;
-  background-color: var(--primary-50);
+  background-color: var(--surface-secondary);
   padding: 3rem 2rem;
 }
 
 .solution-card {
   max-width: 1200px;
   margin: 0 auto;
-  background-color: #FFFFFF;
+  background-color: var(--surface-primary);
   border: 2px solid var(--primary-200);
   border-radius: 12px;
   overflow: hidden;

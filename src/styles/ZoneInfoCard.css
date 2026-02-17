@@ -1,0 +1,186 @@
+/* Zone Info popup card – shown when a barangay boundary is clicked */
+
+.zone-info-card {
+  background: var(--surface-primary, #f8fafc);
+  border-radius: 10px;
+  border: 1px solid var(--primary-200, #e2e8f0);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
+  overflow: hidden;
+  min-width: 280px;
+  max-width: 340px;
+  font-family: var(--font-body, system-ui, sans-serif);
+}
+
+.zone-info-card-tag {
+  padding: 8px 12px 8px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-radius: 10px 10px 0 0;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.zone-info-card-tag-label {
+  flex: 1;
+}
+
+.zone-info-card-close {
+  background: rgba(0, 0, 0, 0.2);
+  border: none;
+  color: inherit;
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  flex-shrink: 0;
+}
+
+.zone-info-card-close:hover {
+  background: rgba(0, 0, 0, 0.3);
+}
+
+.zone-info-card-title {
+  margin: 0;
+  padding: 12px 14px 4px;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--primary-900, #0f172a);
+}
+
+.zone-info-card-subtitle {
+  margin: 0 14px 10px;
+  padding: 0;
+  font-size: 12px;
+  color: var(--primary-600);
+}
+
+.zone-info-card-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: auto auto 1fr;
+  gap: 10px;
+  padding: 0 14px 14px;
+}
+
+.zone-info-card-block {
+  background: var(--primary-50, #f1f5f9);
+  border: 1px solid var(--primary-100, #e2e8f0);
+  border-radius: 8px;
+  padding: 8px 10px;
+}
+
+.zone-info-card-block.zone-info-card-facilities-block {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-direction: column;
+  min-height: 120px;
+}
+
+.zone-info-card-label {
+  display: block;
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--primary-600);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  margin-bottom: 6px;
+}
+
+.zone-info-card-value {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--primary-800);
+}
+
+.zone-info-card-risk,
+.zone-info-card-temp {
+  min-height: 28px;
+  display: flex;
+  align-items: center;
+}
+
+.zone-info-card-facilities-list {
+  flex: 1;
+  overflow-y: auto;
+  max-height: 180px;
+  margin: 0 -4px 0 0;
+  padding-right: 4px;
+}
+
+.zone-info-card-facilities-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.zone-info-card-facilities-list::-webkit-scrollbar-track {
+  background: var(--primary-100);
+  border-radius: 3px;
+}
+
+.zone-info-card-facilities-list::-webkit-scrollbar-thumb {
+  background: var(--primary-300);
+  border-radius: 3px;
+}
+
+.zone-info-card-facility-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 8px 8px 8px 0;
+  border: none;
+  background: none;
+  font-size: 13px;
+  color: var(--primary-800);
+  text-align: left;
+  cursor: pointer;
+  font-family: inherit;
+  border-bottom: 1px solid var(--primary-100);
+}
+
+.zone-info-card-facility-item:last-child {
+  border-bottom: none;
+}
+
+.zone-info-card-facility-item:hover {
+  color: var(--primary-600);
+}
+
+.zone-info-card-facility-name {
+  flex: 1;
+  min-width: 0;
+}
+
+.zone-info-card-facility-distance {
+  font-size: 11px;
+  color: var(--primary-500);
+  flex-shrink: 0;
+}
+
+.zone-info-card-facility-arrow {
+  font-size: 12px;
+  color: var(--primary-500);
+  flex-shrink: 0;
+}
+
+.zone-info-card-facilities-empty {
+  margin: 0;
+  padding: 8px 0;
+  font-size: 12px;
+  color: var(--primary-500);
+}
+
+/* Container used by HeatMap to position the card (e.g. Leaflet popup or overlay) */
+.zone-info-card-wrapper {
+  position: absolute;
+  z-index: 2000;
+  pointer-events: auto;
+}
