@@ -1,0 +1,137 @@
+.built-for-section {
+  width: 100%;
+  padding: 13rem 2rem 6rem 2rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  overflow-x: hidden;
+}
+
+.built-for-container {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  max-width: 1200px;
+  width: 100%;
+}
+
+.built-for-visual {
+  width: 176.09px;
+  height: 231.34px;
+  background: #FD6F00;
+  border-radius: 8px;
+  flex-shrink: 0;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.built-for-content {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
+}
+
+.built-for-subtitle {
+  font-size: 2.5rem;
+  font-weight: 500;
+  color: #333;
+  margin: 0 0 0.25rem 0;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.built-for-title {
+  font-size: 5.5rem;
+  font-weight: 700;
+  color: #333;
+  margin: 0;
+  line-height: 1.2;
+}
+
+.built-for-image-section {
+  width: 100vw;
+  display: flex;
+  justify-content: center;
+  margin-top: 10rem;
+  margin-left: calc(-50vw + 50%);
+}
+
+.outer-rectangle {
+  background-color: #FF6B1A;
+  padding: 5.5rem;
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 750px;
+  height: 420px;
+  max-width: 90%;
+}
+
+.inner-rectangle {
+  background-color: #FF7E1E;
+  position: absolute;
+  top: 50px;
+  left: 50px;
+  right: 50px;
+  bottom: 50px;
+  z-index: 1;
+}
+
+.city-hall-image {
+  position: absolute;
+  z-index: 2;
+  width: 60vw;
+  max-width: 60vw;
+  height: auto;
+  object-fit: contain;
+  display: block;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .built-for-image-section {
+    width: 100%;
+    margin-left: 0;
+  }
+
+  .outer-rectangle {
+    width: 90%;
+    height: 150px;
+    padding: 0;
+    max-width: 90%;
+    position: relative;
+  }
+
+  .city-hall-image {
+    width: 100%;
+    max-width: 100%;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+  }
+
+  .built-for-container {
+    flex-direction: column;
+    gap: 2rem;
+    text-align: center;
+  }
+
+  .built-for-content {
+    align-items: center;
+    text-align: center;
+  }
+
+  .built-for-subtitle {
+    font-size: 1.25rem;
+  }
+
+  .built-for-title {
+    font-size: 2.5rem;
+  }
+}
