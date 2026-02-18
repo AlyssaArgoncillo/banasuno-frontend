@@ -1,0 +1,130 @@
+.how-it-works-section {
+  width: 100%;
+  padding: 6rem 2rem 4rem 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background-color: #fff;
+}
+
+.how-it-works-main-title {
+  font-size: 3rem;
+  font-weight: 700;
+  color: #333;
+  text-align: center;
+  margin: 0 0 4rem 0;
+  letter-spacing: 0.05em;
+}
+
+.how-it-works-container {
+  width: 100%;
+  max-width: 1000px;
+  display: flex;
+  flex-direction: column;
+  gap: 6rem;
+}
+
+.step-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 2rem;
+  position: relative;
+}
+
+.step-item:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  left: 60px;
+  top: 120px;
+  width: 3px;
+  height: calc(100% + 6rem);
+  background: linear-gradient(180deg, #FD6F00 0%, #FF9559 100%);
+  z-index: 0;
+}
+
+.step-icon {
+  width: 120px;
+  height: 120px;
+  min-width: 120px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #FD6F00 0%, #FF9559 100%);
+  box-shadow: 0 4px 12px rgba(253, 111, 0, 0.3);
+  position: relative;
+  z-index: 1;
+}
+
+.step-content {
+  flex: 1;
+  text-align: left;
+}
+
+.step-title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #333;
+  margin: 0 0 1rem 0;
+}
+
+.step-description {
+  font-size: 1.125rem;
+  color: #666;
+  line-height: 1.7;
+  margin: 0;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .how-it-works-section {
+    padding: 4rem 1.5rem 3rem 1.5rem;
+  }
+
+  .how-it-works-main-title {
+    font-size: 2rem;
+    margin-bottom: 3rem;
+  }
+
+  .step-item {
+    gap: 1.5rem;
+  }
+
+  .step-item:not(:last-child)::after {
+    left: 40px;
+    top: 80px;
+  }
+
+  .step-icon {
+    width: 80px;
+    height: 80px;
+    min-width: 80px;
+  }
+
+  .step-title {
+    font-size: 1.5rem;
+  }
+
+  .step-description {
+    font-size: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .step-item {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .step-content {
+    text-align: center;
+  }
+
+  .step-item:not(:last-child)::after {
+    display: none;
+  }
+
+  .step-icon {
+    width: 100px;
+    height: 100px;
+    min-width: 100px;
+  }
+}
