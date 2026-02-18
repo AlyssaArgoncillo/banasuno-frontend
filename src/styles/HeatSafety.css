@@ -1,0 +1,259 @@
+@import url('https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;1,300;1,400;1,700;1,900&family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
+
+.heat-safety-section {
+  width: 100%;
+  padding: 6rem 2rem 4rem 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background-color: #f9f9f9;
+}
+
+.heat-safety-title {
+  font-size: 3rem;
+  font-weight: 700;
+  color: #333;
+  text-align: center;
+  margin: 0 0 4rem 0;
+  letter-spacing: 0.05em;
+}
+
+.cards-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2rem;
+  justify-content: center;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.card {
+  --bg: #fff;
+  --title-color: #fff;
+  --title-color-hover: #FD6F00;
+  --text-color: #666;
+  --button-color: #FD6F00;
+  --button-color-hover: #e56300;
+  background: var(--bg);
+  border-radius: 2rem;
+  padding: 0.5rem;
+  width: 20rem;
+  height: 30rem;
+  overflow: clip;
+  position: relative;
+  font-family: Lato, Montserrat, Helvetica, Arial, sans-serif;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transition: box-shadow 0.3s;
+}
+
+.card:hover {
+  box-shadow: 0 8px 24px rgba(253, 111, 0, 0.2);
+}
+
+.card::before {
+  content: '';
+  position: absolute;
+  width: calc(100% - 1rem);
+  height: 30%;
+  bottom: 0.5rem;
+  left: 0.5rem;
+  mask: linear-gradient(#0000, #000f 80%);
+  backdrop-filter: blur(1rem);
+  border-radius: 0 0 1.5rem 1.5rem;
+  translate: 0 0;
+  transition: translate 0.25s;
+  z-index: 2;
+}
+
+.card > img {
+  max-width: 100%;
+  aspect-ratio: 2 / 3;
+  object-fit: cover;
+  object-position: 50% 5%;
+  border-radius: 1.5rem;
+  display: block;
+  transition: aspect-ratio 0.25s, object-position 0.5s;
+  width: 100%;
+  height: auto;
+}
+
+.card > section {
+  margin: 1rem;
+  height: calc(33.3333% - 1rem);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  z-index: 3;
+}
+
+.card h2 {
+  margin: 0;
+  margin-block-end: 1rem;
+  font-size: 1.5rem;
+  opacity: 0;
+  translate: 0 -200%;
+  color: var(--title-color);
+  transition: color 0.5s, margin-block-end 0.25s, opacity 1s, translate 0.25s;
+}
+
+.card p {
+  font-size: 0.95rem;
+  line-height: 1.3;
+  color: var(--text-color);
+  opacity: 0;
+  margin: 0;
+  translate: 0 100%;
+  transition: margin-block-end 0.25s, opacity 1s 0.2s, translate 0.25s 0.2s;
+}
+
+.card > section > div {
+  flex: 1;
+  align-items: flex-end;
+  display: flex;
+  justify-content: flex-end;
+  opacity: 0;
+  transition: translate 0.25s 0.2s, opacity 1s;
+}
+
+.card button {
+  border: 2px solid var(--button-color);
+  border-radius: 1.25rem 1.25rem 1.5rem 1.25rem;
+  font-size: 1rem;
+  padding: 0.75rem 1.5rem 0.75rem 2.5rem;
+  background: var(--button-color);
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.33s, border-color 0.33s;
+  outline-offset: 2px;
+  position: relative;
+  width: 8rem;
+  text-align: right;
+}
+
+.card button::before,
+.card button::after {
+  content: '';
+  width: 0.85rem;
+  height: 0.1rem;
+  background: currentcolor;
+  position: absolute;
+  top: 50%;
+  left: 1.2rem;
+  border-radius: 1rem;
+}
+
+.card button::after {
+  rotate: 90deg;
+  transition: rotate 0.15s;
+}
+
+.card button.following {
+  background: transparent;
+  color: var(--button-color);
+}
+
+.card button.following::after {
+  rotate: 0deg;
+}
+
+.card button:hover {
+  background: var(--button-color-hover);
+  border-color: var(--button-color-hover);
+  color: #fff;
+}
+
+.card button:focus {
+  outline: 2px solid var(--button-color);
+}
+
+.card:hover::before,
+.card:focus-within::before {
+  translate: 0 100%;
+}
+
+.card:hover > img,
+.card:focus-within > img {
+  aspect-ratio: 1 / 1;
+  object-position: 50% 10%;
+  transition: aspect-ratio 0.25s, object-position 0.25s;
+}
+
+.card:hover h2,
+.card:focus-within h2,
+.card:hover p,
+.card:focus-within p {
+  translate: 0 0;
+  margin-block-end: 0.5rem;
+  opacity: 1;
+}
+
+.card:hover h2,
+.card:focus-within h2 {
+  color: var(--title-color-hover);
+}
+
+.card:hover > section > div,
+.card:focus-within > section > div {
+  translate: 0 0;
+  opacity: 1;
+  transition: translate 0.25s 0.25s, opacity 0.5s 0.25s;
+}
+
+/* Responsive design */
+@media (max-width: 1024px) {
+  .cards-container {
+    gap: 1.5rem;
+  }
+
+  .card {
+    width: 18rem;
+    height: 28rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .heat-safety-section {
+    padding: 4rem 1.5rem 3rem 1.5rem;
+  }
+
+  .heat-safety-title {
+    font-size: 2rem;
+    margin-bottom: 3rem;
+  }
+
+  .cards-container {
+    gap: 1.5rem;
+  }
+
+  .card {
+    width: 100%;
+    max-width: 20rem;
+    height: 28rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .heat-safety-title {
+    font-size: 1.5rem;
+  }
+
+  .card {
+    width: 100%;
+    height: 24rem;
+  }
+
+  .card h2 {
+    font-size: 1.25rem;
+  }
+
+  .card p {
+    font-size: 0.9rem;
+  }
+
+  .card button {
+    width: 7rem;
+    padding: 0.6rem 1rem 0.6rem 2rem;
+    font-size: 0.9rem;
+  }
+}
