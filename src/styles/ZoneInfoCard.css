@@ -95,6 +95,13 @@
   margin-bottom: 6px;
 }
 
+.zone-info-card-sublabel {
+  display: block;
+  font-size: 11px;
+  color: var(--primary-500);
+  margin-bottom: 6px;
+}
+
 .zone-info-card-value {
   font-size: 14px;
   font-weight: 700;
@@ -171,11 +178,16 @@
   flex-shrink: 0;
 }
 
-.zone-info-card-facilities-empty {
+.zone-info-card-facilities-empty,
+.zone-info-card-facilities-loading {
   margin: 0;
   padding: 8px 0;
   font-size: 12px;
   color: var(--primary-500);
+}
+
+.zone-info-card-facilities-loading {
+  font-style: italic;
 }
 
 /* Container used by HeatMap to position the card (e.g. Leaflet popup or overlay) */

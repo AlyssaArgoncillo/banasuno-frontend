@@ -6,6 +6,13 @@ export default defineConfig({
   server: {
     host: true,
     port: 5173,
+    proxy: {
+      // Avoid CORS in local dev: browser talks only to localhost, Vite forwards to backend.
+      '/api': {
+        target: 'https://banasuno-backend.vercel.app',
+        changeOrigin: true,
+      },
+    },
   },
   plugins: [
     react({

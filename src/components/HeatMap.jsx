@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { startTransition, useEffect, useRef, useState } from 'react';
 import '../styles/HeatMap.css';
 import { fetchDavaoBoundaries } from '../services/boundariesService.js';
 import { getBarangayHeatData } from '../services/heatService.js';
@@ -18,8 +18,10 @@ const HeatMap = ({ compact = false }) => {
   const barangayFeaturesRef = useRef([]);
   const locationMarkerRef = useRef(null);
   const facilitiesRequestSeqRef = useRef(0);
+  const lastPolygonClickTimeRef = useRef(0);
   const cancelledRef = useRef(false);
   const [zoomPercentage, setZoomPercentage] = useState(100);
+  const [mapLoading, setMapLoading] = useState(true);
   const [error, setError] = useState(null);
   const [tempRange, setTempRange] = useState({ min: 26, max: 39 });
   const [searchQuery, setSearchQuery] = useState('');
@@ -141,7 +143,7 @@ const HeatMap = ({ compact = false }) => {
         const map = mapInstanceRef.current;
         if (map) {
           setLocationIndicator(lat, lng);
-          map.flyTo([lat, lng], 14, { duration: 0.5 });
+          map.flyTo([lat, lng], 17, { duration: 0.5 });
         }
       },
       (err) => {
@@ -157,9 +159,9 @@ const HeatMap = ({ compact = false }) => {
         }
       },
       {
-        enableHighAccuracy: false,
-        timeout: 20000,
-        maximumAge: 60000
+        enableHighAccuracy: true,
+        timeout: 30000,
+        maximumAge: 0
       }
     );
   };
@@ -240,10 +242,14 @@ const HeatMap = ({ compact = false }) => {
           },
           onEachFeature: (feature, layer) => {
             layer.on('click', () => {
+              const now = Date.now();
+              if (now - lastPolygonClickTimeRef.current < 120) return;
+              lastPolygonClickTimeRef.current = now;
+
               const id = getBarangayId(feature);
               const name = feature.properties?.adm4_en ?? feature.properties?.name ?? 'Barangay';
-              const { tempByBarangayId: temps, tempMin: tMin, tempMax: tMax } = heatDataRef.current;
-              const temp = temps != null && id != null ? temps[id] : null;
+              const { tempByBarangayId: temps } = heatDataRef.current;
+              const temp = temps != null && id != null ? (temps[id] ?? temps[String(id)]) : null;
               const riskLevel = temp != null && Number.isFinite(temp)
                 ? tempToHeatRiskLevel(temp)
                 : tempToHeatRiskLevel(null);
@@ -251,29 +257,49 @@ const HeatMap = ({ compact = false }) => {
               const ring = getPolygonRing(feature.geometry);
               const [lng, lat] = ring ? ringCentroid(ring) : [125.4553, 7.1907];
               const requestSeq = ++facilitiesRequestSeqRef.current;
-              setSelectedZone(null);
+
+              requestAnimationFrame(() => {
+                if (cancelledRef.current) return;
+                setSelectedZone({
+                  name,
+                  temperature: temp,
+                  riskLevel,
+                  riskScore,
+                  facilities: [],
+                  isNearbyFallback: false,
+                  facilitiesLoading: true
+                });
+              });
+
               getHealthFacilitiesNearBarangay(id, { lat, lng })
-                .then((facilities) => {
-                  // Prevent out-of-order async results from overwriting the most recent click.
+                .then((result) => {
                   if (cancelledRef.current) return;
                   if (requestSeq !== facilitiesRequestSeqRef.current) return;
-                  setSelectedZone({
-                    name: name,
-                    temperature: temp,
-                    riskLevel,
-                    riskScore,
-                    facilities
+                  startTransition(() => {
+                    setSelectedZone({
+                      name,
+                      temperature: temp,
+                      riskLevel,
+                      riskScore,
+                      facilities: result.facilities ?? [],
+                      isNearbyFallback: result.isNearbyFallback ?? false,
+                      facilitiesLoading: false
+                    });
                   });
                 })
                 .catch(() => {
                   if (cancelledRef.current) return;
                   if (requestSeq !== facilitiesRequestSeqRef.current) return;
-                  setSelectedZone({
-                    name: name,
-                    temperature: temp,
-                    riskLevel,
-                    riskScore,
-                    facilities: []
+                  startTransition(() => {
+                    setSelectedZone({
+                      name,
+                      temperature: temp,
+                      riskLevel,
+                      riskScore,
+                      facilities: [],
+                      isNearbyFallback: false,
+                      facilitiesLoading: false
+                    });
                   });
                 });
             });
@@ -283,11 +309,14 @@ const HeatMap = ({ compact = false }) => {
 
         const bounds = barangayLayer.getBounds();
         if (bounds.isValid()) mapInstance.fitBounds(bounds, { padding: [24, 24], maxZoom: 12 });
+        if (!cancelledRef.current) setMapLoading(false);
       })
       .catch((err) => {
-        if (!cancelledRef.current) setError(err.message || 'Failed to load boundaries');
-      })
-      .finally(() => {});
+        if (!cancelledRef.current) {
+          setError(err.message || 'Failed to load boundaries');
+          setMapLoading(false);
+        }
+      });
 
     const BASE_ZOOM = 12;
     const updateHeatLayerRadius = () => {
@@ -326,6 +355,12 @@ const HeatMap = ({ compact = false }) => {
     <div className="heatmap-wrapper">
       <div className={`heatmap-container ${compact ? 'heatmap-compact' : ''}`}>
         <div id="heatmap" ref={mapRef} />
+        {mapLoading && (
+          <div className="heatmap-loading" aria-live="polite" aria-busy="true">
+            <div className="heatmap-loading-spinner" aria-hidden />
+            <span className="heatmap-loading-text">Loading map and temperatures…</span>
+          </div>
+        )}
         {error && (
           <div className="heatmap-error">
             {error}
@@ -340,6 +375,8 @@ const HeatMap = ({ compact = false }) => {
               riskLevel={selectedZone.riskLevel}
               riskScore={selectedZone.riskScore}
               facilities={selectedZone.facilities}
+              isNearbyFallback={selectedZone.isNearbyFallback}
+              facilitiesLoading={selectedZone.facilitiesLoading}
               onClose={() => setSelectedZone(null)}
               onFacilityClick={() => {}}
             />

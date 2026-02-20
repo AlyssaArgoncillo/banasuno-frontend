@@ -14,6 +14,8 @@ export default function ZoneInfoCard({
   riskLevel,
   riskScore,
   facilities = [],
+  isNearbyFallback = false,
+  facilitiesLoading = false,
   onClose,
   onFacilityClick
 }) {
@@ -51,9 +53,16 @@ export default function ZoneInfoCard({
           </div>
         </div>
         <div className="zone-info-card-block zone-info-card-facilities-block">
-          <span className="zone-info-card-label">Health Facilities in the Area</span>
+          <span className="zone-info-card-label">
+            {isNearbyFallback ? 'Nearest facilities in the area' : 'Health Facilities in the Area'}
+          </span>
+          {isNearbyFallback && (
+            <span className="zone-info-card-sublabel">No facilities in this barangay; showing closest nearby</span>
+          )}
           <div className="zone-info-card-facilities-list">
-            {facilities.length === 0 ? (
+            {facilitiesLoading ? (
+              <p className="zone-info-card-facilities-loading">Loading facilities…</p>
+            ) : facilities.length === 0 ? (
               <p className="zone-info-card-facilities-empty">No facilities listed.</p>
             ) : (
               facilities.map((fac) => (
