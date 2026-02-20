@@ -8,45 +8,12 @@ This doc describes logic and APIs that should live in the **backend** (separate 
 
 ### 1.1 Barangay temperature / heat data
 
-**Current frontend:** Simulated temperatures per barangay in `src/utils/heatMap.js` (`simulateBarangayTemperatures`) and `src/services/heatService.js`.
+**Lives in the backend repo.** The heat API and all temperature logic (sources of truth, business rules, and the path to a heuristic AI model) are implemented and documented in the backend.
 
-**Backend should:**
+- **API:** `GET /api/heat/:cityId/barangay-temperatures` – returns `{ temperatures, min, max }` keyed by barangay ID.
+- **Docs:** See the backend repo → **`docs/HEAT-API.md`** for the full API contract, backend responsibilities, and the heuristic AI model direction.
 
-- Expose an API that returns **temperature per barangay** for a given city (e.g. Davao).
-- Own all **sources of truth** for temperature (sensors, models, third‑party APIs, caching).
-- Apply any **business rules** (aggregation, time window, min/max range).
-
-**Suggested API contract:**
-
-```http
-GET /api/heat/:cityId/barangay-temperatures
-```
-
-**Query (optional):** `?date=YYYY-MM-DD` or `?timestamp=...` for point-in-time.
-
-**Response:**
-
-```json
-{
-  "temperatures": {
-    "1130700001": 31.2,
-    "1130700002": 33.1
-  },
-  "min": 26,
-  "max": 39,
-  "updatedAt": "2025-02-15T12:00:00Z"
-}
-```
-
-- Keys in `temperatures`: barangay identifier (e.g. PSGC `adm4_psgc` or feature `id`) matching the GeoJSON used on the frontend.
-- `min` / `max`: range for the legend and for normalizing to 0–1 intensity.
-- Frontend already supports this shape in `src/services/heatService.js` (`fetchBarangayTemperatures`).
-
-**Backend logic to implement:**
-
-- Resolve `cityId` (e.g. `davao`) to the correct geographic/barangay set.
-- Compute or fetch temperature per barangay (sensor aggregation, model, external API).
-- Return the map above; frontend will use it in `getBarangayHeatData` and pass it to `buildHeatPointsFromBarangays`.
+The frontend only calls this endpoint and uses the response; it keeps a **simulation fallback** in `src/utils/heatMap.js` when the backend is unavailable.
 
 ---
 
@@ -76,5 +43,5 @@ Right now boundaries come from [philippines-json-maps](https://github.com/faeldo
 
 ## 4. Env and deployment
 
-- Frontend expects backend base URL via **`VITE_API_URL`** (see `src/services/heatService.js`).
-- When `VITE_API_URL` is set and the heat API is implemented, the app will use real data; otherwise it uses simulated barangay temperatures.
+- Frontend expects backend base URL via **`VITE_API_URL`** (see `src/services/heatService.js`). Example: `VITE_API_URL=http://localhost:3000`.
+- The backend heat endpoint is implemented and uses [WeatherAPI.com](https://www.weatherapi.com/). In the backend repo, set **`WEATHER_API_KEY`** in `.env` (get a key at https://www.weatherapi.com/my/). Then start the backend and set `VITE_API_URL` in the frontend so the heat map uses real current weather instead of simulated data.

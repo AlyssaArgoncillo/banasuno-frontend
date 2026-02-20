@@ -44,42 +44,62 @@ export function normalizeTempToIntensity(temp, min = DEFAULT_TEMP_MIN, max = DEF
   return Math.max(0, Math.min(1, (temp - min) / range));
 }
 
-/** Heat index risk levels for zone info card tag and score; also used for map fill colors. */
+/**
+ * PAGASA heat index categories (temperature °C). Used for map fill and zone card.
+ * See: https://www.pagasa.dost.gov.ph/weather/heat-index
+ */
 export const HEAT_RISK_LEVELS = [
-  { level: 1, label: 'Safe', color: '#48bb78' },
-  { level: 2, label: 'Moderate', color: '#ecc94b' },
-  { level: 3, label: 'Elevated', color: '#ed8936' },
-  { level: 4, label: 'High', color: '#f97316' },
-  { level: 5, label: 'Very High', color: '#ea580c' },
-  { level: 6, label: 'Critical', color: '#dc2626' }
+  { level: 1, label: 'Not Hazardous', color: '#48bb78', rangeLabel: '< 27°C' },
+  { level: 2, label: 'Caution', color: '#ecc94b', rangeLabel: '27–32°C' },
+  { level: 3, label: 'Extreme Caution', color: '#ed8936', rangeLabel: '33–41°C' },
+  { level: 4, label: 'Danger', color: '#f97316', rangeLabel: '42–51°C' },
+  { level: 5, label: 'Extreme Danger', color: '#dc2626', rangeLabel: '≥ 52°C' }
 ];
 
-/** Intensity thresholds 0–1 for the 6 heat index levels (map and zone info use these). */
-export const HEAT_INDEX_THRESHOLDS = [0, 0.4, 0.55, 0.7, 0.85, 0.95, 1];
+/** PAGASA temp boundaries: level 1 < 27, 2: 27–32, 3: 33–41, 4: 42–51, 5: ≥ 52 */
+const PAGASA_TEMP_BOUNDS = [
+  { min: -Infinity, max: 27 },
+  { min: 27, max: 33 },
+  { min: 33, max: 42 },
+  { min: 42, max: 52 },
+  { min: 52, max: Infinity }
+];
 
 /**
- * Map normalized intensity 0–1 to heat risk level 1–6 and metadata.
+ * Map temperature (°C) to PAGASA heat risk level (for zone card and counts).
+ * @param {number} temp - Temperature in °C
+ * @returns {{ level: number, label: string, color: string, rangeLabel: string }}
  */
-export function intensityToHeatRiskLevel(intensity) {
-  const v = Math.max(0, Math.min(1, intensity));
-  for (let i = 0; i < HEAT_RISK_LEVELS.length; i++) {
-    if (v <= HEAT_INDEX_THRESHOLDS[i + 1]) return HEAT_RISK_LEVELS[i];
+export function tempToHeatRiskLevel(temp) {
+  if (temp == null || !Number.isFinite(temp)) {
+    return HEAT_RISK_LEVELS[0];
+  }
+  for (let i = 0; i < PAGASA_TEMP_BOUNDS.length; i++) {
+    const { min, max } = PAGASA_TEMP_BOUNDS[i];
+    if (temp >= min && temp < max) return HEAT_RISK_LEVELS[i];
   }
   return HEAT_RISK_LEVELS[HEAT_RISK_LEVELS.length - 1];
 }
 
 /**
- * Get fill color for a normalized intensity 0–1 (for polygon fill).
- * Uses only the 6 heat index legend colors so map coloring strictly matches the legend.
- * @param {number} t - 0–1
+ * Get fill color for temperature (°C) – PAGASA heat index (polygon fill).
+ * @param {number} temp - Temperature in °C
  * @returns {string} hex color
  */
+export function getColorForTemp(temp) {
+  return tempToHeatRiskLevel(temp).color;
+}
+
+/** @deprecated Use tempToHeatRiskLevel(temp) and getColorForTemp(temp) with PAGASA ranges. */
+export function intensityToHeatRiskLevel(intensity) {
+  const t = 0.5;
+  return tempToHeatRiskLevel(DEFAULT_TEMP_MIN + (DEFAULT_TEMP_MAX - DEFAULT_TEMP_MIN) * Math.max(0, Math.min(1, intensity)));
+}
+
+/** @deprecated Use getColorForTemp(temp) for PAGASA-based coloring. */
 export function getColorForIntensity(t) {
-  const v = Math.max(0, Math.min(1, t));
-  for (let i = 0; i < HEAT_RISK_LEVELS.length; i++) {
-    if (v <= HEAT_INDEX_THRESHOLDS[i + 1]) return HEAT_RISK_LEVELS[i].color;
-  }
-  return HEAT_RISK_LEVELS[HEAT_RISK_LEVELS.length - 1].color;
+  const temp = DEFAULT_TEMP_MIN + (DEFAULT_TEMP_MAX - DEFAULT_TEMP_MIN) * Math.max(0, Math.min(1, t));
+  return getColorForTemp(temp);
 }
 
 function parseHex(hex) {

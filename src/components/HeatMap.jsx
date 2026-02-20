@@ -5,7 +5,7 @@ import { getBarangayHeatData } from '../services/heatService.js';
 import { getHealthFacilitiesNearBarangay } from '../services/healthFacilitiesService.js';
 import { geocodeQuery } from '../services/geocodeService.js';
 import { getPolygonRing, ringCentroid } from '../utils/geo.js';
-import { getBarangayId, normalizeTempToIntensity, getColorForIntensity, intensityToHeatRiskLevel } from '../utils/heatMap.js';
+import { getBarangayId, getColorForTemp, tempToHeatRiskLevel, HEAT_RISK_LEVELS } from '../utils/heatMap.js';
 import ZoneInfoCard from './ZoneInfoCard.jsx';
 
 /* global L */
@@ -230,8 +230,7 @@ const HeatMap = ({ compact = false }) => {
                 fillOpacity: 0.3
               };
             }
-            const intensity = normalizeTempToIntensity(temp, tempMin, tempMax);
-            const fillColor = getColorForIntensity(intensity);
+            const fillColor = getColorForTemp(temp);
             return {
               fillColor,
               fillOpacity: 0.38,
@@ -245,10 +244,9 @@ const HeatMap = ({ compact = false }) => {
               const name = feature.properties?.adm4_en ?? feature.properties?.name ?? 'Barangay';
               const { tempByBarangayId: temps, tempMin: tMin, tempMax: tMax } = heatDataRef.current;
               const temp = temps != null && id != null ? temps[id] : null;
-              const intensity = temp != null && Number.isFinite(temp)
-                ? normalizeTempToIntensity(temp, tMin, tMax)
-                : 0.5;
-              const riskLevel = intensityToHeatRiskLevel(intensity);
+              const riskLevel = temp != null && Number.isFinite(temp)
+                ? tempToHeatRiskLevel(temp)
+                : tempToHeatRiskLevel(null);
               const riskScore = riskLevel.level;
               const ring = getPolygonRing(feature.geometry);
               const [lng, lat] = ring ? ringCentroid(ring) : [125.4553, 7.1907];
@@ -353,14 +351,14 @@ const HeatMap = ({ compact = false }) => {
           <div className="heatmap-overlay-bar heatmap-overlay-bar-desktop">
             <div className="heatmap-panel heatmap-panel-legend heatmap-desktop-legend">
               <div className="heatmap-panel-corner" aria-hidden />
-              <h3 className="heatmap-index-legend-title">HEAT INDEX LEGEND</h3>
+              <h3 className="heatmap-index-legend-title">HEAT INDEX (PAGASA)</h3>
               <ul className="heatmap-index-legend-list">
-                <li className="heatmap-index-legend-item"><span className="heatmap-index-dot" style={{ background: '#48bb78' }} /> Heat-1: Safe</li>
-                <li className="heatmap-index-legend-item"><span className="heatmap-index-dot" style={{ background: '#ecc94b' }} /> Heat-2: Moderate</li>
-                <li className="heatmap-index-legend-item"><span className="heatmap-index-dot" style={{ background: '#ed8936' }} /> Heat-3: Elevated</li>
-                <li className="heatmap-index-legend-item"><span className="heatmap-index-dot" style={{ background: '#f97316' }} /> Heat-4: High</li>
-                <li className="heatmap-index-legend-item"><span className="heatmap-index-dot" style={{ background: '#ea580c' }} /> Heat-5: Very High</li>
-                <li className="heatmap-index-legend-item"><span className="heatmap-index-dot" style={{ background: '#dc2626' }} /> Heat-6: Critical</li>
+                {HEAT_RISK_LEVELS.map((r) => (
+                  <li key={r.level} className="heatmap-index-legend-item">
+                    <span className="heatmap-index-dot" style={{ background: r.color }} />
+                    {r.rangeLabel} {r.label}
+                  </li>
+                ))}
               </ul>
             </div>
             <div className="heatmap-search-block heatmap-search-block-desktop" ref={budgetDropdownRef}>
@@ -431,7 +429,7 @@ const HeatMap = ({ compact = false }) => {
               <span>{tempRange.min}°</span>
               <span>{tempRange.max}°</span>
             </div>
-            <span className="heatmap-legend-area">One dot per barangay · PSGC boundaries</span>
+            <span className="heatmap-legend-area">Average index per barangay · PSGC boundaries</span>
           </div>
           <div className="zoom-indicator">{zoomPercentage}%</div>
           <div className="heatmap-zoom-controls heatmap-zoom-controls-desktop">
@@ -519,14 +517,14 @@ const HeatMap = ({ compact = false }) => {
             </div>
           </div>
           <div className="heatmap-bottom-legend">
-            <h3 className="heatmap-bottom-legend-title">Heat Index Legend</h3>
+            <h3 className="heatmap-bottom-legend-title">Heat Index (PAGASA)</h3>
             <ul className="heatmap-bottom-legend-list">
-              <li className="heatmap-bottom-legend-item"><span className="heatmap-index-dot" style={{ background: '#48bb78' }} /> Heat-1: Safe</li>
-              <li className="heatmap-bottom-legend-item"><span className="heatmap-index-dot" style={{ background: '#ecc94b' }} /> Heat-2: Moderate</li>
-              <li className="heatmap-bottom-legend-item"><span className="heatmap-index-dot" style={{ background: '#ed8936' }} /> Heat-3: Elevated</li>
-              <li className="heatmap-bottom-legend-item"><span className="heatmap-index-dot" style={{ background: '#f97316' }} /> Heat-4: High</li>
-              <li className="heatmap-bottom-legend-item"><span className="heatmap-index-dot" style={{ background: '#ea580c' }} /> Heat-5: Very High</li>
-              <li className="heatmap-bottom-legend-item"><span className="heatmap-index-dot" style={{ background: '#dc2626' }} /> Heat-6: Critical</li>
+              {HEAT_RISK_LEVELS.map((r) => (
+                <li key={r.level} className="heatmap-bottom-legend-item">
+                  <span className="heatmap-index-dot" style={{ background: r.color }} />
+                  {r.rangeLabel} {r.label}
+                </li>
+              ))}
             </ul>
           </div>
           <div className="heatmap-zoom-controls heatmap-zoom-controls-mobile">

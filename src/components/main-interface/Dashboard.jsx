@@ -1,13 +1,23 @@
 import { useState, useEffect } from 'react';
 import { fetchDavaoBoundaries } from '../../services/boundariesService.js';
 import { getBarangayHeatData } from '../../services/heatService.js';
-import { getBarangayId, normalizeTempToIntensity, intensityToHeatRiskLevel, HEAT_RISK_LEVELS } from '../../utils/heatMap.js';
+import { getBarangayId, tempToHeatRiskLevel, HEAT_RISK_LEVELS } from '../../utils/heatMap.js';
 import '../../styles/Dashboard.css';
+
+const CITY_ID = 'davao';
+
+function escapeCsvCell(value) {
+  const s = value == null ? '' : String(value);
+  if (/[",\n\r]/.test(s)) return `"${s.replace(/"/g, '""')}"`;
+  return s;
+}
 
 function Dashboard() {
   const [dateTime, setDateTime] = useState({ date: '', time: '' });
   const [trendPeriod, setTrendPeriod] = useState('7');
   const [countsByLevel, setCountsByLevel] = useState(() => HEAT_RISK_LEVELS.map(() => 0));
+  const [tempAvg, setTempAvg] = useState(null);
+  const [exportSnapshot, setExportSnapshot] = useState(null);
 
   useEffect(() => {
     const update = () => {
@@ -34,20 +44,58 @@ function Dashboard() {
         if (cancelled || !heatData?.tempByBarangayId) return;
         const counts = HEAT_RISK_LEVELS.map(() => 0);
         const { tempByBarangayId, tempMin, tempMax } = heatData;
+        const rows = [];
+        let sumTemp = 0;
+        let nTemp = 0;
         features.forEach((feature) => {
           const id = getBarangayId(feature);
           const temp = id != null ? tempByBarangayId[id] : null;
-          if (temp == null || !Number.isFinite(temp)) return;
-          const intensity = normalizeTempToIntensity(temp, tempMin, tempMax);
-          const { level } = intensityToHeatRiskLevel(intensity);
-          const idx = level - 1;
-          if (idx >= 0 && idx < counts.length) counts[idx] += 1;
+          const name = feature.properties?.adm4_en ?? feature.properties?.name ?? '';
+          if (temp != null && Number.isFinite(temp)) {
+            const { level, label } = tempToHeatRiskLevel(temp);
+            const idx = level - 1;
+            if (idx >= 0 && idx < counts.length) counts[idx] += 1;
+            rows.push({ barangay_id: String(id), barangay_name: name, temperature_c: temp, heat_index_level: level, heat_index_label: label });
+            sumTemp += temp;
+            nTemp += 1;
+          }
         });
-        if (!cancelled) setCountsByLevel(counts);
+        const recordedAt = new Date().toISOString();
+        const avg = nTemp > 0 ? Math.round((sumTemp / nTemp) * 10) / 10 : null;
+        if (!cancelled) {
+          setCountsByLevel(counts);
+          setTempAvg(avg);
+          setExportSnapshot({ recordedAt, rows, summary: { tempMin, tempMax, tempAvg: avg, counts } });
+        }
       })
       .catch(() => {});
     return () => { cancelled = true; };
   }, []);
+
+  const handleDownloadCsv = () => {
+    if (!exportSnapshot?.rows?.length) return;
+    const headers = ['recorded_at', 'city_id', 'barangay_id', 'barangay_name', 'temperature_c', 'heat_index_level', 'heat_index_label'];
+    const lines = [headers.join(',')];
+    exportSnapshot.rows.forEach((r) => {
+      lines.push([
+        escapeCsvCell(exportSnapshot.recordedAt),
+        escapeCsvCell(CITY_ID),
+        escapeCsvCell(r.barangay_id),
+        escapeCsvCell(r.barangay_name),
+        escapeCsvCell(r.temperature_c),
+        escapeCsvCell(r.heat_index_level),
+        escapeCsvCell(r.heat_index_label)
+      ].join(','));
+    });
+    const csv = lines.join('\r\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `heat-snapshot-barangays-${CITY_ID}-${exportSnapshot.recordedAt.slice(0, 10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
 
   return (
     <div className="dashboard">
@@ -61,7 +109,7 @@ function Dashboard() {
           </div>
           <div className="dashboard-card dashboard-card-temp">
             <span className="dashboard-card-label">The Day&apos;s Average Temperature</span>
-            <span className="dashboard-card-value dashboard-temp-value">— °C</span>
+            <span className="dashboard-card-value dashboard-temp-value">{tempAvg != null ? `${tempAvg} °C` : '— °C'}</span>
           </div>
         </section>
 
@@ -104,7 +152,7 @@ function Dashboard() {
           <span className="dashboard-graph-placeholder-text">Temperature Graph</span>
         </div>
         <div className="dashboard-trends-actions">
-          <button type="button" className="dashboard-download-csv" aria-label="Download CSV">
+          <button type="button" className="dashboard-download-csv" aria-label="Download CSV" onClick={handleDownloadCsv} disabled={!exportSnapshot?.rows?.length}>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
               <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
               <polyline points="7 10 12 15 17 10" />
