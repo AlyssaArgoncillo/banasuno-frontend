@@ -1,8 +1,8 @@
-import Header from '../components/landing/Header.jsx';
-import HeroAbout from '../components/landing/HeroAbout.jsx';
-import HowItWorks from '../components/landing/HowItWorks.jsx';
-import HeatSafety from '../components/landing/HeatSafety.jsx';
-import ContactSection from '../components/landing/ContactSection.jsx';
+﻿import Header from '../components/landing/Header.jsx';
+import HeroAbout from '../components/about/HeroAbout.jsx';
+import HowItWorks from '../components/about/HowItWorks.jsx';
+import HeatSafety from '../components/about/HeatSafety.jsx';
+import ContactSection from '../components/about/ContactSection.jsx';
 
 function AboutPage() {
   return (

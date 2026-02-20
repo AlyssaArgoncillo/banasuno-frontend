@@ -16,20 +16,16 @@ function CityPlannersSection({
         </div>
       </div>
       <h2 className="city-planners-title">{title}</h2>
-      <table className="planners-table">
-        <thead>
-          <tr>
-            <th>Need:</th>
-            <th>We Provide:</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>{need}</td>
-            <td>{provide}</td>
-          </tr>
-        </tbody>
-      </table>
+      <div className="planners-cards">
+        <div className="planners-card planners-need">
+          <div className="planners-card-label">Need</div>
+          <p className="planners-card-text">{need}</p>
+        </div>
+        <div className="planners-card planners-provide">
+          <div className="planners-card-label">We Provide</div>
+          <p className="planners-card-text">{provide}</p>
+        </div>
+      </div>
     </section>
   );
 }

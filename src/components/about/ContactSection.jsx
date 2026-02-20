@@ -14,7 +14,7 @@ function ContactSection() {
               <div className="team-lower">
                 <h3>Alyssa Nicole A. Argoncillo</h3>
                 <h4>Project Lead & System Developer</h4>
-                <p>Tinder profile below.</p>
+                <p>Dummy data</p>
                 <a className="team-btn" href="https://www.facebook.com/ekleas.prsea" target="_blank" rel="noopener noreferrer">Profile</a>
               </div>
             </div>
@@ -26,7 +26,7 @@ function ContactSection() {
               <div className="team-lower">
                 <h3>Kisha Ann Joy M. Sanchez</h3>
                 <h4>Data Analyst & UI Documentation Lead</h4>
-                <p>Blablablabalbal Ilovep4ssy</p>
+                <p>Dummy data</p>
                 <a className="team-btn" href="https://www.facebook.com/kishaannjoy.sanchez" target="_blank" rel="noopener noreferrer">Profile</a>
               </div>
             </div>

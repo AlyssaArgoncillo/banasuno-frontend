@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import '../../styles/FinalCTA.css';
 
 function FinalCTA() {
@@ -10,8 +11,8 @@ function FinalCTA() {
             Start visualizing heat zones and locating health facilities near you.
           </p>
           <div className="cta-buttons">
-            <button className="cta-button primary">Launch the Map -&gt;</button>
-            <button className="cta-button secondary">Heat Safety Tips</button>
+            <Link to="/home?view=heatmap" className="cta-button primary">Launch the Map</Link>
+            <Link to="/about#heat-safety" className="cta-button secondary">Heat Safety Tips</Link>
           </div>
         </div>
       </div>

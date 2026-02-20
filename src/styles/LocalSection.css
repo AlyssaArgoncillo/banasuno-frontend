@@ -1,7 +1,7 @@
 .local-section {
   width: 100%;
   padding: 6rem 2rem;
-  background-color: var(--primary-50);
+  background-color: transparent;
 }
 
 .local-container {
@@ -21,7 +21,7 @@
 }
 
 .local-card {
-  background-color: #FFFFFF;
+  background-color: #FFFAF8;
   border: 2px solid var(--primary-200);
   border-radius: 12px;
   display: flex;
@@ -32,7 +32,7 @@
 
 .local-content {
   flex: 1;
-  padding: 2rem;
+  padding: 2rem 3rem;
   display: flex;
   align-items: center;
 }

@@ -2,7 +2,7 @@
   width: 100%;
   padding: 8rem 2rem 4rem 2rem;
   margin-top: 6rem;
-  background-color: var(--surface-secondary);
+  background-color: transparent;
 }
 
 .try-it-now-heading {

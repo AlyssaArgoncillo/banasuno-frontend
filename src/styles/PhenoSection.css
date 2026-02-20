@@ -1,7 +1,7 @@
 .pheno-section {
   width: 100%;
   padding: 0.75rem 2rem;
-  background-color: var(--surface-secondary);
+  background-color: transparent;
 }
 
 .pheno-container {

@@ -36,7 +36,7 @@ function HeatSafety() {
   ];
 
   return (
-    <section className="heat-safety-section">
+    <section id="heat-safety" className="heat-safety-section">
       <h1 className="heat-safety-title">STAY SAFE IN THIS HEAT</h1>
       <div className="cards-container">
         {cards.map((card, index) => (

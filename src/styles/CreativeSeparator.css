@@ -1,7 +1,7 @@
 .creative-separator {
   width: 100%;
   padding: 3rem 2rem;
-  background-color: var(--surface-secondary);
+  background-color: transparent;
   display: flex;
   align-items: center;
   justify-content: center;

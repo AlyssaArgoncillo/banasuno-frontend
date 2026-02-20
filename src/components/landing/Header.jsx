@@ -22,8 +22,8 @@ function Header() {
 
         <nav className={`nav-links ${isMenuOpen ? 'active' : ''}`}>
           <Link to="/about" className="nav-link" onClick={closeMenu}>About Us</Link>
-          <a href="/#features" className="nav-link" onClick={closeMenu}>Features</a>
-          <a href="/#data" className="nav-link" onClick={closeMenu}>Data</a>
+          <a href="/#solution" className="nav-link" onClick={closeMenu}>Features</a>
+          <a href="/#data-sources" className="nav-link" onClick={closeMenu}>Data</a>
           <Link to="/home" className="cta-button mobile-cta" onClick={closeMenu}>
             Access BanasUno→
           </Link>

@@ -3,7 +3,7 @@ import '../../styles/HeroAbout.css';
 function HeroAbout() {
   return (
     <section className="hero-about-section">
-      <img src="/banner.png" alt="About BanasUno Banner" className="hero-about-visual" />
+      <img src="/banner2.png" alt="About BanasUno Banner" className="hero-about-visual" />
       <div className="hero-about-content">
         <h1 className="hero-about-title">ABOUT BANASUNO</h1>
         <p className="hero-about-description">
