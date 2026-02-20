@@ -12,7 +12,7 @@ function LocalSection() {
             </p>
           </div>
           <div className="local-image">
-            <img src="/risk1.jpg" alt="Davao City" />
+            <img src="/davao.jpg" alt="Davao City" />
           </div>
         </div>
       </div>

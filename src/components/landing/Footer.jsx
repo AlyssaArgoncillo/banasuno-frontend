@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import '../../styles/Footer.css';
 
 function Footer() {
@@ -11,8 +12,12 @@ function Footer() {
             Making climate data accessible and actionable.
           </p>
           <div className="footer-social">
-            <div className="social-icon"></div>
-            <div className="social-icon"></div>
+            <div className="social-icon" aria-hidden="true">
+              <img src="/github.png" alt="GitHub" />
+            </div>
+            <div className="social-icon" aria-hidden="true">
+              <img src="/email.png" alt="Email" />
+            </div>
           </div>
         </div>
         
@@ -20,16 +25,16 @@ function Footer() {
           <div className="footer-column">
             <h5 className="footer-heading">Quick Links</h5>
             <ul className="footer-links">
-              <li><a href="#">Heat Map</a></li>
-              <li><a href="#">Data Export</a></li>
+              <li><Link to="/home?view=heatmap">Heat Map</Link></li>
+              <li><Link to="/home?view=dashboard">Data Export</Link></li>
             </ul>
           </div>
           
           <div className="footer-column">
             <h5 className="footer-heading">Resources</h5>
             <ul className="footer-links">
-              <li><a href="#">About Us</a></li>
-              <li><a href="#">Data Sources</a></li>
+              <li><Link to="/about">About Us</Link></li>
+              <li><a href="/#data-sources">Data Sources</a></li>
             </ul>
           </div>
         </div>

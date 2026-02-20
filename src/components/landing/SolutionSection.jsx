@@ -1,8 +1,53 @@
 import '../../styles/SolutionSection.css';
+import { useEffect, useRef } from 'react';
 
 function SolutionSection() {
+  const subsectionsRef = useRef([]);
+
+  useEffect(() => {
+    // Set initial state
+    subsectionsRef.current.forEach((subsection) => {
+      if (subsection) {
+        const content = subsection.querySelector('.subsection-content');
+        const image = subsection.querySelector('.subsection-image');
+        if (content) content.classList.add('initial');
+        if (image) image.classList.add('initial');
+      }
+    });
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            const content = entry.target.querySelector('.subsection-content');
+            const image = entry.target.querySelector('.subsection-image');
+            if (content) {
+              content.classList.remove('initial');
+              content.classList.add('in-view');
+            }
+            if (image) {
+              image.classList.remove('initial');
+              image.classList.add('in-view');
+            }
+          }
+        });
+      },
+      { threshold: 0.2 }
+    );
+
+    subsectionsRef.current.forEach((subsection) => {
+      if (subsection) observer.observe(subsection);
+    });
+
+    return () => {
+      subsectionsRef.current.forEach((subsection) => {
+        if (subsection) observer.unobserve(subsection);
+      });
+    };
+  }, []);
+
   return (
-    <section className="solution-section">
+    <section id="solution" className="solution-section">
       <div className="solution-card">
         <div className="solution-header">
           <h2 className="solution-title">BanasUno's Approach</h2>
@@ -13,7 +58,7 @@ function SolutionSection() {
 
         <div className="solution-divider"></div>
 
-        <div className="hrv-subsection subsection">
+        <div className="hrv-subsection subsection" ref={(el) => (subsectionsRef.current[0] = el)}>
           <div className="subsection-content">
             <h3 className="subsection-heading">Heat Risk Visualization</h3>
             <p className="subsection-description">
@@ -21,15 +66,15 @@ function SolutionSection() {
             </p>
           </div>
           <div className="subsection-image">
-            <img src="/risk1.jpg" alt="Heat Risk Visualization" />
+            <img src="/HeatZone.png" alt="Heat Risk Visualization" />
           </div>
         </div>
 
         <div className="solution-divider"></div>
 
-        <div className="cls-subsection subsection">
+        <div className="cls-subsection subsection" ref={(el) => (subsectionsRef.current[1] = el)}>
           <div className="subsection-image">
-            <img src="/risk1.jpg" alt="Clinic Locator" />
+            <img src="/ClinicLoc.png" alt="Clinic Locator" />
           </div>
           <div className="subsection-content">
             <h3 className="subsection-heading">Clinic Locator</h3>
@@ -41,7 +86,7 @@ function SolutionSection() {
 
         <div className="solution-divider"></div>
 
-        <div className="das-subsection subsection">
+        <div className="das-subsection subsection" ref={(el) => (subsectionsRef.current[2] = el)}>
           <div className="subsection-content">
             <h3 className="subsection-heading">Data Analytics</h3>
             <p className="subsection-description">

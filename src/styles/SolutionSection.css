@@ -1,13 +1,57 @@
 .solution-section {
   width: 100%;
-  background-color: var(--surface-secondary);
+  background-color: transparent;
   padding: 3rem 2rem;
+}
+
+@keyframes slideInFromLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-50px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideInFromRight {
+  from {
+    opacity: 0;
+    transform: translateX(50px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideInFromBottom {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
 .solution-card {
   max-width: 1200px;
   margin: 0 auto;
-  background-color: var(--surface-primary);
+  background-color: #FFFAF8;
   border: 2px solid var(--primary-200);
   border-radius: 12px;
   overflow: hidden;
@@ -16,7 +60,7 @@
 
 .solution-header {
   background: linear-gradient(135deg, #FF9559 0%, #FF6B1A 100%);
-  padding: 2.5rem 2rem;
+  padding: 2.5rem 3rem;
   text-align: center;
 }
 
@@ -80,7 +124,18 @@
   flex-direction: column;
   justify-content: center;
   text-align: left;
-  padding: 2rem;
+  padding: 2rem 3rem;
+  transition: all 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.subsection-content.initial {
+  opacity: 0;
+  transform: translateX(-50px);
+}
+
+.subsection-content.in-view {
+  opacity: 1;
+  transform: translateX(0);
 }
 
 .subsection-heading {
@@ -103,7 +158,41 @@
 
 .subsection-image {
   flex: 1;
-  overflow: hidden;
+  overflow: visible;
+  padding: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+  position: relative;
+}
+
+.subsection-image.initial {
+  opacity: 0;
+  transform: scale(0.95);
+}
+
+.subsection-image.in-view {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.cls-subsection .subsection-image.initial {
+  transform: scale(0.95) translateX(50px);
+}
+
+.cls-subsection .subsection-image.in-view {
+  transform: scale(1) translateX(0);
+}
+
+.cls-subsection .subsection-content.initial {
+  opacity: 0;
+  transform: translateX(50px);
+}
+
+.cls-subsection .subsection-content.in-view {
+  opacity: 1;
+  transform: translateX(0);
 }
 
 .subsection-image img {
@@ -111,15 +200,246 @@
   height: 100%;
   object-fit: cover;
   display: block;
+  border-radius: 12px;
+  box-shadow: 0 2.8px 2.2px rgba(0, 0, 0, 0.014), 0 6.7px 5.3px rgba(0, 0, 0, 0.02),
+    0 12.5px 10px rgba(0, 0, 0, 0.025), 0 22.3px 17.9px rgba(0, 0, 0, 0.03),
+    0 41.8px 33.4px rgba(0, 0, 0, 0.036), 0 100px 80px rgba(0, 0, 0, 0.05);
+  transition: transform 550ms ease, filter 550ms ease;
 }
 
-.hrv-content {
-  flex: 1;
+.image-info {
+  position: absolute;
+  width: 80px;
+  height: 80px;
+  background: rgba(0, 0, 0, 0.8);
+  border-radius: 6px;
   display: flex;
   flex-direction: column;
   justify-content: center;
-  text-align: left;
-  padding: 2rem;
+  align-items: center;
+  transition: width 550ms ease, height 550ms ease, left 550ms ease, top 550ms ease, right 550ms ease, bottom 550ms ease, background 550ms ease;
+  overflow: hidden;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+  z-index: 10;
+}
+
+.image-info::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background: transparent;
+  border: 2px solid transparent;
+  z-index: 1;
+  opacity: 0;
+  transition: opacity 550ms ease, border-color 550ms ease;
+  pointer-events: none;
+  box-sizing: border-box;
+}
+
+.image-info .info-icon {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 2rem;
+  color: white;
+  z-index: 2;
+  opacity: 1;
+  transition: opacity 250ms ease, transform 250ms ease;
+}
+
+.image-info .info-text {
+  display: block;
+  position: absolute;
+  left: 50%;
+  bottom: 5%;
+  transform: translateX(-50%);
+  font-size: 0.65rem;
+  letter-spacing: 1.5px;
+  font-family: 'Outfit', sans-serif;
+  font-weight: bold;
+  color: #fff;
+  white-space: nowrap;
+  z-index: 2;
+  opacity: 0;
+  transition: opacity 250ms ease 300ms, transform 250ms ease 300ms;
+}
+
+.image-info .info--image {
+  display: none;
+}
+
+.image-info.info-1 {
+  bottom: calc(50% - 40px);
+  right: calc(50% - 40px);
+}
+
+.image-info.info-2 {
+  bottom: 15px;
+  right: 15px;
+}
+
+/* Clinic Locator specific - move info-2 to the left */
+.cls-subsection .image-info.info-2 {
+  right: auto;
+  left: 15px;
+  bottom: 15px;
+}
+
+/* Heat Risk specific - Analytics on top-left */
+.hrv-subsection .image-info.info-2 {
+  right: auto;
+  bottom: auto;
+  left: 15px;
+  top: 15px;
+}
+
+/* Heat Risk specific colors */
+.hrv-subsection .image-info.info-1 {
+  background: #FF9559;
+  right: calc(50% - 40px);
+  bottom: calc(50% - 40px);
+  border-radius: 6px;
+}
+
+.hrv-subsection .image-info.info-2 {
+  background: #FF6B1A;
+  left: 15px;
+  top: 15px;
+  border-radius: 6px;
+}
+
+/* Clinic Locator specific colors */
+.cls-subsection .image-info.info-1 {
+  background: #B8551E;
+  left: 15px;
+  top: 15px;
+  bottom: auto;
+  border-radius: 6px;
+}
+
+.cls-subsection .image-info.info-2 {
+  background: #B8551E;
+  left: calc(50% - 40px);
+  bottom: 15px;
+  border-radius: 6px;
+}
+
+/* Data Analytics specific colors */
+.das-subsection .image-info.info-1 {
+  background: #B8551E;
+  left: 15px;
+  top: 15px;
+  bottom: auto;
+  border-radius: 6px;
+}
+
+.das-subsection .image-info.info-2 {
+  background: #B8551E;
+  left: calc(50% - 40px);
+  right: auto;
+  bottom: 15px;
+  border-radius: 6px;
+}
+
+/* Individual box hover expansion */
+.image-info:hover {
+  width: 120px;
+  height: 120px;
+}
+
+.image-info:hover::after {
+  opacity: 1;
+}
+
+/* Heat Risk - info-1 bottom-right hover */
+.hrv-subsection .image-info.info-1:hover {
+  background: rgba(255, 107, 26, 0.25);
+  right: calc(50% - 60px);
+  bottom: calc(50% - 60px);
+}
+
+.hrv-subsection .image-info.info-1:hover::after {
+  border-color: #FF9559;
+  opacity: 1;
+}
+
+/* Heat Risk - info-2 (Analytics) top-left hover */
+.hrv-subsection .image-info.info-2:hover {
+  background: rgba(255, 107, 26, 0.25);
+  left: 15px;
+  top: 15px;
+}
+
+.hrv-subsection .image-info.info-2:hover::after {
+  border-color: #FF6B1A;
+  opacity: 1;
+}
+
+/* Clinic Locator - info-1 top-left hover */
+.cls-subsection .image-info.info-1:hover {
+  background: rgba(184, 85, 30, 0.25);
+  left: 15px;
+  top: 15px;
+}
+
+.cls-subsection .image-info.info-1:hover::after {
+  border-color: #B8551E;
+  opacity: 1;
+}
+
+/* Clinic Locator - info-2 bottom-center hover */
+.cls-subsection .image-info.info-2:hover {
+  background: rgba(184, 85, 30, 0.25);
+  left: calc(50% - 60px);
+  bottom: 15px;
+}
+
+.cls-subsection .image-info.info-2:hover::after {
+  border-color: #B8551E;
+  opacity: 1;
+}
+
+/* Data Analytics - info-1 top-left hover */
+.das-subsection .image-info.info-1:hover {
+  background: rgba(184, 85, 30, 0.25);
+  left: 15px;
+  top: 15px;
+}
+
+.das-subsection .image-info.info-1:hover::after {
+  border-color: #B8551E;
+  opacity: 1;
+}
+
+/* Data Analytics - info-2 bottom-center hover */
+.das-subsection .image-info.info-2:hover {
+  background: rgba(184, 85, 30, 0.25);
+  left: calc(50% - 60px);
+  bottom: 15px;
+}
+
+.das-subsection .image-info.info-2:hover::after {
+  border-color: #B8551E;
+  opacity: 1;
+}
+
+.image-info:hover .info-text {
+  opacity: 1;
+  transition-delay: 250ms;
+}
+
+.image-info:hover .info-icon {
+  opacity: 0;
+  transform: translate(-50%, -50%) scale(0.8);
+  transition-delay: 0ms;
+}
+
+.image-info:hover .info--image img {
+  display: none;
 }
 
 .hrv-heading {
@@ -209,9 +529,45 @@
     order: 2;
   }
 
+  .subsection-content.initial {
+    opacity: 0;
+    transform: translateY(-30px);
+  }
+
+  .subsection-content.in-view {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
   .subsection-image {
     order: 1;
     min-height: 300px;
+  }
+
+  .subsection-image.initial {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+
+  .subsection-image.in-view {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .cls-subsection .subsection-image.initial {
+    transform: translateY(30px);
+  }
+
+  .cls-subsection .subsection-image.in-view {
+    transform: translateY(0);
+  }
+
+  .cls-subsection .subsection-content.initial {
+    transform: translateY(-30px);
+  }
+
+  .cls-subsection .subsection-content.in-view {
+    transform: translateY(0);
   }
 
   .subsection-heading {
@@ -275,9 +631,37 @@
     order: 2;
   }
 
+  .subsection-content.initial {
+    opacity: 0;
+    transform: translateY(-30px);
+  }
+
+  .subsection-content.in-view {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
   .subsection-image {
     order: 1;
     min-height: 250px;
+  }
+
+  .subsection-image.initial {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+
+  .subsection-image.in-view {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .subsection.animate-in .subsection-content {
+    transform: translateY(0);
+  }
+
+  .subsection.animate-in .subsection-image {
+    transform: translateY(0);
   }
 
   .subsection-heading {

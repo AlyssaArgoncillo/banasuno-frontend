@@ -4,7 +4,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  background-color: #fff;
+  background-color: transparent;
 }
 
 .cta-card {
@@ -12,7 +12,7 @@
   max-width: 900px;
   border: 3px solid #FD6F00;
   border-radius: 12px;
-  background-color: #fff;
+  background-color: #FFFAF8;
   box-shadow: 0 4px 12px rgba(253, 111, 0, 0.15);
   transition: all 0.3s ease;
 }

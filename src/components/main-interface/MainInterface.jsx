@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { Link, useLocation } from 'react-router-dom';
 import Sidebar from './Sidebar';
 import MainContent from './MainContent';
 import '../../styles/MainInterface.css';
@@ -7,6 +7,15 @@ import '../../styles/MainInterface.css';
 function MainInterface() {
   const [activeView, setActiveView] = useState('heatmap');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const location = useLocation();
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const view = params.get('view');
+    if (view === 'dashboard' || view === 'heatmap') {
+      setActiveView(view);
+    }
+  }, [location.search]);
 
   const closeMobileMenu = () => setIsMobileMenuOpen(false);
   const setViewAndClose = (view) => {

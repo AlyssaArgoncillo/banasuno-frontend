@@ -1,7 +1,7 @@
 .hero-section {
   width: 100%;
   min-height: calc(100vh - 100px);
-  background-color: var(--surface-secondary);
+  background-color: transparent;
   display: flex;
   align-items: center;
   justify-content: center;
