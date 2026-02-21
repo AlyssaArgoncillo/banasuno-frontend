@@ -2,7 +2,7 @@
 
 .heat-safety-section {
   width: 100%;
-  padding: 6rem 2rem 4rem 2rem;
+  padding: 8rem 2rem 10rem 2rem;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -38,7 +38,7 @@
   border-radius: 2rem;
   padding: 0.5rem;
   width: 20rem;
-  height: 30rem;
+  height: 32rem;
   overflow: clip;
   position: relative;
   font-family: Lato, Montserrat, Helvetica, Arial, sans-serif;
@@ -73,12 +73,14 @@
   border-radius: 1.5rem;
   display: block;
   transition: aspect-ratio 0.25s, object-position 0.5s;
-  width: 100%;
+  width: 90%;
   height: auto;
+  margin: 0.75rem auto 0;
 }
 
 .card > section {
   margin: 1rem;
+  padding-bottom: 2rem;
   height: calc(33.3333% - 1rem);
   display: flex;
   flex-direction: column;
@@ -96,14 +98,25 @@
   transition: color 0.5s, margin-block-end 0.25s, opacity 1s, translate 0.25s;
 }
 
-.card p {
+.card p,
+.card ul {
   font-size: 0.95rem;
   line-height: 1.3;
   color: var(--text-color);
   opacity: 0;
   margin: 0;
+  padding: 0.5rem 0.25rem 0;
   translate: 0 100%;
   transition: margin-block-end 0.25s, opacity 1s 0.2s, translate 0.25s 0.2s;
+}
+
+.card ul {
+  padding-left: 1.1rem;
+  list-style: disc;
+}
+
+.card li {
+  margin-bottom: 0.35rem;
 }
 
 .card > section > div {
@@ -182,7 +195,9 @@
 .card:hover h2,
 .card:focus-within h2,
 .card:hover p,
-.card:focus-within p {
+.card:focus-within p,
+.card:hover ul,
+.card:focus-within ul {
   translate: 0 0;
   margin-block-end: 0.5rem;
   opacity: 1;
@@ -198,6 +213,23 @@
   translate: 0 0;
   opacity: 1;
   transition: translate 0.25s 0.25s, opacity 0.5s 0.25s;
+}
+
+/* Card-specific heading colors */
+.card:nth-child(1) h2 {
+  --title-color-hover: #1565c0;
+}
+
+.card:nth-child(2) h2 {
+  --title-color-hover: #90cadb;
+}
+
+.card:nth-child(3) h2 {
+  --title-color-hover: #02a69f;
+}
+
+.card:nth-child(4) h2 {
+  --title-color-hover: #88c789;
 }
 
 /* Responsive design */
@@ -229,7 +261,7 @@
   .card {
     width: 100%;
     max-width: 20rem;
-    height: 28rem;
+    height: 32rem;
   }
 }
 
@@ -240,7 +272,7 @@
 
   .card {
     width: 100%;
-    height: 24rem;
+    height: 30rem;
   }
 
   .card h2 {
