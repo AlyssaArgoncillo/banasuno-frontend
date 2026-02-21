@@ -1,37 +1,38 @@
-import { useState } from 'react';
 import '../../styles/HeatSafety.css';
 
 function HeatSafety() {
-  const [followStates, setFollowStates] = useState({
-    0: false,
-    1: false,
-    2: false,
-    3: false,
-  });
-
-  const handleButtonClick = (index) => {
-    setFollowStates(prev => ({
-      ...prev,
-      [index]: !prev[index]
-    }));
-  };
-
   const cards = [
     {
-      title: 'Early Warning',
-      description: 'Real-time heat alerts for high-risk areas.'
+      title: 'Hydrate',
+      image: '/hydrate.png',
+      description: [
+        'Drink water regularly, even if not thirsty.',
+        'Avoid alcohol and caffeine.',
+        'Carry a water bottle outdoors.'
+      ]
     },
     {
-      title: 'Community Support',
-      description: 'Connect with local resources and cooling centers.'
+      title: 'Seek Shade',
+      image: '/shade.png',
+      description: [
+        'Avoid peak sun hours (12-3 PM).',
+        'Stay in air-conditioned spaces.',
+        'Use umbrellas or hats when outside.'
+      ]
     },
     {
-      title: 'Health Protection',
-      description: 'Find healthcare facilities and emergency services nearby.'
+      title: 'Dress Light',
+      image: '/run.png',
+      description: [
+        'Wear loose, breathable clothing.',
+        'Choose light colors.',
+        'Use sunscreen SPF 30+.'
+      ]
     },
     {
-      title: 'Risk Knowledge',
-      description: 'Understand your neighborhood heat vulnerability.'
+      title: 'When To Get Help',
+      image: '/dizzy.png',
+      description: 'Seek medical attention immediately if experiencing: dizziness, confusion, rapid heartbeat, nausea, headache, or hot dry skin.'
     }
   ];
 
@@ -41,18 +42,18 @@ function HeatSafety() {
       <div className="cards-container">
         {cards.map((card, index) => (
           <div key={index} className="card">
-            <img src="/risk1.jpg" alt={card.title} />
+            <img src={card.image} alt={card.title} />
             <section>
               <h2>{card.title}</h2>
-              <p>{card.description}</p>
-              <div>
-                <button
-                  onClick={() => handleButtonClick(index)}
-                  className={followStates[index] ? 'following' : ''}
-                >
-                  {followStates[index] ? 'Following' : 'Learn'}
-                </button>
-              </div>
+              {Array.isArray(card.description) ? (
+                <ul>
+                  {card.description.map((item, itemIndex) => (
+                    <li key={itemIndex}>{item}</li>
+                  ))}
+                </ul>
+              ) : (
+                <p>{card.description}</p>
+              )}
             </section>
           </div>
         ))}
