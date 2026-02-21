@@ -155,7 +155,7 @@ export function buildHeatPointsFromBarangays(barangayFeatures, tempByBarangayId,
 
 /**
  * DUMMY: Simulate temperature per barangay when backend is not available.
- * BACKEND: Real data from heatService.fetchBarangayTemperatures(); remove or keep as dev fallback.
+ * BACKEND: Real data from heatService.fetchBarangayTemperatures() (GET /api/heat/:cityId/barangays); remove or keep as dev fallback.
  *
  * @param {import('geojson').Feature[]} barangayFeatures
  * @param {{ centerLng: number, centerLat: number, min: number, max: number }} options

@@ -25,9 +25,21 @@ const API_BASE = getApiBase();
  */
 export async function pingBackend() {
   const base = getApiBase();
-  const url = base ? `${base}/api/heat/davao/average` : '/api/heat/davao/average';
+  
+  // Try new endpoint first
+  const newUrl = base ? `${base}/api/heat/davao/current` : '/api/heat/davao/current';
   try {
-    const res = await fetch(url, { cache: 'no-store' });
+    const res = await fetch(newUrl, { cache: 'no-store' });
+    if (res.ok) return { ok: true };
+    console.warn(`[apiConfig] New ping endpoint failed (${res.status}), trying fallback...`);
+  } catch (err) {
+    console.warn(`[apiConfig] New ping endpoint error, trying fallback...`);
+  }
+  
+  // Fallback to old endpoint
+  const fallbackUrl = base ? `${base}/api/heat/davao/average` : '/api/heat/davao/average';
+  try {
+    const res = await fetch(fallbackUrl, { cache: 'no-store' });
     if (res.ok) return { ok: true };
     return { ok: false, error: `HTTP ${res.status}` };
   } catch (err) {

@@ -9,7 +9,7 @@ export default defineConfig({
     proxy: {
       // Avoid CORS in local dev: browser talks only to localhost, Vite forwards to backend.
       '/api': {
-        target: 'https://banasuno-backend.vercel.app',
+        target: 'http://localhost:3000',  // Local backend
         changeOrigin: true,
       },
     },

@@ -102,3 +102,121 @@ async function fetchNearestInArea(center) {
     return { facilities: [], isNearbyFallback: false };
   }
 }
+
+/**
+ * Fetch a single facility by ID.
+ * GET /api/facilities/:id
+ * Response: { id, name, facility_type, lat, lng, barangay_id, source, ownership, address? }
+ *
+ * @param {string|number} facilityId
+ * @returns {Promise<{ id: string, name: string, facility_type?: string, lat?: number, lng?: number, barangay_id?: string, source?: string, ownership?: string, address?: string } | null>}
+ */
+export async function getFacilityById(facilityId) {
+  if (facilityId == null) return null;
+  try {
+    const id = String(facilityId);
+    const res = await fetch(apiUrl(`/api/facilities/${encodeURIComponent(id)}`), { cache: 'no-store' });
+    if (!res.ok) return null;
+    const data = await res.json();
+    if (!data || typeof data !== 'object') return null;
+    
+    return {
+      id: String(data.id ?? ''),
+      name: data.name ?? '',
+      facility_type: data.facility_type,
+      lat: data.lat ?? data.latitude,
+      lng: data.lng ?? data.longitude,
+      barangay_id: data.barangay_id,
+      source: data.source,
+      ownership: data.ownership,
+      address: data.address
+    };
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Fetch multiple facilities with optional filters.
+ * GET /api/facilities?type=...&source=...&ownership=...&name=...&limit=...&offset=...
+ * Response: { facilities: [...], total: number }
+ *
+ * @param {{ type?: string, source?: string, ownership?: string, name?: string, limit?: number, offset?: number }} [options]
+ * @returns {Promise<{ facilities: Array<{ id: string, name: string, facility_type?: string, lat?: number, lng?: number, address?: string }>, total: number } | null>}
+ */
+export async function listFacilities(options = {}) {
+  try {
+    const params = new URLSearchParams();
+    if (options.type) params.append('type', options.type);
+    if (options.source) params.append('source', options.source);
+    if (options.ownership) params.append('ownership', options.ownership);
+    if (options.name) params.append('name', options.name);
+    if (options.limit != null) params.append('limit', String(options.limit));
+    if (options.offset != null) params.append('offset', String(options.offset));
+    
+    const queryString = params.toString() ? `?${params.toString()}` : '';
+    const res = await fetch(apiUrl(`/api/facilities${queryString}`), { cache: 'no-store' });
+    if (!res.ok) return null;
+    const data = await res.json();
+    
+    const facilities = Array.isArray(data.facilities) ? data.facilities.map(f => ({
+      id: String(f.id ?? ''),
+      name: f.name ?? '',
+      facility_type: f.facility_type,
+      lat: f.lat ?? f.latitude,
+      lng: f.lng ?? f.longitude,
+      address: f.address
+    })) : [];
+    
+    return {
+      facilities,
+      total: data.total ?? facilities.length
+    };
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Fetch facility type summary.
+ * GET /api/types
+ * Response: { types: [ { type_name, count, ... } ] }
+ *
+ * @returns {Promise<Array<{ type_name: string, count: number }> | null>}
+ */
+export async function getFacilityTypes() {
+  try {
+    const res = await fetch(apiUrl('/api/types'), { cache: 'no-store' });
+    if (!res.ok) return null;
+    const data = await res.json();
+    return Array.isArray(data.types) ? data.types : null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Fetch facility counts for multiple barangays (batch operation, for AI pipeline).
+ * POST /api/facilities/counts-by-barangays
+ * Body: { barangayIds: [ ... ] }
+ * Response: { counts: { [barangayId]: number } }
+ *
+ * @param {string[]|number[]} barangayIds
+ * @returns {Promise<Record<string, number> | null>}
+ */
+export async function getFacilityCountsByBarangays(barangayIds = []) {
+  if (!Array.isArray(barangayIds) || barangayIds.length === 0) return null;
+  try {
+    const res = await fetch(apiUrl('/api/facilities/counts-by-barangays'), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ barangayIds: barangayIds.map(id => String(id)) }),
+      cache: 'no-store'
+    });
+    if (!res.ok) return null;
+    const data = await res.json();
+    return (data.counts && typeof data.counts === 'object') ? data.counts : null;
+  } catch {
+    return null;
+  }
+}
