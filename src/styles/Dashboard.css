@@ -9,6 +9,28 @@
   width: 100%;
 }
 
+.dashboard-backend-status {
+  font-size: 0.75rem;
+  padding: 0.35rem 0.5rem;
+  border-radius: 6px;
+  background: var(--surface-secondary, #f1f5f9);
+}
+
+.dashboard-backend-checking {
+  color: var(--primary-600);
+  font-style: italic;
+}
+
+.dashboard-backend-ok {
+  color: var(--primary-700);
+  font-weight: 600;
+}
+
+.dashboard-backend-unavailable {
+  color: var(--error-600, #b91c1c);
+  font-weight: 500;
+}
+
 .dashboard-top {
   display: grid;
   grid-template-columns: 1fr 1.4fr;

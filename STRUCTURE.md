@@ -18,14 +18,14 @@ Data fetching and integration. Call backend or external URLs.
 | File | Exports | Purpose |
 |------|--------|--------|
 | **boundariesService.js** | `fetchProvdistBoundaries`, `fetchBarangayBoundaries`, `fetchDavaoBoundaries`, `getDavaoCityFeature` | Fetch city/barangay GeoJSON (PSGC); extract Davao City feature from provdist. |
-| **heatService.js** | `fetchBarangayTemperatures`, `getBarangayHeatData` | Fetch temps from backend (`GET /api/heat/:cityId/barangay-temperatures`); fallback to simulated; return heat points + range for map. |
+| **heatService.js** | `fetchBarangayTemperatures`, `getBarangayHeatData`, `fetchCityAverage`, `fetchCityForecast`, `fetchBarangayPopulation`, `getPipelineReportMeta`, `getPipelineReport`, `generatePipelineReport`, `uploadPipelineReport` | Fetch temps from backend (`GET /api/heat/:cityId/barangays`); fetch current weather (`GET /api/heat/:cityId/current`); forecast; population; pipeline reports; fallback to simulated temps for map. |
 
 ## Backend repository (separate repo)
 
 See **[BACKEND.md](./BACKEND.md)** for:
 
-- API contract: `GET /api/heat/:cityId/barangay-temperatures` (temperature per barangay).
-- What to implement: resolve city, compute/fetch temperatures, return `{ temperatures, min, max }`.
+- API contract: `GET /api/heat/:cityId/barangays` (per-barangay temp, risk, location, area); `GET /api/heat/:cityId/current` (current weather); `GET /api/heat/:cityId/forecast` (forecast); facility endpoints; pipeline reports.
+- What to implement: resolve city, compute/fetch temperatures, return `{ barangays: [...], min, max }`.
 - Optional: serve boundary GeoJSON from your API instead of GitHub.
 
 ## Components
