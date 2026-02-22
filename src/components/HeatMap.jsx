@@ -10,7 +10,7 @@ import ZoneInfoCard from './ZoneInfoCard.jsx';
 
 /* global L */
 
-const HeatMap = ({ compact = false }) => {
+const HeatMap = ({ compact = false, selectedZone: propSelectedZone, onZoneSelected, onGoToDashboard }) => {
   const mapRef = useRef(null);
   const mapInstanceRef = useRef(null);
   const barangayLayerRef = useRef(null);
@@ -23,33 +23,13 @@ const HeatMap = ({ compact = false }) => {
   const [error, setError] = useState(null);
   const [tempRange, setTempRange] = useState({ min: 26, max: 39 });
   const [searchQuery, setSearchQuery] = useState('');
-  const [budgetFilter, setBudgetFilter] = useState('any');
-  const [budgetDropdownOpen, setBudgetDropdownOpen] = useState(false);
   const [selectedZone, setSelectedZone] = useState(null);
-  const budgetDropdownRef = useRef(null);
-  const budgetDropdownRefMobile = useRef(null);
   const zoneInfoCardRef = useRef(null);
   const resizeCleanupRef = useRef(null);
   const showDeviceLocation = searchQuery.trim().length > 0;
   const errorDismissTimeoutRef = useRef(null);
 
-  useEffect(() => {
-    const handleClickOutside = (e) => {
-      const inDesktop = budgetDropdownRef.current?.contains(e.target);
-      const inMobile = budgetDropdownRefMobile.current?.contains(e.target);
-      if (!inDesktop && !inMobile) setBudgetDropdownOpen(false);
-    };
-    document.addEventListener('click', handleClickOutside);
-    return () => document.removeEventListener('click', handleClickOutside);
-  }, []);
 
-  const BUDGET_OPTIONS = [
-    { value: 'any', label: 'Any budget' },
-    { value: 'under500', label: 'Under ₱500' },
-    { value: '500-1000', label: '₱500 – ₱1,000' },
-    { value: '1000-2500', label: '₱1,000 – ₱2,500' },
-    { value: '2500plus', label: '₱2,500+' }
-  ];
 
   const setLocationError = (message) => {
     if (errorDismissTimeoutRef.current) clearTimeout(errorDismissTimeoutRef.current);
@@ -257,24 +237,28 @@ const HeatMap = ({ compact = false }) => {
                   // Prevent out-of-order async results from overwriting the most recent click.
                   if (cancelledRef.current) return;
                   if (requestSeq !== facilitiesRequestSeqRef.current) return;
-                  setSelectedZone({
+                  const zoneData = {
                     name: name,
                     temperature: temp,
                     riskLevel,
                     riskScore,
                     facilities
-                  });
+                  };
+                  setSelectedZone(zoneData);
+                  onZoneSelected?.(zoneData);
                 })
                 .catch(() => {
                   if (cancelledRef.current) return;
                   if (requestSeq !== facilitiesRequestSeqRef.current) return;
-                  setSelectedZone({
+                  const zoneData = {
                     name: name,
                     temperature: temp,
                     riskLevel,
                     riskScore,
                     facilities: []
-                  });
+                  };
+                  setSelectedZone(zoneData);
+                  onZoneSelected?.(zoneData);
                 });
             });
           }
@@ -289,12 +273,14 @@ const HeatMap = ({ compact = false }) => {
       })
       .finally(() => {});
 
-    const BASE_ZOOM = 12;
     const updateHeatLayerRadius = () => {
       if (!mapInstanceRef.current) return;
-      const currentZoom = mapInstanceRef.current.getZoom();
-      const minZoom = 1;
-      const percentage = Math.round(((currentZoom - minZoom) / (BASE_ZOOM - minZoom)) * 100);
+      const map = mapInstanceRef.current;
+      const currentZoom = map.getZoom();
+      const minZoom = Number.isFinite(map.getMinZoom()) ? map.getMinZoom() : 0;
+      const maxZoom = Number.isFinite(map.getMaxZoom()) ? map.getMaxZoom() : 18;
+      const range = Math.max(1, maxZoom - minZoom);
+      const percentage = Math.round(((currentZoom - minZoom) / range) * 100);
       setZoomPercentage(Math.max(0, Math.min(100, percentage)));
     };
       map.on('zoomend', updateHeatLayerRadius);
@@ -342,6 +328,7 @@ const HeatMap = ({ compact = false }) => {
               facilities={selectedZone.facilities}
               onClose={() => setSelectedZone(null)}
               onFacilityClick={() => {}}
+              onGoToDashboard={onGoToDashboard}
             />
           </div>
         )}
@@ -354,14 +341,15 @@ const HeatMap = ({ compact = false }) => {
               <h3 className="heatmap-index-legend-title">HEAT INDEX (PAGASA)</h3>
               <ul className="heatmap-index-legend-list">
                 {HEAT_RISK_LEVELS.map((r) => (
-                  <li key={r.level} className="heatmap-index-legend-item">
+                  <li key={r.level} className="heatmap-index-legend-item" style={{ '--risk-color': r.color }}>
                     <span className="heatmap-index-dot" style={{ background: r.color }} />
-                    {r.rangeLabel} {r.label}
+                    <span className="heatmap-index-range">{r.rangeLabel}</span>
+                    <span className="heatmap-index-label">{r.label}</span>
                   </li>
                 ))}
               </ul>
             </div>
-            <div className="heatmap-search-block heatmap-search-block-desktop" ref={budgetDropdownRef}>
+            <div className="heatmap-search-block heatmap-search-block-desktop">
               <div className="heatmap-search-row">
                 <button type="button" className="heatmap-search-btn" aria-label="Search location" onClick={handleSearchLocation}>
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8" /><path d="m21 21-4.35-4.35" /></svg>
@@ -376,41 +364,7 @@ const HeatMap = ({ compact = false }) => {
                   onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleSearchLocation())}
                 />
               </div>
-              <div className="heatmap-search-budget-row">
-                <span className="heatmap-search-budget-label">Budget</span>
-                <div className={`heatmap-budget-dropdown heatmap-budget-inline ${budgetDropdownOpen ? 'is-open' : ''}`}>
-                  <button
-                    type="button"
-                    className="heatmap-budget-trigger"
-                    onClick={() => setBudgetDropdownOpen((o) => !o)}
-                    aria-expanded={budgetDropdownOpen}
-                    aria-haspopup="listbox"
-                    aria-label="Filter by budget"
-                  >
-                    <span className="heatmap-budget-trigger-label">
-                      {BUDGET_OPTIONS.find((o) => o.value === budgetFilter)?.label ?? 'Any budget'}
-                    </span>
-                    <svg className="heatmap-budget-chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-                      <path d="m6 9 6 6 6-6" />
-                    </svg>
-                  </button>
-                  {budgetDropdownOpen && (
-                    <ul className="heatmap-budget-options" role="listbox">
-                      {BUDGET_OPTIONS.map((opt) => (
-                        <li
-                          key={opt.value}
-                          role="option"
-                          aria-selected={budgetFilter === opt.value}
-                          className={`heatmap-budget-option ${budgetFilter === opt.value ? 'heatmap-budget-option-selected' : ''}`}
-                          onClick={() => { setBudgetFilter(opt.value); setBudgetDropdownOpen(false); }}
-                        >
-                          {opt.label}
-                        </li>
-                      ))}
-                    </ul>
-                  )}
-                </div>
-              </div>
+
               {showDeviceLocation && (
                 <>
                   <div className="heatmap-search-divider" />
@@ -455,7 +409,7 @@ const HeatMap = ({ compact = false }) => {
             <span className="heatmap-temp-range">{tempRange.min}°–{tempRange.max}°C</span>
           </div>
           <div className="heatmap-overlay-bar heatmap-overlay-bar-mobile">
-            <div className="heatmap-search-block heatmap-search-block-mobile" ref={budgetDropdownRefMobile}>
+            <div className="heatmap-search-block heatmap-search-block-mobile">
               <div className="heatmap-search-row">
                 <button type="button" className="heatmap-search-btn" aria-label="Search location" onClick={handleSearchLocation}>
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8" /><path d="m21 21-4.35-4.35" /></svg>
@@ -470,41 +424,7 @@ const HeatMap = ({ compact = false }) => {
                   onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleSearchLocation())}
                 />
               </div>
-              <div className="heatmap-search-budget-row">
-                <span className="heatmap-search-budget-label">Budget</span>
-                <div className={`heatmap-budget-dropdown heatmap-budget-inline ${budgetDropdownOpen ? 'is-open' : ''}`}>
-                  <button
-                    type="button"
-                    className="heatmap-budget-trigger"
-                    onClick={() => setBudgetDropdownOpen((o) => !o)}
-                    aria-expanded={budgetDropdownOpen}
-                    aria-haspopup="listbox"
-                    aria-label="Filter by budget"
-                  >
-                    <span className="heatmap-budget-trigger-label">
-                      {BUDGET_OPTIONS.find((o) => o.value === budgetFilter)?.label ?? 'Any budget'}
-                    </span>
-                    <svg className="heatmap-budget-chevron" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-                      <path d="m6 9 6 6 6-6" />
-                    </svg>
-                  </button>
-                  {budgetDropdownOpen && (
-                    <ul className="heatmap-budget-options" role="listbox">
-                      {BUDGET_OPTIONS.map((opt) => (
-                        <li
-                          key={opt.value}
-                          role="option"
-                          aria-selected={budgetFilter === opt.value}
-                          className={`heatmap-budget-option ${budgetFilter === opt.value ? 'heatmap-budget-option-selected' : ''}`}
-                          onClick={() => { setBudgetFilter(opt.value); setBudgetDropdownOpen(false); }}
-                        >
-                          {opt.label}
-                        </li>
-                      ))}
-                    </ul>
-                  )}
-                </div>
-              </div>
+
               {showDeviceLocation && (
                 <>
                   <div className="heatmap-search-divider" />
@@ -520,9 +440,10 @@ const HeatMap = ({ compact = false }) => {
             <h3 className="heatmap-bottom-legend-title">Heat Index (PAGASA)</h3>
             <ul className="heatmap-bottom-legend-list">
               {HEAT_RISK_LEVELS.map((r) => (
-                <li key={r.level} className="heatmap-bottom-legend-item">
+                <li key={r.level} className="heatmap-bottom-legend-item" style={{ '--risk-color': r.color }}>
                   <span className="heatmap-index-dot" style={{ background: r.color }} />
-                  {r.rangeLabel} {r.label}
+                  <span className="heatmap-index-range">{r.rangeLabel}</span>
+                  <span className="heatmap-index-label">{r.label}</span>
                 </li>
               ))}
             </ul>
