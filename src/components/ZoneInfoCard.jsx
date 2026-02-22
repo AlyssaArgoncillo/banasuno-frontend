@@ -7,6 +7,7 @@ import '../styles/ZoneInfoCard.css';
  * - Risk score (1–6).
  * - Current temperature (°C).
  * - Scrollable list of health facilities in or near the area.
+ * - "Full Report" button to navigate to dashboard.
  */
 export default function ZoneInfoCard({
   zoneName,
@@ -17,8 +18,12 @@ export default function ZoneInfoCard({
   isNearbyFallback = false,
   facilitiesLoading = false,
   onClose,
-  onFacilityClick
+  onFacilityClick,
+  onGoToDashboard
 }) {
+  const normalizedRiskScore = Number.isFinite(Number(riskScore))
+    ? Number(riskScore).toFixed(2)
+    : null;
   const tagStyle = riskLevel?.color
     ? { backgroundColor: riskLevel.color, color: '#fff' }
     : { backgroundColor: 'var(--primary-500)', color: '#fff' };
@@ -43,7 +48,7 @@ export default function ZoneInfoCard({
         <div className="zone-info-card-block">
           <span className="zone-info-card-label">Risk Score</span>
           <div className="zone-info-card-value zone-info-card-risk">
-            {riskScore != null ? `Heat-${riskScore}` : '—'}
+            {normalizedRiskScore ?? '—'}
           </div>
         </div>
         <div className="zone-info-card-block">
@@ -81,6 +86,13 @@ export default function ZoneInfoCard({
           </div>
         </div>
       </div>
+      <button
+        type="button"
+        className="zone-info-card-full-report-btn"
+        onClick={() => onGoToDashboard?.()}
+      >
+        Full Report →
+      </button>
     </div>
   );
 }

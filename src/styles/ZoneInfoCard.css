@@ -196,3 +196,29 @@
   z-index: 2000;
   pointer-events: auto;
 }
+.zone-info-card-full-report-btn {
+  width: calc(100% - 28px);
+  padding: 14px 14px;
+  margin-top: 6px;
+  margin-bottom: 14px;
+  margin-left: 14px;
+  margin-right: 14px;
+  background: var(--orange-500, #ff6b1a);
+  border: none;
+  border-radius: 8px;
+  font-family: var(--font-body, system-ui, sans-serif);
+  font-size: 13px;
+  font-weight: 600;
+  color: #fff;
+  cursor: pointer;
+  transition: background-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.zone-info-card-full-report-btn:hover {
+  background: var(--orange-600, #e55a00);
+  box-shadow: 0 2px 8px rgba(255, 107, 26, 0.24);
+}
+
+.zone-info-card-full-report-btn:active {
+  background: var(--orange-700, #cc4c00);
+}

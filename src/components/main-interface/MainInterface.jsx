@@ -7,6 +7,7 @@ import '../../styles/MainInterface.css';
 function MainInterface() {
   const [activeView, setActiveView] = useState('heatmap');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [selectedZone, setSelectedZone] = useState(null);
   const location = useLocation();
 
   useEffect(() => {
@@ -22,6 +23,10 @@ function MainInterface() {
     setActiveView(view);
     closeMobileMenu();
   };
+  const onGoToDashboard = () => {
+    setActiveView('dashboard');
+    closeMobileMenu();
+  };
 
   return (
     <div className="main-interface">
@@ -29,7 +34,7 @@ function MainInterface() {
 
       <div className="main-interface-body">
         <main className="main-interface-content main-interface-content-card">
-          <MainContent view={activeView} />
+          <MainContent view={activeView} selectedZone={selectedZone} onZoneSelected={setSelectedZone} onGoToDashboard={onGoToDashboard} />
         </main>
       </div>
 
