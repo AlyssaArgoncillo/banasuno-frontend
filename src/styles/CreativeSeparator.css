@@ -52,7 +52,23 @@
   }
 }
 
-@media (max-width: 480px) {
+@media (max-width: 412px) {
+  .creative-separator {
+    padding: 1.75rem 1.25rem;
+    gap: 1.25rem;
+  }
+
+  .separator-oval {
+    width: 90px;
+    height: 45px;
+  }
+
+  .ribbon {
+    height: 18px;
+  }
+}
+
+@media (max-width: 375px) {
   .creative-separator {
     padding: 1.5rem 1rem;
     gap: 1rem;
@@ -65,5 +81,21 @@
 
   .ribbon {
     height: 15px;
+  }
+}
+
+@media (max-width: 320px) {
+  .creative-separator {
+    padding: 1.25rem 0.75rem;
+    gap: 0.75rem;
+  }
+
+  .separator-oval {
+    width: 70px;
+    height: 35px;
+  }
+
+  .ribbon {
+    height: 14px;
   }
 }

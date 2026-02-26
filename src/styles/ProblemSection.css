@@ -147,7 +147,7 @@
 }
 
 /* ============================================
-   RESPONSIVE DESIGN
+   RESPONSIVE DESIGN – 320 / 375 / 412 / 768 / 1024 / 1280
    ============================================ */
 
 @media (max-width: 1024px) {
@@ -155,58 +155,59 @@
     grid-template-columns: 1fr;
     min-height: auto;
   }
-  
+
   .problem-intro {
     clip-path: none;
     padding: 60px 40px;
   }
-  
+
   .problem-detail {
     padding: 60px 40px;
   }
-  
+
   .problem-detail::before {
     left: 40px;
     top: 40px;
   }
-  
+
   .problem-intro h2 {
     font-size: 36px;
   }
-  
+
   .problem-detail h3 {
     font-size: 30px;
   }
 }
 
+/* 768px – tablets */
 @media (max-width: 768px) {
   .problem-section {
     padding: 60px 0;
   }
-  
+
   .problem-intro,
   .problem-detail {
     padding: 40px 24px;
   }
-  
+
   .problem-intro h2 {
     font-size: 32px;
     margin-bottom: 20px;
   }
-  
+
   .problem-intro p {
     font-size: 16px;
   }
-  
+
   .problem-detail h3 {
     font-size: 26px;
     margin-top: 20px;
   }
-  
+
   .problem-detail p {
     font-size: 16px;
   }
-  
+
   .problem-detail::before {
     left: 24px;
     top: 24px;
@@ -214,13 +215,87 @@
   }
 }
 
-@media (max-width: 480px) {
+/* 412px – large Androids */
+@media (max-width: 412px) {
+  .problem-section {
+    padding: 48px 0;
+  }
+
+  .problem-intro,
+  .problem-detail {
+    padding: 32px 20px;
+  }
+
   .problem-intro h2 {
     font-size: 28px;
+    margin-bottom: 18px;
   }
-  
+
   .problem-detail h3 {
     font-size: 24px;
+    margin-top: 18px;
+  }
+}
+
+/* 375px – standard iPhones */
+@media (max-width: 375px) {
+  .problem-section {
+    padding: 40px 0;
+  }
+
+  .problem-intro,
+  .problem-detail {
+    padding: 28px 16px;
+  }
+
+  .problem-intro h2 {
+    font-size: 26px;
+  }
+
+  .problem-detail h3 {
+    font-size: 22px;
+  }
+
+  .problem-detail::before {
+    left: 16px;
+    top: 20px;
+    width: 40px;
+  }
+}
+
+/* 320px – small phones */
+@media (max-width: 320px) {
+  .problem-section {
+    padding: 32px 0;
+  }
+
+  .problem-intro,
+  .problem-detail {
+    padding: 24px 12px;
+  }
+
+  .problem-intro h2 {
+    font-size: 22px;
+    margin-bottom: 16px;
+  }
+
+  .problem-intro p {
+    font-size: 0.9375rem;
+  }
+
+  .problem-detail h3 {
+    font-size: 1.25rem;
+    margin-top: 16px;
+  }
+
+  .problem-detail p {
+    font-size: 0.9375rem;
+  }
+
+  .problem-detail::before {
+    left: 12px;
+    top: 16px;
+    width: 36px;
   }
 }
 

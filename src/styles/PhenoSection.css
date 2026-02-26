@@ -77,7 +77,17 @@
   }
 }
 
-@media (max-width: 480px) {
+@media (max-width: 412px) {
+  .pheno-section {
+    padding: 6.5rem 1.25rem;
+  }
+
+  .pheno-heading {
+    font-size: 1.625rem;
+  }
+}
+
+@media (max-width: 375px) {
   .pheno-section {
     padding: 6rem 1rem;
   }
@@ -93,5 +103,24 @@
   .pheno-box {
     padding: 1rem;
     border-width: 3px;
+  }
+}
+
+@media (max-width: 320px) {
+  .pheno-section {
+    padding: 5rem 0.75rem;
+  }
+
+  .pheno-heading {
+    font-size: 1.375rem;
+  }
+
+  .pheno-description {
+    font-size: 0.875rem;
+  }
+
+  .pheno-box {
+    padding: 0.875rem;
+    border-width: 2px;
   }
 }

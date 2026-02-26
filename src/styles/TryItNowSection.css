@@ -148,12 +148,84 @@
 }
 
 .display-area {
+  position: relative;
   width: 100%;
   height: 100%;
   background-color: transparent;
   border-radius: 8px;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.06);
   overflow: hidden;
+}
+
+/* Desktop only: heat index panel on map, bottom left – static display (no dropdown) */
+.try-it-now-heat-index-on-map {
+  display: none;
+}
+
+@media (min-width: 769px) {
+  .try-it-now-heat-index-on-map {
+    display: block;
+    position: absolute;
+    left: 10px;
+    bottom: 10px;
+    z-index: 500;
+    max-width: 220px;
+    padding: 10px 12px;
+    background: rgba(255, 255, 255, 0.96);
+    border: 1px solid var(--primary-100);
+    border-radius: 10px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(255, 107, 26, 0.06);
+    backdrop-filter: blur(8px);
+  }
+
+  .try-it-now-heat-index-on-map-title {
+    font-family: var(--font-header);
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--primary-800);
+    margin: 0 0 8px 0;
+    letter-spacing: 0.03em;
+  }
+
+  .try-it-now-heat-index-on-map-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    font-family: var(--font-body);
+    font-size: 11px;
+    color: var(--primary-700);
+  }
+
+  .try-it-now-heat-index-on-map-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 2px 0;
+  }
+
+  .try-it-now-heat-index-on-map-range {
+    display: inline-block;
+    padding: 2px 6px;
+    border-radius: 6px;
+    font-size: 10px;
+    font-weight: 600;
+    color: #fff;
+    text-shadow: 0 1px 1px rgba(0, 0, 0, 0.2);
+    flex-shrink: 0;
+  }
+
+  .try-it-now-heat-index-on-map-label {
+    flex: 1;
+  }
+}
+
+@media (max-width: 768px) {
+  .try-it-now-heat-index-on-map {
+    display: none;
+  }
 }
 
 @media (max-width: 1024px) {
@@ -175,6 +247,197 @@
   .map-bar { height: 120px; }
 }
 
+/* Heat index panel below launch bar – mobile only; desktop uses on-map panel */
+.try-it-now-heat-index-mobile {
+  max-width: 900px;
+  margin: 1.5rem auto 0;
+}
+
+@media (min-width: 769px) {
+  .try-it-now-heat-index-mobile {
+    display: none;
+  }
+}
+
+@media (max-width: 768px) {
+  .try-it-now-heat-index-mobile {
+    display: block;
+    animation: try-it-now-panel-fade-in 0.5s ease-out;
+  }
+}
+
+@keyframes try-it-now-panel-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.try-it-now-heat-index-toggle {
+  position: relative;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.875rem 1.25rem;
+  font-family: var(--font-header);
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--primary-800);
+  letter-spacing: 0.02em;
+  background: linear-gradient(135deg, var(--surface-primary) 0%, var(--surface-warning) 100%);
+  border: 1px solid var(--primary-100);
+  border-radius: 12px;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06), 0 0 0 1px rgba(255, 107, 26, 0.08);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+
+.try-it-now-heat-index-toggle:hover {
+  background: linear-gradient(135deg, var(--surface-warning) 0%, var(--orange-50) 100%);
+  box-shadow: 0 4px 14px rgba(255, 107, 26, 0.12), 0 0 0 1px rgba(255, 107, 26, 0.15);
+  transform: translateY(-1px);
+}
+
+.try-it-now-heat-index-toggle:active {
+  transform: translateY(0);
+}
+
+.try-it-now-heat-index-toggle::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: linear-gradient(180deg, var(--orange-500), var(--orange-300));
+  border-radius: 12px 0 0 12px;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.try-it-now-heat-index-toggle:hover::before,
+.try-it-now-heat-index-mobile.open .try-it-now-heat-index-toggle::before {
+  opacity: 1;
+}
+
+.try-it-now-heat-index-chevron {
+  font-size: 0.7rem;
+  color: var(--orange-600, var(--orange-700));
+  transition: transform 0.3s ease;
+}
+
+.try-it-now-heat-index-mobile.open .try-it-now-heat-index-chevron {
+  transform: rotate(90deg);
+}
+
+.try-it-now-heat-index-list {
+  margin-top: 0.5rem;
+  padding: 1rem 1.25rem;
+  background: var(--surface-primary);
+  border: 1px solid var(--primary-100);
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06), inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  overflow: hidden;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.try-it-now-heat-index-list[hidden] {
+  display: none;
+}
+
+.try-it-now-heat-index-ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  font-family: var(--font-body);
+  font-size: 0.9375rem;
+  color: var(--primary-700);
+}
+
+.try-it-now-heat-index-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.4rem 0;
+  border-radius: 8px;
+  transition: background 0.2s ease, transform 0.15s ease;
+}
+
+@media (max-width: 768px) {
+  .try-it-now-heat-index-mobile.open .try-it-now-heat-index-item {
+    animation: try-it-now-item-in 0.35s ease-out backwards;
+  }
+
+  .try-it-now-heat-index-mobile.open .try-it-now-heat-index-item:nth-child(1) { animation-delay: 0.05s; }
+  .try-it-now-heat-index-mobile.open .try-it-now-heat-index-item:nth-child(2) { animation-delay: 0.1s; }
+  .try-it-now-heat-index-mobile.open .try-it-now-heat-index-item:nth-child(3) { animation-delay: 0.15s; }
+  .try-it-now-heat-index-mobile.open .try-it-now-heat-index-item:nth-child(4) { animation-delay: 0.2s; }
+  .try-it-now-heat-index-mobile.open .try-it-now-heat-index-item:nth-child(5) { animation-delay: 0.25s; }
+}
+
+@keyframes try-it-now-item-in {
+  from {
+    opacity: 0;
+    transform: translateX(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.try-it-now-heat-index-item:hover {
+  background: var(--primary-50);
+  transform: translateX(4px);
+}
+
+.try-it-now-heat-index-range {
+  display: inline-block;
+  padding: 0.35rem 0.65rem;
+  border-radius: 8px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: #fff;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+  flex-shrink: 0;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.try-it-now-heat-index-item:hover .try-it-now-heat-index-range {
+  transform: scale(1.05);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
+}
+
+.try-it-now-heat-index-label {
+  flex: 1;
+  font-weight: 500;
+}
+
+/* Mobile: collapsible */
+@media (max-width: 768px) {
+  .try-it-now-heat-index-toggle {
+    pointer-events: auto;
+    cursor: pointer;
+  }
+
+  .try-it-now-heat-index-toggle::before {
+    opacity: 0;
+  }
+
+  .try-it-now-heat-index-mobile.open .try-it-now-heat-index-toggle::before {
+    opacity: 1;
+  }
+}
+
 @media (max-width: 768px) {
   .try-it-now-section {
     padding: 2.5rem 1.5rem;
@@ -182,8 +445,8 @@
   }
 
   .try-it-now-heading {
-    font-size: 8rem;
-    margin-bottom: 3rem;
+    font-size: 3rem;
+    margin-bottom: 2rem;
   }
 
   .monitor-frame {
@@ -225,19 +488,34 @@
   .launch-btn { padding: 10px 22px; }
 }
 
-@media (max-width: 480px) {
+@media (max-width: 412px) {
   .try-it-now-section {
-    padding: 2rem 1rem;
+    padding: 2.25rem 1.25rem;
     margin-top: 1.5rem;
   }
 
   .try-it-now-heading {
-    font-size: 8rem;
-    margin-bottom: 3rem;
+    font-size: 2.5rem;
+    margin-bottom: 1.5rem;
   }
 
   .monitor-frame {
     max-width: 100%;
+    padding: 18px;
+  }
+}
+
+@media (max-width: 375px) {
+  .try-it-now-section {
+    padding: 2rem 1rem;
+  }
+
+  .try-it-now-heading {
+    font-size: 2.25rem;
+    margin-bottom: 1.25rem;
+  }
+
+  .monitor-frame {
     padding: 15px;
   }
 
@@ -269,8 +547,52 @@
   .monitor-screen {
     padding: 12px;
   }
-  .monitor-controls { bottom: 12px; }
-  .control-btn { width: 32px; height: 10px; border-radius: 4px; }
-  .map-bar { height: 84px; }
-  .launch-btn { padding: 9px 20px; }
+
+  .monitor-controls {
+    bottom: 12px;
+  }
+
+  .control-btn {
+    width: 32px;
+    height: 10px;
+    border-radius: 4px;
+  }
+
+  .map-bar {
+    height: 84px;
+  }
+
+  .launch-btn {
+    padding: 9px 20px;
+  }
+}
+
+@media (max-width: 320px) {
+  .try-it-now-section {
+    padding: 1.5rem 0.75rem;
+    margin-top: 1rem;
+  }
+
+  .try-it-now-heading {
+    font-size: 1.75rem;
+    margin-bottom: 1rem;
+  }
+
+  .monitor-frame {
+    padding: 12px;
+  }
+
+  .screw {
+    width: 8px;
+    height: 8px;
+  }
+
+  .map-bar {
+    height: 72px;
+  }
+
+  .launch-btn {
+    padding: 8px 16px;
+    font-size: 0.875rem;
+  }
 }

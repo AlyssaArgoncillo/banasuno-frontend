@@ -1,12 +1,25 @@
 import React from 'react';
 import '../styles/ZoneInfoCard.css';
 
+/** Parse "X.X km" or numeric to km; return null if not parseable. */
+function parseDistanceKm(fac) {
+  if (fac == null) return null;
+  if (Number.isFinite(fac.distance_km)) return fac.distance_km;
+  const s = fac.distance;
+  if (typeof s !== 'string') return null;
+  const n = parseFloat(s);
+  return Number.isFinite(n) ? n : null;
+}
+
+const MAP_ROUTE_CUTOFF_KM = 6;
+
 /**
  * Popup card shown when a barangay boundary is clicked.
  * - Tag at top: heat index level (color + label).
  * - Risk score (1–6).
  * - Current temperature (°C).
  * - Scrollable list of health facilities in or near the area.
+ * - If nearest facility is > 6 km, shows note: "Nearest facility is X km away — too far for map routing."
  * - "Full Report" button to navigate to dashboard.
  */
 export default function ZoneInfoCard({
@@ -21,6 +34,9 @@ export default function ZoneInfoCard({
   onFacilityClick,
   onGoToDashboard
 }) {
+  const nearestKm = facilities.length > 0 ? parseDistanceKm(facilities[0]) : null;
+  const beyondCutoff = nearestKm != null && nearestKm > MAP_ROUTE_CUTOFF_KM;
+
   const normalizedRiskScore = Number.isFinite(Number(riskScore))
     ? Number(riskScore).toFixed(2)
     : null;
@@ -64,6 +80,11 @@ export default function ZoneInfoCard({
           {isNearbyFallback && (
             <span className="zone-info-card-sublabel">No facilities in this barangay; showing closest nearby</span>
           )}
+          {beyondCutoff && (
+            <p className="zone-info-card-cutoff-note" role="status">
+              Nearest facility is {nearestKm.toFixed(1)} km away — too far for map routing.
+            </p>
+          )}
           <div className="zone-info-card-facilities-list">
             {facilitiesLoading ? (
               <p className="zone-info-card-facilities-loading">Loading facilities…</p>
@@ -89,6 +110,7 @@ export default function ZoneInfoCard({
       <button
         type="button"
         className="zone-info-card-full-report-btn"
+        style={tagStyle}
         onClick={() => onGoToDashboard?.()}
       >
         Full Report →

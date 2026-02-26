@@ -1,0 +1,122 @@
+/* Site palette: orange #FF6B1A – scoped to overlay only */
+.navigation-loader-overlay {
+  --loader-accent: #FF6B1A;
+  --loader-accent-dim: rgba(255, 107, 26, 0.25);
+  --loader-accent-glow: rgba(255, 107, 26, 0.5);
+  --loader-bg: #1a1a1a;
+  position: fixed;
+  inset: 0;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100vw;
+  height: 100vh;
+  min-height: 100%;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--loader-bg);
+  animation: loader-fade-in 0.2s ease-out;
+  overflow: hidden;
+}
+
+@keyframes loader-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.navigation-loader-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.radar-loader {
+  width: 104px;
+  height: 104px;
+  border-radius: 50%;
+  border: 3px solid var(--loader-accent-dim);
+  position: relative;
+  flex-shrink: 0;
+}
+
+.radar-loader::before {
+  content: '';
+  position: absolute;
+  width: 50%;
+  height: 50%;
+  top: 50%;
+  left: 50%;
+  background: linear-gradient(90deg, transparent, var(--loader-accent));
+  transform-origin: 0 0;
+  animation: radar-sweep 1.5s linear infinite;
+  border-radius: 0 100% 0 0;
+}
+
+.radar-loader::after {
+  content: '';
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  background: var(--loader-accent);
+  border-radius: 50%;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  box-shadow: 0 0 14px var(--loader-accent-glow);
+}
+
+.radar-ring {
+  position: absolute;
+  border: 1px solid var(--loader-accent-dim);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.radar-ring:nth-child(1) {
+  width: 50%;
+  height: 50%;
+  top: 25%;
+  left: 25%;
+}
+
+.radar-ring:nth-child(2) {
+  width: 75%;
+  height: 75%;
+  top: 12.5%;
+  left: 12.5%;
+}
+
+@keyframes radar-sweep {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.navigation-loader-text {
+  font-family: 'DM Sans', 'Segoe UI', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.85);
+  letter-spacing: 0.02em;
+  margin: 0;
+}
+
+@media (max-width: 480px) {
+  .radar-loader {
+    width: 80px;
+    height: 80px;
+    border-width: 2.5px;
+  }
+
+  .radar-loader::after {
+    width: 8px;
+    height: 8px;
+  }
+
+  .navigation-loader-text {
+    font-size: 0.8rem;
+  }
+}

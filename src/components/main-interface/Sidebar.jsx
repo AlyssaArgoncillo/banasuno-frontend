@@ -3,19 +3,7 @@ import { Link } from 'react-router-dom';
 import '../../styles/MainInterface.css';
 
 const ChevronDown = ({ open }) => (
-  <svg
-    width="16"
-    height="16"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    aria-hidden
-    className="main-interface-chevron"
-    style={{ transform: open ? 'rotate(180deg)' : 'rotate(0deg)' }}
-  >
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden className="main-interface-chevron" style={{ transform: open ? 'rotate(180deg)' : 'rotate(0deg)' }}>
     <path d="m6 9 6 6 6-6" />
   </svg>
 );
@@ -39,6 +27,14 @@ const InfoIcon = () => (
   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
     <circle cx="12" cy="12" r="10" />
     <path d="M12 16v-4m0-4h.01" />
+  </svg>
+);
+
+const AlertIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+    <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+    <line x1="12" y1="9" x2="12" y2="13" />
+    <line x1="12" y1="17" x2="12.01" y2="17" />
   </svg>
 );
 
@@ -79,6 +75,14 @@ function Sidebar({ activeView, onSelectView }) {
             >
               <ChartIcon />
               <span>Dashboard</span>
+            </button>
+            <button
+              type="button"
+              className={`main-interface-nav-item ${activeView === 'heat-advisory' ? 'active' : ''}`}
+              onClick={() => onSelectView('heat-advisory')}
+            >
+              <AlertIcon />
+              <span>Heat Advisory</span>
             </button>
           </div>
         )}

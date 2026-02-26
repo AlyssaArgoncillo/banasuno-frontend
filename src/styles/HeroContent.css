@@ -72,6 +72,7 @@
   }
 }
 
+/* 1024px – larger tablets: center content */
 @media (max-width: 1024px) {
   .hero-content {
     max-width: 100%;
@@ -79,47 +80,90 @@
     text-align: center;
     padding-right: 0;
   }
-  
+
   .hero-heading {
     font-size: 3.75rem;
   }
-  
+
   .hero-description {
     max-width: 600px;
   }
-  
+
   .scroll-indicator {
     justify-content: center;
   }
 }
 
+/* 768px – tablets */
 @media (max-width: 768px) {
   .hero-content {
     gap: 2rem;
   }
-  
+
   .hero-heading {
     font-size: 2.75rem;
     line-height: 1.1;
   }
-  
+
   .hero-description {
     font-size: 1.0625rem;
   }
 }
 
-@media (max-width: 480px) {
+/* 412px – large Androids */
+@media (max-width: 412px) {
+  .hero-content {
+    gap: 1.75rem;
+  }
+
+  .hero-heading {
+    font-size: 2.5rem;
+  }
+
+  .hero-description {
+    font-size: 1.0625rem;
+  }
+}
+
+/* 375px – standard iPhones */
+@media (max-width: 375px) {
   .hero-heading {
     font-size: 2.25rem;
   }
-  
+
   .hero-description {
     font-size: 1rem;
     line-height: 1.65;
   }
-  
+
   .scroll-indicator svg {
     width: 24px;
     height: 24px;
+  }
+}
+
+/* 320px – small phones */
+@media (max-width: 320px) {
+  .hero-content {
+    gap: 1.5rem;
+  }
+
+  .hero-heading {
+    font-size: 1.875rem;
+    line-height: 1.15;
+  }
+
+  .hero-description {
+    font-size: 0.9375rem;
+    line-height: 1.6;
+  }
+
+  .scroll-indicator {
+    margin-top: 1rem;
+  }
+
+  .scroll-indicator svg {
+    width: 22px;
+    height: 22px;
   }
 }

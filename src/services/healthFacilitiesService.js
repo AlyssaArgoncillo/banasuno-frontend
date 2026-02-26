@@ -30,6 +30,9 @@ function mapFacilitiesWithDistance(list, center) {
       address: f.address ?? (lat != null && lng != null ? `${Number(lat).toFixed(4)}, ${Number(lng).toFixed(4)}` : undefined),
       facility_type: f.facility_type,
       distance: km != null ? `${km.toFixed(1)} km` : undefined,
+      distance_km: km ?? undefined,
+      lat: lat ?? undefined,
+      lng: lng ?? undefined,
       _distanceKm: km
     };
   });

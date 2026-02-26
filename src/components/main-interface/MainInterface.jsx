@@ -13,7 +13,7 @@ function MainInterface() {
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     const view = params.get('view');
-    if (view === 'dashboard' || view === 'heatmap') {
+    if (view === 'dashboard' || view === 'heatmap' || view === 'heat-advisory') {
       setActiveView(view);
     }
   }, [location.search]);
@@ -77,6 +77,13 @@ function MainInterface() {
             onClick={() => setViewAndClose('dashboard')}
           >
             Dashboard
+          </button>
+          <button
+            type="button"
+            className={`main-interface-mobile-nav-item ${activeView === 'heat-advisory' ? 'active' : ''}`}
+            onClick={() => setViewAndClose('heat-advisory')}
+          >
+            Heat Advisory
           </button>
           <Link to="/about" className="main-interface-mobile-nav-item main-interface-mobile-nav-link" onClick={closeMobileMenu}>
             About Us

@@ -225,40 +225,86 @@
 
 
 
+/* 1280px+ – desktop */
+@media (min-width: 1280px) {
+  .hero-graphic {
+    min-height: 650px;
+  }
+
+  .graphic-container {
+    max-width: 700px;
+  }
+}
+
+/* 1024px – larger tablets */
 @media (max-width: 1024px) {
   .hero-graphic {
     min-height: 550px;
   }
-  
+
   .graphic-container {
     max-width: 550px;
   }
 }
 
+/* 768px – tablets */
 @media (max-width: 768px) {
   .hero-graphic {
     min-height: 450px;
   }
-  
+
   .graphic-container {
     max-width: 450px;
   }
-  
+
   .mascot-container {
     width: 180%;
     height: 180%;
   }
 }
 
-@media (max-width: 480px) {
+/* 412px – large Androids */
+@media (max-width: 412px) {
+  .hero-graphic {
+    min-height: 380px;
+  }
+
+  .graphic-container {
+    max-width: min(380px, 90vw);
+  }
+
+  .mascot-container {
+    width: 170%;
+    height: 170%;
+  }
+}
+
+/* 375px – standard iPhones */
+@media (max-width: 375px) {
   .hero-graphic {
     min-height: 350px;
   }
-  
+
   .graphic-container {
-    max-width: 350px;
+    max-width: min(340px, 90vw);
   }
-  
+
+  .mascot-container {
+    width: 165%;
+    height: 165%;
+  }
+}
+
+/* 320px – small phones */
+@media (max-width: 320px) {
+  .hero-graphic {
+    min-height: 300px;
+  }
+
+  .graphic-container {
+    max-width: min(280px, 92vw);
+  }
+
   .mascot-container {
     width: 160%;
     height: 160%;

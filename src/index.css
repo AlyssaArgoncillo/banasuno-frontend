@@ -44,6 +44,14 @@
   /* Typography */
   --font-header: 'Outfit', sans-serif;
   --font-body: 'Manrope', sans-serif;
+
+  /* Responsive breakpoints (use in media queries; values for reference) */
+  --bp-sm-phone: 320px;
+  --bp-iphone: 375px;
+  --bp-android: 412px;
+  --bp-tablet: 768px;
+  --bp-tablet-lg: 1024px;
+  --bp-desktop: 1280px;
 }
 
 /* Reset and Base Styles */
@@ -108,15 +116,39 @@ button {
   cursor: pointer;
 }
 
-/* Utility Classes */
+/* Utility Classes – fluid container across breakpoints */
 .container {
   max-width: 1400px;
   margin: 0 auto;
-  padding: 0 3rem;
+  padding: 0 0.75rem;
 }
 
-@media (max-width: 768px) {
+@media (min-width: 375px) {
+  .container {
+    padding: 0 1rem;
+  }
+}
+
+@media (min-width: 412px) {
+  .container {
+    padding: 0 1.25rem;
+  }
+}
+
+@media (min-width: 768px) {
   .container {
     padding: 0 1.5rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .container {
+    padding: 0 2rem;
+  }
+}
+
+@media (min-width: 1280px) {
+  .container {
+    padding: 0 3rem;
   }
 }

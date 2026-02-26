@@ -1,15 +1,16 @@
 /**
  * Shared API base URL for backend (heat, facilities).
- * Default: live Vercel backend (banasuno-backend.vercel.app).
- * Override in .env with VITE_API_URL (e.g. http://localhost:3000 for local backend).
- * Restart dev server after changing .env.
+ * When VITE_USE_PROXY=true (e.g. in .env for local dev): return '' so fetch('/api/...') hits
+ * same origin and Vite proxies to VITE_API_URL (e.g. http://localhost:3000) — no CORS.
+ * Otherwise: return VITE_API_URL or LIVE_BACKEND_URL so requests go directly to the backend.
+ * Production: set VITE_API_URL=https://banasuno-backend.vercel.app (and do not set VITE_USE_PROXY).
  */
 
 const LIVE_BACKEND_URL = 'https://banasuno-backend.vercel.app';
 
 export function getApiBase() {
-  // In dev, use relative URL so Vite proxy forwards /api to backend (avoids CORS).
-  if (typeof import.meta !== 'undefined' && import.meta.env?.DEV) return '';
+  const useProxy = typeof import.meta !== 'undefined' && (import.meta.env?.VITE_USE_PROXY === 'true' || import.meta.env?.VITE_USE_PROXY === '1');
+  if (useProxy) return '';
   const raw = typeof import.meta !== 'undefined' && import.meta.env?.VITE_API_URL;
   const url = typeof raw === 'string' ? raw.trim().replace(/\/+$/, '') : '';
   const invalid = !url || url === 'undefined' || url === 'null';

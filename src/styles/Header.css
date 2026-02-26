@@ -132,32 +132,30 @@
   background-color: var(--orange-500);
 }
 
+/* 768px – tablets: switch to hamburger menu */
 @media (max-width: 768px) {
   .header {
     padding: 1.25rem 0;
   }
-  
+
   .header-container {
     padding: 0 1.5rem;
   }
-  
-  /* Show hamburger on mobile */
+
   .hamburger {
     display: flex;
   }
-  
-  /* Hide desktop CTA, show mobile CTA inside menu */
+
   .desktop-cta {
     display: none;
   }
-  
+
   .mobile-cta {
     display: block;
     width: 100%;
     margin-top: 1rem;
   }
-  
-  /* Mobile navigation */
+
   .nav-links {
     position: fixed;
     top: 80px;
@@ -175,53 +173,111 @@
     max-height: calc(100vh - 80px);
     overflow-y: auto;
   }
-  
+
   .nav-links.active {
     transform: translateX(0);
     opacity: 1;
     visibility: visible;
   }
-  
+
   .nav-link {
     font-size: 1.125rem;
     padding: 0.75rem 0;
     border-bottom: 1px solid var(--primary-100);
     transition: all 0.2s ease;
   }
-  
+
   .nav-link:last-of-type {
     border-bottom: none;
   }
-  
+
   .nav-link:active {
     background-color: var(--surface-warning);
     padding-left: 1rem;
   }
 }
 
-@media (max-width: 480px) {
+/* 412px – large Androids */
+@media (max-width: 412px) {
+  .header-container {
+    padding: 0 1.25rem;
+  }
+
+  .logo-image {
+    height: 38px;
+  }
+}
+
+/* 375px – standard iPhones */
+@media (max-width: 375px) {
   .header-container {
     padding: 0 1rem;
   }
-  
+
   .logo-image {
     height: 36px;
   }
-  
+
+  .nav-links {
+    top: 72px;
+    padding: 1.5rem 1rem;
+    gap: 1.25rem;
+  }
+}
+
+/* 320px – small phones */
+@media (max-width: 320px) {
+  .header {
+    padding: 1rem 0;
+  }
+
+  .header-container {
+    padding: 0 0.75rem;
+    gap: 1rem;
+  }
+
+  .logo-image {
+    height: 32px;
+  }
+
   .hamburger {
     width: 26px;
     height: 20px;
   }
-  
+
   .hamburger-line {
     height: 2.5px;
   }
-  
+
   .hamburger.active .hamburger-line:nth-child(1) {
     transform: translateY(8.75px) rotate(45deg);
   }
-  
+
   .hamburger.active .hamburger-line:nth-child(3) {
     transform: translateY(-8.75px) rotate(-45deg);
+  }
+
+  .nav-links {
+    top: 64px;
+    padding: 1.25rem 0.75rem;
+    max-height: calc(100vh - 64px);
+  }
+
+  .nav-link {
+    font-size: 1rem;
+  }
+}
+
+/* 1024px – larger tablets: ensure desktop layout */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .header-container {
+    padding: 0 2rem;
+  }
+}
+
+/* 1280px+ – desktop */
+@media (min-width: 1280px) {
+  .header-container {
+    padding: 0 3rem;
   }
 }

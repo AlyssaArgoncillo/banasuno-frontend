@@ -32,8 +32,8 @@ const riskMeta = {
 const facilityMeta = {
   hospital:  { label: "Hospital",          icon: "/hospital.png", color: P.red700,   bg: P.red100   },
   clinic:    { label: "Clinic",            icon: "/clinic.png",   color: P.blue700,  bg: P.blue100  },
-  healthctr: { label: "Health Center",     icon: "/cross2.png",    color: P.blue700,  bg: P.blue100  },
-  pharmacy:  { label: "Pharmacy",          icon: "/pill2.png",     color: P.green700, bg: P.green100 },
+  healthctr: { label: "Health Center",     icon: "/cross2.png",   color: P.blue700,  bg: P.blue100  },
+  pharmacy:  { label: "Pharmacy",          icon: "/pill2.png",    color: P.green700, bg: P.green100 },
   doctor:    { label: "Doctor's Facility", icon: "/doctor.png",   color: P.green700, bg: P.green100 },
 };
 
@@ -164,10 +164,15 @@ export default function Dashboard({ selectedZone }) {
     return facilities.slice(0, count);
   };
 
-  const chartData = Array.from({ length: trendDays }, (_, i) => ({
-    day: i + 1,
-    temp: 32 + Math.sin(i * 0.6 + 1) * 4 + Math.random() * 2,
-  }));
+  const chartData = Array.from({ length: trendDays }, (_, i) => {
+    const d = new Date(now);
+    d.setDate(d.getDate() - (trendDays - 1 - i));
+    return {
+      day: i + 1,
+      temp: 32 + Math.sin(i * 0.6 + 1) * 4 + Math.random() * 2,
+      dateLabel: d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }),
+    };
+  });
   const maxT = Math.max(...chartData.map(d => d.temp));
   const minT = Math.min(...chartData.map(d => d.temp));
   const avgT = chartData.reduce((sum, d) => sum + d.temp, 0) / chartData.length;
@@ -188,10 +193,8 @@ export default function Dashboard({ selectedZone }) {
         @media (min-width: 900px) {
           .dashboard-row2 { grid-template-columns: 300px 1fr; }
         }
-        .dashboard-row3 { display: grid; grid-template-columns: 1fr; gap: 16px; }
-        @media (min-width: 1000px) {
-          .dashboard-row3 { grid-template-columns: 1fr 380px; }
-        }
+        .dashboard-row3 { display: block; margin-bottom: 16px; }
+        .dashboard-row4 { margin-bottom: 16px; }
         .export-csv-btn { justify-self: center; }
         .export-csv-long { display: none; }
         .export-csv-short { display: inline; }
@@ -200,11 +203,16 @@ export default function Dashboard({ selectedZone }) {
           .export-csv-long { display: inline; }
           .export-csv-short { display: none; }
         }
-        .trend-data { margin-top: 12px; display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 8px; }
+        .trend-data { margin-top: 8px; display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 8px; }
         .trend-data-item { min-width: 0; }
-        .trend-layout { display: grid; grid-template-columns: 1fr; gap: 16px; }
-        @media (min-width: 1000px) {
-          .trend-layout { grid-template-columns: minmax(0, 2.2fr) minmax(220px, 1fr); }
+        .trend-layout { display: flex; flex-direction: column; gap: 24px; }
+        .trend-graph-wrap { width: 100%; flex: 0 0 auto; min-height: 220px; }
+        .trend-left-col { display: flex; flex-direction: column; gap: 20px; min-width: 0; }
+        .trend-right-col { min-width: 0; }
+        @media (min-width: 768px) {
+          .trend-layout { flex-direction: row; align-items: start; }
+          .trend-left-col { flex: 1; min-width: 0; }
+          .trend-right-col { width: 240px; flex-shrink: 0; }
         }
         .trend-insights { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; }
         @media (max-width: 700px) {
@@ -212,10 +220,6 @@ export default function Dashboard({ selectedZone }) {
         }
         @media (max-width: 700px) {
           .trend-data { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-        }
-        .topbar-title { display: inline; }
-        @media (max-width: 520px) {
-          .topbar-title { display: none; }
         }
         .topbar-right { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
         .topbar-pill { display: inline-flex; align-items: center; gap: 8px; flex-wrap: wrap; }
@@ -228,52 +232,44 @@ export default function Dashboard({ selectedZone }) {
         }
       `}</style>
 
-      {/* ══ TOPBAR — #C44F00 (simplified & responsive) ══ */}
+      {/* ══ TOPBAR — #C44F00 (barangay on far left, compact) ══ */}
       <div style={{
         background: "#C44F00", padding: "0 clamp(12px, 4vw, 28px)",
-        minHeight: "clamp(48px, 8vh, 56px)",
+        minHeight: "clamp(44px, 7vh, 52px)",
         display: "flex", alignItems: "center", justifyContent: "space-between", gap: "clamp(8px, 2vw, 12px)",
         position: "sticky", top: 0, zIndex: 30,
         boxShadow: "0 2px 16px rgba(0,0,0,0.3)",
       }}>
-        <div style={{ display: "flex", alignItems: "center", gap: "clamp(10px, 3vw, 18px)", minWidth: 110 }}>
-          <span className="topbar-title" style={{
-            fontFamily: "'DM Sans', sans-serif", fontSize: "clamp(12px, 2.4vw, 14px)",
-            fontWeight: 800, color: P.white, letterSpacing: "0.08em",
+        {/* Barangay location — far left, compact */}
+        <div className="topbar-pill" style={{
+          padding: "4px 10px 4px 10px",
+          borderRadius: 12,
+          background: "rgba(255,255,255,0.22)",
+          border: "1px solid rgba(255,255,255,0.35)",
+          boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
+          display: "inline-flex",
+          flexDirection: "column",
+          alignItems: "flex-start",
+          gap: 2,
+          flexShrink: 0,
+        }}>
+          <span style={{
+            fontFamily: "'DM Mono', monospace", fontSize: "9px",
+            letterSpacing: "0.08em", color: "rgba(255,255,255,0.85)",
           }}>
-            DASHBOARD
+            BARANGAY
           </span>
-        </div>
-        <div style={{ flex: 1, display: "flex", justifyContent: "center", minWidth: 0 }}>
-          <div className="topbar-pill" style={{
-            padding: "6px clamp(10px, 2vw, 14px)",
-            borderRadius: 16,
-            background: "rgba(255,255,255,0.22)",
-            border: "1px solid rgba(255,255,255,0.35)",
-            boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
-            maxWidth: "min(70vw, 560px)",
-            marginLeft: 0,
-          }}>
-            <span style={{
-              fontFamily: "'DM Mono', monospace", fontSize: "clamp(9px, 1.6vw, 10px)",
-              letterSpacing: "0.08em", color: "rgba(255,255,255,0.85)",
-            }}>
-              BARANGAY
-            </span>
+          <div style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
             <span className="topbar-name" style={{
-              fontFamily: "'DM Sans', sans-serif", fontSize: "clamp(13px, 2.8vw, 18px)",
-              fontWeight: 900, color: P.white, letterSpacing: "0.01em",
-              overflow: "hidden",
+              fontFamily: "'DM Sans', sans-serif", fontSize: "13px",
+              fontWeight: 800, color: P.white, letterSpacing: "0.01em",
             }}>
               {barangay.name}
             </span>
-            <span style={{
-              width: 1, height: 18, background: "rgba(255,255,255,0.35)",
-            }} />
             <RiskPill risk={risk} mini />
           </div>
         </div>
-        <div className="topbar-right">
+        <div className="topbar-right" style={{ marginLeft: "auto" }}>
           <span className="topbar-date" style={{
             fontFamily: "'DM Mono', monospace", fontSize: "clamp(10px, 2vw, 11px)",
             color: P.white, opacity: 0.85,
@@ -314,7 +310,7 @@ export default function Dashboard({ selectedZone }) {
               AVG TEMPERATURE
             </div>
             <div style={{ fontFamily: "'DM Sans', sans-serif", fontWeight: 900, fontSize: "clamp(32px, 8vw, 46px)", color: P.white, lineHeight: 1, letterSpacing: "-0.03em" }}>
-              {barangay.temp}°
+              {avgT.toFixed(1)}°
             </div>
             <div className="avg-date" style={{
               fontFamily: "'DM Mono', monospace", fontSize: "clamp(9px, 2.2vw, 11px)",
@@ -326,7 +322,7 @@ export default function Dashboard({ selectedZone }) {
               fontFamily: "'DM Sans', sans-serif", fontSize: "clamp(10px, 2.4vw, 12px)",
               color: "rgba(255,255,255,0.8)", marginTop: 6,
             }}>
-              Barangay {barangay.name}
+              Davao City
             </div>
           </div>
 
@@ -377,13 +373,17 @@ export default function Dashboard({ selectedZone }) {
               display: "flex", justifyContent: "space-between", alignItems: "center",
             }}>
               <div style={{ fontFamily: "'DM Sans', sans-serif", fontWeight: 700, fontSize: 13, color: P.white }}>
-                Nearby Health Facilities
+                Nearby Health Facilities of {barangay.name}
               </div>
               <span style={{
                 fontFamily: "'DM Mono', monospace", fontSize: 9, color: P.blue100,
                 background: "rgba(255,255,255,0.15)", borderRadius: 20,
-                padding: "1px 8px", fontWeight: 700,
-              }}>{facilities.length} total</span>
+                padding: "6px 12px", fontWeight: 700,
+                display: "inline-flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 0,
+              }}>
+                <span>{facilities.length}</span>
+                <span>total</span>
+              </span>
             </div>
 
             <div style={{ flex: 1, overflowY: "auto" }}>
@@ -416,16 +416,17 @@ export default function Dashboard({ selectedZone }) {
           {/* All Barangays Table — Gray-900 header */}
           <div style={{ background: P.white, borderRadius: 16, border: `1px solid ${P.gray100}`, overflow: "hidden", display: "flex", flexDirection: "column" }}>
             <div style={{
-              padding: "14px 20px", background: "#FF6B1A",
-              display: "flex", justifyContent: "space-between", alignItems: "center",
+              padding: "18px 28px", background: "#FF6B1A",
+              display: "flex", justifyContent: "space-between", alignItems: "center", gap: 20,
             }}>
-              <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 10, fontWeight: 700, letterSpacing: "0.1em", color: P.white }}>
+              <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", color: P.white }}>
                 ALL BARANGAYS — HEAT RISK OVERVIEW
               </div>
               <button style={{
-                border: `1px solid rgba(255,255,255,0.3)`, borderRadius: 8, padding: "5px 12px",
+                border: `1px solid rgba(255,255,255,0.3)`, borderRadius: 8, padding: "8px 16px",
                 fontFamily: "'DM Sans', sans-serif", fontWeight: 600, fontSize: 11,
                 cursor: "pointer", background: "rgba(255,255,255,0.1)", color: P.white,
+                flexShrink: 0,
               }}>⬇ Export Data</button>
             </div>
 
@@ -571,15 +572,84 @@ export default function Dashboard({ selectedZone }) {
           </div>
         </div>
 
-        {/* ══ ROW 3: Historical Trends (Yellow) + Facility Directory (Green) ══ */}
+        {/* ══ ROW 3: Health Facility Directory only ══ */}
         <div className="dashboard-row3">
-
-          {/* Historical Trends — Yellow-500 header + Accent surface */}
+          {/* Health Facility Directory — Green-700 header */}
+          <div style={{ background: P.white, borderRadius: 16, overflow: "hidden", border: `1px solid ${P.green100}`, display: "flex", flexDirection: "column" }}>
+            <div style={{ padding: "14px 18px", background: P.green700 }}>
+              <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 9, fontWeight: 700, letterSpacing: "0.1em", color: P.green100, marginBottom: 10 }}>
+                HEALTH FACILITY DIRECTORY
+              </div>
+              <div style={{ display: "flex", gap: 4, flexWrap: "wrap", marginBottom: 8 }}>
+                {[{ key: "all", label: "All Types" }, ...Object.entries(facilityMeta).map(([k, v]) => ({ key: k, label: v.label }))].map(f => (
+                  <button
+                    key={f.key}
+                    onClick={() => setDirType(f.key)}
+                    style={{
+                      border: `1px solid ${dirType === f.key ? P.white : "rgba(255,255,255,0.2)"}`,
+                      borderRadius: 8, padding: "2px 8px",
+                      fontFamily: "'DM Sans', sans-serif", fontWeight: 600, fontSize: 9,
+                      cursor: "pointer",
+                      background: dirType === f.key ? P.white : "transparent",
+                      color: dirType === f.key ? P.green700 : "rgba(255,255,255,0.7)",
+                    }}
+                  >{f.label}</button>
+                ))}
+              </div>
+              <button
+                onClick={() => setDirSort(dirSort === "asc" ? "desc" : "asc")}
+                style={{
+                  border: "1px solid rgba(255,255,255,0.25)", borderRadius: 8,
+                  padding: "3px 10px", background: "rgba(255,255,255,0.1)",
+                  fontFamily: "'DM Sans', sans-serif", fontWeight: 600, fontSize: 10,
+                  cursor: "pointer", color: "rgba(255,255,255,0.75)",
+                }}
+              >
+                Distance {dirSort === "asc" ? "↑ Near–Far" : "↓ Far–Near"}
+              </button>
+            </div>
+            <div style={{ flex: 1, overflowY: "auto" }}>
+              {dirFacilities.map((f, i) => {
+                const fm = facilityMeta[f.type];
+                return (
+                  <div
+                    key={f.id}
+                    style={{
+                      padding: "10px 18px",
+                      borderBottom: i < dirFacilities.length - 1 ? `1px solid ${P.gray100}` : "none",
+                      display: "flex", alignItems: "center", gap: 10,
+                      background: i % 2 === 0 ? P.white : P.green100 + "44",
+                    }}
+                  >
+                    <div style={{ width: 32, height: 32, borderRadius: 8, background: fm.bg, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                      <img src={fm.icon} alt="" style={{ width: f.type === 'hospital' ? 18 : 22, height: f.type === 'hospital' ? 18 : 22 }} />
+                    </div>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 700, color: P.gray900, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{f.name}</div>
+                      <TypeChip type={f.type} />
+                    </div>
+                    <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 3, flexShrink: 0 }}>
+                      <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 11, fontWeight: 700, color: P.orange500 }}>{f.dist} km</div>
+                      <button style={{
+                        border: "none", background: P.blue100, color: P.blue700,
+                        fontFamily: "'DM Sans', sans-serif", fontWeight: 600, fontSize: 8,
+                        padding: "1px 6px", borderRadius: 5, cursor: "pointer",
+                        display: "inline-flex", alignItems: "center", gap: 4,
+                      }}>
+                        <img src="/pin.png" alt="" style={{ width: 10, height: 10 }} />
+                        Map
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+        {/* ══ ROW 4: Historical Trends — full width below directory ══ */}
+        <div className="dashboard-row4">
           <div style={{ background: P.surfaceAccent, borderRadius: 16, border: `1px solid ${P.yellow100}`, overflow: "hidden", display: "flex", flexDirection: "column" }}>
-            <div style={{
-              padding: "14px 20px", background: P.yellow500,
-              display: "flex", justifyContent: "space-between", alignItems: "center",
-            }}>
+            <div style={{ padding: "14px 20px", background: P.yellow500, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
               <div style={{ fontFamily: "'DM Sans', sans-serif", fontWeight: 700, fontSize: 13, color: P.gray900 }}>
                 Historical Trends
               </div>
@@ -606,65 +676,63 @@ export default function Dashboard({ selectedZone }) {
               </div>
             </div>
 
-            <div style={{ padding: "20px 24px", display: "flex", flexDirection: "column", gap: 16, flex: 1 }}>
-              <div className="trend-layout" style={{ flex: 1, alignItems: "stretch" }}>
-                <div>
-                  {/* Y-axis labels */}
-                  <div style={{ display: "flex", gap: 0 }}>
-                    <div style={{ display: "flex", flexDirection: "column", justifyContent: "space-between", paddingRight: 8, paddingBottom: 20 }}>
-                      {[maxT.toFixed(0), ((maxT + minT) / 2).toFixed(0), minT.toFixed(0)].map(v => (
-                        <span key={v} style={{ fontFamily: "'DM Mono', monospace", fontSize: 8, color: P.gray500 }}>{v}°</span>
-                      ))}
-                    </div>
-                    <div style={{ flex: 1 }}>
-                      <svg width="100%" height="clamp(180px, 32vh, 260px)" viewBox={`0 0 ${trendDays * 46} 120`} preserveAspectRatio="none" style={{ display: "block" }}>
-                        <defs>
-                          <linearGradient id="grad" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="0%" stopColor={P.orange500} stopOpacity="0.35" />
-                            <stop offset="100%" stopColor={P.orange500} stopOpacity="0.02" />
-                          </linearGradient>
-                        </defs>
-                        {[0, 40, 80, 120].map(y => (
-                          <line key={y} x1="0" y1={y} x2={trendDays * 46} y2={y} stroke={P.yellow100} strokeWidth="1" />
+            <div style={{ padding: "20px 24px", display: "flex", flexDirection: "column", gap: 24 }}>
+              <div className="trend-layout">
+                <div className="trend-left-col">
+                  {/* Graph only — fixed height so it doesn’t overlap content below */}
+                  <div className="trend-graph-wrap">
+                    <div style={{ display: "flex", gap: 0 }}>
+                      <div style={{ display: "flex", flexDirection: "column", justifyContent: "space-between", paddingRight: 8, paddingBottom: 20 }}>
+                        {[maxT.toFixed(0), ((maxT + minT) / 2).toFixed(0), minT.toFixed(0)].map(v => (
+                          <span key={v} style={{ fontFamily: "'DM Mono', monospace", fontSize: 8, color: P.gray500 }}>{v}°</span>
                         ))}
-                        <path
-                          d={[
-                            `M 0 ${120 - ((chartData[0].temp - minT) / (maxT - minT + 1)) * 100}`,
-                            ...chartData.slice(1).map((d, i) => `L ${(i + 1) * 46} ${120 - ((d.temp - minT) / (maxT - minT + 1)) * 100}`),
-                            `L ${(trendDays - 1) * 46} 120 L 0 120 Z`,
-                          ].join(" ")}
-                          fill="url(#grad)"
-                        />
-                        <path
-                          d={chartData.map((d, i) => `${i === 0 ? "M" : "L"} ${i * 46} ${120 - ((d.temp - minT) / (maxT - minT + 1)) * 100}`).join(" ")}
-                          stroke={P.orange500} strokeWidth="2.5" fill="none" strokeLinecap="round" strokeLinejoin="round"
-                        />
-                        {chartData.map((d, i) => (
-                          <circle key={i} cx={i * 46} cy={120 - ((d.temp - minT) / (maxT - minT + 1)) * 100} r="3.5" fill={P.orange500} stroke={P.yellow50} strokeWidth="2" />
-                        ))}
-                      </svg>
-                      {/* X-axis labels */}
-                      <div style={{ display: "flex", justifyContent: "space-between", marginTop: 6, paddingLeft: 2 }}>
-                        {chartData.map((d, i) => (
-                          (i === 0 || i === Math.floor(trendDays / 2) || i === trendDays - 1) &&
-                          <span key={d.day} style={{ fontFamily: "'DM Mono', monospace", fontSize: 9, color: P.gray500 }}>Day {d.day}</span>
-                        ))}
+                      </div>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <svg width="100%" height="220" viewBox={`0 0 ${trendDays * 46} 120`} preserveAspectRatio="xMidYMid meet" style={{ display: "block" }}>
+                          <defs>
+                            <linearGradient id="grad" x1="0" y1="0" x2="0" y2="1">
+                              <stop offset="0%" stopColor={P.orange500} stopOpacity="0.35" />
+                              <stop offset="100%" stopColor={P.orange500} stopOpacity="0.02" />
+                            </linearGradient>
+                          </defs>
+                          {[0, 40, 80, 120].map(y => (
+                            <line key={y} x1="0" y1={y} x2={trendDays * 46} y2={y} stroke={P.yellow100} strokeWidth="1" />
+                          ))}
+                          <path
+                            d={[
+                              `M 0 ${120 - ((chartData[0].temp - minT) / (maxT - minT + 1)) * 100}`,
+                              ...chartData.slice(1).map((d, i) => `L ${(i + 1) * 46} ${120 - ((d.temp - minT) / (maxT - minT + 1)) * 100}`),
+                              `L ${(trendDays - 1) * 46} 120 L 0 120 Z`,
+                            ].join(" ")}
+                            fill="url(#grad)"
+                          />
+                          <path
+                            d={chartData.map((d, i) => `${i === 0 ? "M" : "L"} ${i * 46} ${120 - ((d.temp - minT) / (maxT - minT + 1)) * 100}`).join(" ")}
+                            stroke={P.orange500} strokeWidth="2.5" fill="none" strokeLinecap="round" strokeLinejoin="round"
+                          />
+                          {chartData.map((d, i) => (
+                            <circle key={i} cx={i * 46} cy={120 - ((d.temp - minT) / (maxT - minT + 1)) * 100} r="3.5" fill={P.orange500} stroke={P.yellow50} strokeWidth="2" />
+                          ))}
+                        </svg>
+                        <div style={{ display: "flex", justifyContent: "space-between", marginTop: 6, paddingLeft: 2 }}>
+                          {chartData.map((d, i) => (
+                            (i === 0 || i === Math.floor(trendDays / 2) || i === trendDays - 1) &&
+                            <span key={d.day} style={{ fontFamily: "'DM Mono', monospace", fontSize: 9, color: P.gray500 }}>Day {d.day}</span>
+                          ))}
+                        </div>
                       </div>
                     </div>
                   </div>
-                  <div style={{
-                    fontFamily: "'DM Sans', sans-serif", fontWeight: 700, fontSize: 12, color: P.gray700,
-                    margin: "12px 0 8px",
-                  }}>
-                    Day-by-day temperatures
-                  </div>
-                  <div className="trend-data">
-                    {chartData.map((d, i) => {
-                      const prev = chartData[i - 1]?.temp;
-                      const delta = prev != null ? d.temp - prev : 0;
-                      const deltaSign = delta > 0 ? "+" : "";
-                      const deltaColor = delta > 0 ? P.red500 : delta < 0 ? P.green700 : P.gray500;
-                      return (
+                  {/* Day-by-day — separate block below graph */}
+                  <div className="trend-day-section">
+                    <div style={{
+                      fontFamily: "'DM Sans', sans-serif", fontWeight: 700, fontSize: 12, color: P.gray700,
+                      marginBottom: 8,
+                    }}>
+                      Day-by-day temperatures
+                    </div>
+                    <div className="trend-data">
+                      {chartData.map((d) => (
                         <div key={d.day} className="trend-data-item" style={{
                           background: P.white, border: `1px solid ${P.yellow100}`,
                           borderRadius: 10, padding: "8px 10px",
@@ -675,18 +743,17 @@ export default function Dashboard({ selectedZone }) {
                           <div style={{ fontFamily: "'DM Sans', sans-serif", fontWeight: 700, fontSize: 12, color: P.gray900 }}>
                             {d.temp.toFixed(1)}°C
                           </div>
-                          <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 9, color: deltaColor }}>
-                            {i === 0 ? "—" : `${deltaSign}${delta.toFixed(1)}°`}
+                          <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 9, color: P.gray500 }}>
+                            {d.dateLabel}
                           </div>
                         </div>
-                      );
-                    })}
+                      ))}
+                    </div>
                   </div>
                 </div>
-                <div>
+                <div className="trend-right-col">
                   <div style={{
                     fontFamily: "'DM Sans', sans-serif", fontWeight: 700, fontSize: 12, color: P.gray700,
-                    marginBottom: 8,
                   }}>
                     Trend insights
                   </div>
@@ -712,81 +779,6 @@ export default function Dashboard({ selectedZone }) {
                   </div>
                 </div>
               </div>
-            </div>
-          </div>
-
-          {/* Health Facility Directory — Green-700 header */}
-          <div style={{ background: P.white, borderRadius: 16, overflow: "hidden", border: `1px solid ${P.green100}`, display: "flex", flexDirection: "column" }}>
-            <div style={{ padding: "14px 18px", background: P.green700 }}>
-              <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 9, fontWeight: 700, letterSpacing: "0.1em", color: P.green100, marginBottom: 10 }}>
-                HEALTH FACILITY DIRECTORY
-              </div>
-              {/* Type filters */}
-              <div style={{ display: "flex", gap: 4, flexWrap: "wrap", marginBottom: 8 }}>
-                {[{ key: "all", label: "All Types" }, ...Object.entries(facilityMeta).map(([k, v]) => ({ key: k, label: v.label }))].map(f => (
-                  <button
-                    key={f.key}
-                    onClick={() => setDirType(f.key)}
-                    style={{
-                      border: `1px solid ${dirType === f.key ? P.white : "rgba(255,255,255,0.2)"}`,
-                      borderRadius: 8, padding: "2px 8px",
-                      fontFamily: "'DM Sans', sans-serif", fontWeight: 600, fontSize: 9,
-                      cursor: "pointer",
-                      background: dirType === f.key ? P.white : "transparent",
-                      color: dirType === f.key ? P.green700 : "rgba(255,255,255,0.7)",
-                    }}
-                  >{f.label}</button>
-                ))}
-              </div>
-              {/* Distance sort */}
-              <button
-                onClick={() => setDirSort(dirSort === "asc" ? "desc" : "asc")}
-                style={{
-                  border: "1px solid rgba(255,255,255,0.25)", borderRadius: 8,
-                  padding: "3px 10px", background: "rgba(255,255,255,0.1)",
-                  fontFamily: "'DM Sans', sans-serif", fontWeight: 600, fontSize: 10,
-                  cursor: "pointer", color: "rgba(255,255,255,0.75)",
-                }}
-              >
-                Distance {dirSort === "asc" ? "↑ Near–Far" : "↓ Far–Near"}
-              </button>
-            </div>
-
-            <div style={{ flex: 1, overflowY: "auto" }}>
-              {dirFacilities.map((f, i) => {
-                const fm = facilityMeta[f.type];
-                return (
-                  <div
-                    key={f.id}
-                    style={{
-                      padding: "10px 18px",
-                      borderBottom: i < dirFacilities.length - 1 ? `1px solid ${P.gray100}` : "none",
-                      display: "flex", alignItems: "center", gap: 10,
-                      background: i % 2 === 0 ? P.white : P.green100 + "44",
-                    }}
-                  >
-                      <div style={{ width: 32, height: 32, borderRadius: 8, background: fm.bg, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                        <img src={fm.icon} alt="" style={{ width: f.type === 'hospital' ? 18 : 22, height: f.type === 'hospital' ? 18 : 22 }} />
-                      </div>
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 700, color: P.gray900, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{f.name}</div>
-                      <TypeChip type={f.type} />
-                    </div>
-                    <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 3, flexShrink: 0 }}>
-                      <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 11, fontWeight: 700, color: P.orange500 }}>{f.dist} km</div>
-                      <button style={{
-                        border: "none", background: P.blue100, color: P.blue700,
-                        fontFamily: "'DM Sans', sans-serif", fontWeight: 600, fontSize: 8,
-                        padding: "1px 6px", borderRadius: 5, cursor: "pointer",
-                        display: "inline-flex", alignItems: "center", gap: 4,
-                      }}>
-                        <img src="/pin.png" alt="" style={{ width: 10, height: 10 }} />
-                        Map
-                      </button>
-                    </div>
-                  </div>
-                );
-              })}
             </div>
           </div>
         </div>
