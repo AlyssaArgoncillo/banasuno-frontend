@@ -43,11 +43,20 @@ export async function fetchBarangayTemperatures(cityId = 'davao') {
   
   // Try new endpoint first
   const newUrl = base ? `${base}/api/heat/${cityId}/barangays` : `/api/heat/${cityId}/barangays`;
-  try {
+try {
     const res = await fetch(newUrl, { cache: 'no-store' });
     if (res.ok) {
-      const data = await res.json();
-      
+      const text = await res.text();
+      let data;
+      try {
+        data = JSON.parse(text);
+      } catch (parseErr) {
+        console.warn('[heatService] Barangays endpoint returned invalid JSON (possible HTML/error page):', text?.slice(0, 150));
+        throw parseErr;
+      }
+      if (!data || typeof data !== 'object') {
+        console.warn('[heatService] Barangays endpoint returned non-object');
+      } else {
       // Map array of barangay objects to temperature dictionary
       const temperatures = {};
       let avgSum = 0;
@@ -55,7 +64,7 @@ export async function fetchBarangayTemperatures(cityId = 'davao') {
       let minTemp = Infinity;
       let maxTemp = -Infinity;
       
-      if (Array.isArray(data.barangays)) {
+      if (data && Array.isArray(data.barangays)) {
         for (const b of data.barangays) {
           const id = b.barangay_id ?? b.id ?? b.adm4_psgc;
           const temp = b.temperature_c ?? b.temp_c ?? b.temp;
@@ -82,7 +91,7 @@ export async function fetchBarangayTemperatures(cityId = 'davao') {
       console.log('[fetchBarangayTemperatures] Final range: min=', finalMin, 'max=', finalMax);
       console.log('[fetchBarangayTemperatures] Sample temps:', Object.values(temperatures).slice(0, 10));
       
-      return {
+return {
         temperatures,
         min: finalMin,
         max: finalMax,
@@ -90,10 +99,17 @@ export async function fetchBarangayTemperatures(cityId = 'davao') {
         updatedAt: typeof data.updatedAt === 'string' ? data.updatedAt : undefined,
         count: Object.keys(temperatures).length
       };
+      }
     }
-    
+
     // If new endpoint fails, log response body and try old endpoint
     const errorText = await res.text().catch(() => 'Could not read error');
+    if (res.headers.get('content-type')?.includes('application/json')) {
+      try {
+        const errBody = JSON.parse(errorText);
+        console.warn('[heatService] Barangays endpoint error:', errBody);
+      } catch (_) {}
+    }
     console.warn(`[heatService] New endpoint ${newUrl} failed (${res.status}):`, errorText, '- trying fallback...');
   } catch (err) {
     console.warn(`[heatService] New endpoint ${newUrl} error:`, err?.message, '- trying fallback...');

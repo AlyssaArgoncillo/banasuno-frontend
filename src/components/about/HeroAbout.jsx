@@ -1,22 +1,16 @@
 import '../../styles/HeroAbout.css';
 
+const overviewP1 = "BanasUno is a web‑based tool that makes neighborhood heat information accessible to everyone. It uses official PAGASA heat levels and translates them into a simple, interactive map so residents can quickly see which areas are hotter and identify nearby health facilities.";
+
 function HeroAbout() {
   return (
     <section className="hero-about-section">
       <img src="/banner2.png" alt="About BanasUno Banner" className="hero-about-visual" />
       <div className="hero-about-content">
-        <h1 className="hero-about-title">ABOUT BANASUNO</h1>
-        <p className="hero-about-description">
-          BanasUno turns complex urban heat data into clear, actionable insights. 
-          Using satellite imagery and temperature analysis, we create interactive 
-          neighborhood-level heat maps that show you exactly where risk is highest 
-          and where to find help when you need it.
-        </p>
-        <br />
-        <p className="hero-about-description">
-          We make critical climate information accessible to everyone. Because 
-          understanding your environment is the first step to staying safe in it.
-        </p>
+        <h1 className="hero-about-title">
+          ABOUT <span className="hero-about-title-accent">BANASUNO</span>
+        </h1>
+        <p className="hero-about-description">{overviewP1}</p>
       </div>
     </section>
   );

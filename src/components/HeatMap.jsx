@@ -6,6 +6,8 @@ import { getHealthFacilitiesNearBarangay } from '../services/healthFacilitiesSer
 import { geocodeQuery } from '../services/geocodeService.js';
 import { getPolygonRing, ringCentroid } from '../utils/geo.js';
 import { getBarangayId, getColorForTemp, tempToHeatRiskLevel, HEAT_RISK_LEVELS } from '../utils/heatMap.js';
+import { getUserLocationWithFallback, setManualLocation } from '../api/location.js';
+import { fetchAccessibility } from '../api/ors.js';
 import ZoneInfoCard from './ZoneInfoCard.jsx';
 
 /* global L */
@@ -26,8 +28,11 @@ const HeatMap = ({ compact = false, selectedZone: propSelectedZone, onZoneSelect
   const [tempRange, setTempRange] = useState({ min: 26, max: 39 });
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedZone, setSelectedZone] = useState(null);
+  const [accessibilityData, setAccessibilityData] = useState(null);
   const zoneInfoCardRef = useRef(null);
   const resizeCleanupRef = useRef(null);
+  const compactRef = useRef(compact);
+  compactRef.current = compact;
   const showDeviceLocation = searchQuery.trim().length > 0;
   const errorDismissTimeoutRef = useRef(null);
 
@@ -99,56 +104,55 @@ const HeatMap = ({ compact = false, selectedZone: propSelectedZone, onZoneSelect
     });
   };
 
-  /** Device location: used only to center the map and show a pin. Not stored or sent to any server. */
-  const handleUseDeviceLocation = () => {
+  /** Device location: high-accuracy first, then IP fallback. Used only to center the map and show a pin. Not stored or sent to any server. */
+  const handleUseDeviceLocation = async () => {
     if (!window.isSecureContext) {
       setLocationError('Location is only available on secure connections (HTTPS or localhost).');
-      return;
-    }
-    if (!navigator.geolocation) {
-      setLocationError('Location is not supported by your browser.');
       return;
     }
     const message = 'Allow this site to use your location to show it on the map? Your location is not stored or sent to any server.';
     if (!window.confirm(message)) return;
     setError(null);
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        const lat = position.coords.latitude;
-        const lng = position.coords.longitude;
-        if (!Number.isFinite(lat) || !Number.isFinite(lng) || lat < -90 || lat > 90 || lng < -180 || lng > 180) {
-          setLocationError('Invalid location result. Please try again.');
-          return;
-        }
-        const map = mapInstanceRef.current;
-        if (map) {
-          setLocationIndicator(lat, lng);
-          map.flyTo([lat, lng], 17, { duration: 0.5 });
-        }
-      },
-      (err) => {
-        const code = err?.code;
-        if (code === 1) {
-          setLocationError('Location denied. Enable location permission for this site and try again.');
-        } else if (code === 2) {
-          setLocationError('Location unavailable. Turn on Location Services in your device settings, or use the search bar to find a place.');
-        } else if (code === 3) {
-          setLocationError('Location request timed out. Try again or use the search bar to find a place.');
-        } else {
-          setLocationError('Location unavailable. Try the search bar to find a place on the map.');
-        }
-      },
-      {
-        enableHighAccuracy: true,
-        timeout: 30000,
-        maximumAge: 0
+
+    try {
+      const loc = await getUserLocationWithFallback();
+      const lat = loc.lat;
+      const lng = loc.lon;
+      if (!Number.isFinite(lat) || !Number.isFinite(lng) || lat < -90 || lat > 90 || lng < -180 || lng > 180) {
+        setLocationError('Invalid location result. Please try again.');
+        return;
       }
-    );
+      const map = mapInstanceRef.current;
+      if (map) {
+        setLocationIndicator(lat, lng);
+        map.flyTo([lat, lng], 17, { duration: 0.5 });
+        if (loc.source === 'ip') {
+          setLocationError('Using approximate location (from IP). For better accuracy, allow browser location or search for your barangay.');
+        }
+      }
+    } catch (err) {
+      const code = err?.code;
+      if (code === 1) {
+        setLocationError('Location denied. Enable location permission for this site and try again.');
+      } else if (code === 2) {
+        setLocationError('Location unavailable. Turn on Location Services, or use the search bar to find a place.');
+      } else if (code === 3) {
+        setLocationError('Location request timed out. Try again or use the search bar.');
+      } else {
+        setLocationError('Location unavailable. Try the search bar to find a place on the map.');
+      }
+    }
   };
 
   useEffect(() => {
     const container = mapRef.current;
     if (!container || !container.parentElement || mapInstanceRef.current) return;
+
+    if (typeof window.L === 'undefined') {
+      setError(new Error('Map library is still loading. Please refresh the page.'));
+      return;
+    }
+    const L = window.L;
 
     cancelledRef.current = false;
     setError(null);
@@ -238,32 +242,53 @@ const HeatMap = ({ compact = false, selectedZone: propSelectedZone, onZoneSelect
               const [lng, lat] = ring ? ringCentroid(ring) : [125.4553, 7.1907];
               const requestSeq = ++facilitiesRequestSeqRef.current;
 
-              requestAnimationFrame(() => {
-                if (cancelledRef.current) return;
-                setSelectedZone({
-                  name,
-                  temperature: temp,
-                  riskLevel,
-                  riskScore,
-                  facilities: [],
-                  isNearbyFallback: false,
-                  facilitiesLoading: true
+              if (!compactRef.current) {
+                requestAnimationFrame(() => {
+                  if (cancelledRef.current) return;
+                  setSelectedZone({
+                    name,
+                    temperature: temp,
+                    riskLevel,
+                    riskScore,
+                    facilities: [],
+                    isNearbyFallback: false,
+                    facilitiesLoading: true
+                  });
                 });
-              });
+              }
 
+              if (compactRef.current) return;
+              setManualLocation({ lat, lon: lng, barangayId: id });
               getHealthFacilitiesNearBarangay(id, { lat, lng })
-                .then((result) => {
+                .then(async (result) => {
                   if (cancelledRef.current) return;
                   if (requestSeq !== facilitiesRequestSeqRef.current) return;
+                  const facilities = result.facilities ?? [];
                   const zoneData = {
+                    barangayId: id,
                     name: name,
                     temperature: temp,
                     riskLevel,
                     riskScore,
-                    facilities
+                    facilities,
+                    isNearbyFallback: result.isNearbyFallback ?? false,
+                    facilitiesLoading: false
                   };
                   setSelectedZone(zoneData);
                   onZoneSelected?.(zoneData);
+                  setAccessibilityData(null);
+                  const withCoords = facilities.filter((f) => f.lat != null && f.lng != null);
+                  if (withCoords.length > 0) {
+                    try {
+                      const orsBody = withCoords.map((f) => ({ id: f.id, lon: f.lng, lat: f.lat }));
+                      const response = await fetchAccessibility([id], orsBody);
+                      if (requestSeq !== facilitiesRequestSeqRef.current) return;
+                      console.log('[HeatMap] fetchAccessibility response:', response);
+                      setAccessibilityData(response);
+                    } catch (err) {
+                      console.warn('[HeatMap] fetchAccessibility failed:', err?.message);
+                    }
+                  }
                 })
                 .catch(() => {
                   if (cancelledRef.current) return;
@@ -277,6 +302,7 @@ const HeatMap = ({ compact = false, selectedZone: propSelectedZone, onZoneSelect
                   };
                   setSelectedZone(zoneData);
                   onZoneSelected?.(zoneData);
+                  setAccessibilityData(null);
                 });
             });
           }
@@ -331,7 +357,7 @@ const HeatMap = ({ compact = false, selectedZone: propSelectedZone, onZoneSelect
 
   return (
     <div className="heatmap-wrapper">
-      <div className={`heatmap-container ${compact ? 'heatmap-compact' : ''}`}>
+      <div className={`heatmap-container ${compact ? 'heatmap-compact heatmap-compact-hide-mobile-legend' : ''}`}>
         <div id="heatmap" ref={mapRef} />
         {mapLoading && (
           <div className="heatmap-loading" aria-live="polite" aria-busy="true">
@@ -341,11 +367,11 @@ const HeatMap = ({ compact = false, selectedZone: propSelectedZone, onZoneSelect
         )}
         {error && (
           <div className="heatmap-error">
-            {error}
+            {error?.message ?? String(error)}
           </div>
         )}
 
-        {selectedZone && (
+        {!compact && selectedZone && (
           <div className="zone-info-card-wrapper" ref={zoneInfoCardRef}>
             <ZoneInfoCard
               zoneName={selectedZone.name}
@@ -355,7 +381,7 @@ const HeatMap = ({ compact = false, selectedZone: propSelectedZone, onZoneSelect
               facilities={selectedZone.facilities}
               isNearbyFallback={selectedZone.isNearbyFallback}
               facilitiesLoading={selectedZone.facilitiesLoading}
-              onClose={() => setSelectedZone(null)}
+              onClose={() => { setSelectedZone(null); setAccessibilityData(null); }}
               onFacilityClick={() => {}}
               onGoToDashboard={onGoToDashboard}
             />

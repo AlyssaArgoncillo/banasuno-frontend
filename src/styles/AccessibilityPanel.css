@@ -1,0 +1,59 @@
+.accessibility-panel {
+  background: var(--surface-primary, #fff);
+  border-radius: 8px;
+  padding: 1rem 1.25rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.accessibility-panel__title {
+  font-size: 1rem;
+  font-weight: 700;
+  margin: 0 0 0.75rem 0;
+  color: var(--primary-900, #212121);
+}
+
+.accessibility-panel__message {
+  font-size: 0.875rem;
+  color: var(--primary-500, #757575);
+  margin: 0 0 0.75rem 0;
+  line-height: 1.4;
+}
+
+.accessibility-panel__empty {
+  font-size: 0.9rem;
+  color: var(--primary-500, #757575);
+  margin: 0;
+}
+
+.accessibility-panel__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.accessibility-panel__item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid var(--gray-100, #eee);
+  font-size: 0.9rem;
+}
+
+.accessibility-panel__item:last-child {
+  border-bottom: none;
+}
+
+.accessibility-panel__name {
+  flex: 1;
+  min-width: 0;
+  color: var(--primary-900, #212121);
+  font-weight: 500;
+}
+
+.accessibility-panel__distance {
+  flex-shrink: 0;
+  font-weight: 600;
+  color: var(--orange-500, #ff6b1a);
+}

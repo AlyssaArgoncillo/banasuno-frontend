@@ -269,8 +269,41 @@
   }
 }
 
-@media (max-width: 480px) {
+@media (max-width: 412px) {
+  .contact-section {
+    padding: 3rem 1.25rem 2.5rem 1.25rem;
+  }
+
+  .contact-title {
+    font-size: 1.875rem;
+  }
+}
+
+@media (max-width: 375px) {
   .contact-title {
     font-size: 1.75rem;
+  }
+
+  .contact-card {
+    padding: 1.25rem;
+  }
+}
+
+@media (max-width: 320px) {
+  .contact-section {
+    padding: 2.5rem 1rem 2rem 1rem;
+  }
+
+  .contact-title {
+    font-size: 1.5rem;
+  }
+
+  .contact-description {
+    font-size: 0.9375rem;
+  }
+
+  .contact-visual {
+    width: 100px;
+    height: 100px;
   }
 }

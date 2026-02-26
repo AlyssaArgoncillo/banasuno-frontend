@@ -74,7 +74,7 @@ function SolutionSection() {
 
         <div className="cls-subsection subsection" ref={(el) => (subsectionsRef.current[1] = el)}>
           <div className="subsection-image">
-            <img src="/ClinicLoc.png" alt="Clinic Locator" />
+            <img src="/clinicloc2.png" alt="Clinic Locator" />
           </div>
           <div className="subsection-content">
             <h3 className="subsection-heading">Clinic Locator</h3>
@@ -94,7 +94,7 @@ function SolutionSection() {
             </p>
           </div>
           <div className="subsection-image">
-            <img src="/risk1.jpg" alt="Data Analytics" />
+            <img src="/historical.png" alt="Data Analytics" />
           </div>
         </div>
       </div>

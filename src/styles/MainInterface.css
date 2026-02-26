@@ -331,8 +331,21 @@
   visibility: visible;
 }
 
-/* Tablet: iPad Air, iPad Pro, etc. – same as desktop but ensure scrolling and touch-friendly spacing */
+/* 1280px+ – desktop: full sidebar */
+@media (min-width: 1280px) {
+  .main-interface-sidebar {
+    width: 260px;
+    min-width: 260px;
+  }
+}
+
+/* 1024px – larger tablets: sidebar, touch-friendly */
 @media (min-width: 769px) and (max-width: 1024px) {
+  .main-interface-sidebar {
+    width: 240px;
+    min-width: 240px;
+  }
+
   .main-interface-body {
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
@@ -343,7 +356,7 @@
   }
 }
 
-/* Mobile: hide sidebar, show mobile header and overlay; allow full page scrolling */
+/* 768px – tablets: mobile layout, hamburger */
 @media (max-width: 768px) {
   .main-interface-sidebar {
     display: none;
@@ -379,13 +392,58 @@
   }
 }
 
-/* Small mobile: Samsung Galaxy, etc. */
-@media (max-width: 480px) {
+/* 412px – large Androids */
+@media (max-width: 412px) {
+  .main-interface-content {
+    padding: 0.875rem;
+  }
+
+  .main-interface-map-area {
+    min-height: min(calc(100vh - 56px - 1.75rem), 500px);
+  }
+
+  .main-interface-mobile-overlay {
+    width: min(280px, 85vw);
+  }
+}
+
+/* 375px – standard iPhones */
+@media (max-width: 375px) {
   .main-interface-content {
     padding: 0.75rem;
   }
 
   .main-interface-map-area {
     min-height: min(calc(100vh - 56px - 1.5rem), 480px);
+  }
+}
+
+/* 320px – small phones */
+@media (max-width: 320px) {
+  .main-interface-mobile-header {
+    height: 52px;
+    padding: 0 0.75rem;
+  }
+
+  .main-interface-body {
+    padding-top: 52px;
+  }
+
+  .main-interface-mobile-overlay {
+    top: 52px;
+    width: min(260px, 90vw);
+    padding: 1rem 0.75rem;
+  }
+
+  .main-interface-content {
+    padding: 0.5rem;
+  }
+
+  .main-interface-map-area {
+    min-height: min(calc(100vh - 52px - 1rem), 440px);
+  }
+
+  .main-interface-mobile-logo-image {
+    height: 32px;
   }
 }

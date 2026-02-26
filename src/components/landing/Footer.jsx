@@ -12,12 +12,12 @@ function Footer() {
             Making climate data accessible and actionable.
           </p>
           <div className="footer-social">
-            <div className="social-icon" aria-hidden="true">
+            <a href="https://github.com" className="social-icon" aria-label="GitHub" target="_blank" rel="noopener noreferrer">
               <img src="/github.png" alt="GitHub" />
-            </div>
-            <div className="social-icon" aria-hidden="true">
+            </a>
+            <a href="mailto:contact@banasuno.example" className="social-icon" aria-label="Email">
               <img src="/email.png" alt="Email" />
-            </div>
+            </a>
           </div>
         </div>
         

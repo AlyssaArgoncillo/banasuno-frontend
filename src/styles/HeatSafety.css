@@ -36,7 +36,7 @@
   --button-color-hover: #e56300;
   background: var(--bg);
   border-radius: 2rem;
-  padding: 0.5rem;
+  padding: 1.5rem 0.5rem 3.5rem 0.5rem;
   width: 20rem;
   height: 32rem;
   overflow: clip;
@@ -67,20 +67,20 @@
 
 .card > img {
   max-width: 100%;
+  width: 90%;
+  margin: 0.75rem auto 0;
+  display: block;
   aspect-ratio: 2 / 3;
   object-fit: cover;
   object-position: 50% 5%;
   border-radius: 1.5rem;
-  display: block;
-  transition: aspect-ratio 0.25s, object-position 0.5s;
-  width: 90%;
   height: auto;
-  margin: 0.75rem auto 0;
+  transition: aspect-ratio 0.25s, object-position 0.5s;
 }
 
 .card > section {
   margin: 1rem;
-  padding-bottom: 2rem;
+  padding-bottom: 4.5rem;
   height: calc(33.3333% - 1rem);
   display: flex;
   flex-direction: column;
@@ -265,14 +265,23 @@
   }
 }
 
-@media (max-width: 480px) {
+@media (max-width: 412px) {
+  .heat-safety-section {
+    padding: 3rem 1.25rem 2.5rem 1.25rem;
+  }
+
   .heat-safety-title {
-    font-size: 1.5rem;
+    font-size: 1.625rem;
   }
 
   .card {
-    width: 100%;
     height: 30rem;
+  }
+}
+
+@media (max-width: 375px) {
+  .heat-safety-title {
+    font-size: 1.5rem;
   }
 
   .card h2 {
@@ -287,5 +296,28 @@
     width: 7rem;
     padding: 0.6rem 1rem 0.6rem 2rem;
     font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 320px) {
+  .heat-safety-section {
+    padding: 2.5rem 1rem 2rem 1rem;
+  }
+
+  .heat-safety-title {
+    font-size: 1.375rem;
+    margin-bottom: 2rem;
+  }
+
+  .card {
+    height: 28rem;
+  }
+
+  .card h2 {
+    font-size: 1.125rem;
+  }
+
+  .card p {
+    font-size: 0.875rem;
   }
 }

@@ -53,11 +53,13 @@
   justify-content: center;
 }
 
-.social-icon img {
+.social-icon img,
+.social-icon svg {
   width: 18px;
   height: 18px;
   display: block;
   object-fit: contain;
+  flex-shrink: 0;
 }
 
 .social-icon:hover {
@@ -110,7 +112,14 @@
   color: #FD6F00;
 }
 
-/* Responsive design */
+/* 1024px – larger tablets */
+@media (max-width: 1024px) {
+  .footer-container {
+    gap: 3rem;
+  }
+}
+
+/* 768px – tablets: stack layout */
 @media (max-width: 768px) {
   .footer {
     padding: 2.5rem 1.5rem 2rem 1.5rem;
@@ -144,9 +153,58 @@
   }
 }
 
-@media (max-width: 480px) {
+/* 412px – large Androids */
+@media (max-width: 412px) {
+  .footer {
+    padding: 2rem 1.25rem 1.5rem 1.25rem;
+  }
+
+  .footer-right {
+    gap: 1.75rem;
+  }
+}
+
+/* 375px – standard iPhones */
+@media (max-width: 375px) {
+  .footer {
+    padding: 1.75rem 1rem 1.5rem 1rem;
+  }
+
+  .footer-brand {
+    font-size: 1.375rem;
+  }
+
   .footer-right {
     flex-direction: column;
     gap: 1.5rem;
+  }
+}
+
+/* 320px – small phones */
+@media (max-width: 320px) {
+  .footer {
+    padding: 1.5rem 0.75rem 1.25rem 0.75rem;
+  }
+
+  .footer-brand {
+    font-size: 1.25rem;
+  }
+
+  .footer-description {
+    font-size: 0.875rem;
+  }
+
+  .footer-right {
+    gap: 1.25rem;
+  }
+
+  .social-icon {
+    width: 36px;
+    height: 36px;
+  }
+
+  .social-icon img {
+    width: 16px;
+    height: 16px;
   }
 }

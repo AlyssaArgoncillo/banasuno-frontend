@@ -6,8 +6,8 @@
   border: 1px solid var(--primary-200, #e2e8f0);
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
   overflow: hidden;
-  min-width: 280px;
-  max-width: 340px;
+  min-width: 260px;
+  max-width: min(340px, calc(100vw - 24px));
   font-family: var(--font-body, system-ui, sans-serif);
 }
 
@@ -99,6 +99,13 @@
   display: block;
   font-size: 11px;
   color: var(--primary-500);
+}
+
+.zone-info-card-cutoff-note {
+  margin: 6px 0 0 0;
+  font-size: 11px;
+  color: var(--orange-500, #ff6b1a);
+  line-height: 1.35;
   margin-bottom: 6px;
 }
 
@@ -203,7 +210,6 @@
   margin-bottom: 14px;
   margin-left: 14px;
   margin-right: 14px;
-  background: var(--orange-500, #ff6b1a);
   border: none;
   border-radius: 8px;
   font-family: var(--font-body, system-ui, sans-serif);
@@ -211,14 +217,40 @@
   font-weight: 600;
   color: #fff;
   cursor: pointer;
-  transition: background-color 0.2s ease, box-shadow 0.2s ease;
+  transition: filter 0.2s ease, box-shadow 0.2s ease;
 }
 
 .zone-info-card-full-report-btn:hover {
-  background: var(--orange-600, #e55a00);
-  box-shadow: 0 2px 8px rgba(255, 107, 26, 0.24);
+  filter: brightness(0.92);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
 
 .zone-info-card-full-report-btn:active {
-  background: var(--orange-700, #cc4c00);
+  filter: brightness(0.85);
+}
+
+/* 320px – small phones: keep card within viewport */
+@media (max-width: 320px) {
+  .zone-info-card {
+    min-width: 240px;
+    max-width: calc(100vw - 16px);
+  }
+
+  .zone-info-card-title {
+    font-size: 14px;
+    padding: 10px 12px 4px;
+  }
+
+  .zone-info-card-grid {
+    padding: 0 12px 12px;
+    gap: 8px;
+  }
+
+  .zone-info-card-block {
+    padding: 6px 8px;
+  }
+
+  .zone-info-card-value {
+    font-size: 13px;
+  }
 }

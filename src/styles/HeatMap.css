@@ -198,6 +198,10 @@
 .heatmap-container.heatmap-compact .heatmap-mobile-ui .heatmap-zoom-controls-mobile {
   display: none;
 }
+.heatmap-container.heatmap-compact.heatmap-compact-hide-mobile-legend .heatmap-mobile-ui .heatmap-bottom-legend {
+  display: none;
+}
+
 .heatmap-container.heatmap-compact .heatmap-mobile-ui .heatmap-bottom-legend {
   max-width: 70%;
   padding: 6px 10px 8px;
@@ -270,7 +274,7 @@
 .heatmap-index-legend-item,
 .heatmap-bottom-legend-item {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   gap: 8px;
   padding: 6px 8px;
   border-radius: 6px;
@@ -583,7 +587,7 @@
 
 .heatmap-index-legend-item {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   gap: 8px;
   padding: 6px 8px;
   line-height: 1.2;
@@ -591,6 +595,7 @@
 }
 
 .heatmap-index-dot {
+  display: none; /* Color blocks on far left removed per design */
   width: 10px;
   height: 10px;
   border-radius: 2px;
@@ -774,12 +779,13 @@
 
 .heatmap-bottom-legend-item {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   gap: 6px;
   padding: 2px 0;
 }
 
 .heatmap-bottom-legend-item .heatmap-index-dot {
+  display: none; /* Color blocks on far left removed per design */
   width: 8px;
   height: 8px;
   border-radius: 2px;
@@ -933,13 +939,20 @@
   }
 }
 
-/* Small mobile (e.g. Samsung Galaxy ~360–412px) */
-@media (max-width: 480px) {
+/* 412px – large Androids */
+@media (max-width: 412px) {
   .heatmap-wrapper {
     padding: 4px;
     min-height: min(360px, calc(100vh - 56px - 1.5rem - 8px));
   }
 
+  .heatmap-mobile-ui .heatmap-search-block-mobile {
+    max-width: min(200px, 88vw);
+  }
+}
+
+/* 375px – standard iPhones */
+@media (max-width: 375px) {
   .heatmap-mobile-ui .heatmap-overlay-bar-mobile {
     top: 10px;
     left: 6px;
@@ -949,13 +962,14 @@
   }
 
   .heatmap-mobile-ui .heatmap-search-block-mobile {
-    max-width: min(200px, 88vw);
     padding: 4px 6px 4px 0;
   }
+
   .heatmap-mobile-ui .heatmap-search-block-mobile .heatmap-search-input {
     font-size: 10px;
     padding: 4px 5px;
   }
+
   .heatmap-mobile-ui .heatmap-search-block-mobile .heatmap-search-input::placeholder {
     font-size: 9px;
   }
@@ -985,5 +999,47 @@
     height: 28px;
     min-width: 28px;
     min-height: 28px;
+  }
+}
+
+/* 320px – small phones */
+@media (max-width: 320px) {
+  .heatmap-wrapper {
+    min-height: min(320px, calc(100vh - 52px - 1rem - 8px));
+    padding: 3px;
+  }
+
+  .heatmap-mobile-ui .heatmap-overlay-bar-mobile {
+    top: 8px;
+    left: 4px;
+    right: 4px;
+    max-width: calc(100% - 8px);
+    width: calc(100% - 8px);
+  }
+
+  .heatmap-mobile-ui .heatmap-search-block-mobile {
+    max-width: min(180px, 90vw);
+    padding: 3px 4px 3px 0;
+  }
+
+  .heatmap-mobile-ui .heatmap-search-block-mobile .heatmap-search-input {
+    font-size: 9px;
+    padding: 3px 4px;
+  }
+
+  .heatmap-mobile-ui .heatmap-bottom-legend {
+    left: 4px;
+    padding: 4px 6px 5px;
+  }
+
+  .heatmap-mobile-ui .heatmap-bottom-legend-list {
+    font-size: 7px;
+  }
+
+  .heatmap-mobile-ui .heatmap-zoom-btn {
+    width: 26px;
+    height: 26px;
+    min-width: 26px;
+    min-height: 26px;
   }
 }

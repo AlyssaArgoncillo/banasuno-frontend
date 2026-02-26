@@ -77,7 +77,7 @@ function NeedProvideCard({ label, text, color, isNeed }) {
             fontWeight: 700,
           }}>
             {isNeed ? (
-              <img src="/need.png" alt="Need" className="need-icon" />
+              <img src="/need.png" alt="" className="need-icon" aria-hidden />
             ) : (
               "✦"
             )}
@@ -128,13 +128,17 @@ function PersonaSection({ persona }) {
           <img
             src={persona.imageSrc}
             alt={persona.imageAlt}
-            className={`city-hall-image${persona.imageSrc === "/Volunteer.png" ? " volunteer-image" : ""}`}
+            className={`city-hall-image${
+              persona.imageSrc === "/Volunteer.png" ? " volunteer-image" :
+              persona.imageSrc === "/NGO.png" ? " ngo-image" :
+              persona.imageSrc === "/family.png" ? " residents-image" : ""
+            }`}
           />
         </div>
       </div>
 
       {/* Content wrapper - centered */}
-      <div style={{
+      <div className="built-for-persona-content" style={{
         width: "100%",
         maxWidth: "1200px",
         display: "flex",
@@ -147,7 +151,7 @@ function PersonaSection({ persona }) {
         zIndex: 10,
       }}>
         {/* Heading */}
-        <h2 style={{
+        <h2 className="built-for-persona-heading" style={{
           fontFamily: "'DM Sans', sans-serif",
           fontSize: "3.75rem",
           fontWeight: 700,
@@ -163,7 +167,7 @@ function PersonaSection({ persona }) {
         </h2>
         
         {/* Cards */}
-        <div style={{
+        <div className="built-for-cards-grid" style={{
           display: "grid",
           gridTemplateColumns: "repeat(2, 1fr)",
           gap: "2rem",

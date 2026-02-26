@@ -251,7 +251,22 @@
   }
 }
 
-@media (max-width: 480px) {
+@media (max-width: 412px) {
+  .health-risks-section {
+    padding: 3.5rem 1.25rem;
+  }
+
+  .health-risks-heading {
+    font-size: 1.625rem;
+  }
+
+  .card {
+    width: 190px;
+    min-height: 280px;
+  }
+}
+
+@media (max-width: 375px) {
   .health-risks-section {
     padding: 3rem 1rem;
   }
@@ -281,16 +296,8 @@
     object-fit: contain;
   }
 
-  .card:first-child .circle .icon {
-    width: 85px;
-    height: 85px;
-  }
-
-  .card:nth-child(2) .circle .icon {
-    width: 85px;
-    height: 85px;
-  }
-
+  .card:first-child .circle .icon,
+  .card:nth-child(2) .circle .icon,
   .card:nth-child(3) .circle .icon {
     width: 85px;
     height: 85px;
@@ -307,5 +314,55 @@
 
   .card-description {
     font-size: 11px;
+  }
+}
+
+@media (max-width: 320px) {
+  .health-risks-section {
+    padding: 2.5rem 0.75rem;
+  }
+
+  .health-risks-heading {
+    font-size: 1.375rem;
+  }
+
+  .card {
+    width: 165px;
+    min-height: 260px;
+  }
+
+  .circle {
+    width: 90px;
+    height: 90px;
+  }
+
+  .circle::after {
+    width: 80px;
+    height: 80px;
+  }
+
+  .circle .icon {
+    width: 62px;
+    height: 62px;
+  }
+
+  .card:first-child .circle .icon,
+  .card:nth-child(2) .circle .icon,
+  .card:nth-child(3) .circle .icon {
+    width: 75px;
+    height: 75px;
+  }
+
+  .overlay {
+    width: 80px;
+    height: 80px;
+  }
+
+  .card-title {
+    font-size: 13px;
+  }
+
+  .card-description {
+    font-size: 10px;
   }
 }
