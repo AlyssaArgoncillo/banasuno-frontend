@@ -2,7 +2,7 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 
 // In dev, /api requests are proxied to the backend so the browser sees same origin (no CORS).
-const proxyTarget = process.env.VITE_API_URL?.trim() || 'http://localhost:3000'
+const proxyTarget = 'https://banasuno-backend.vercel.app'
 
 // https://vite.dev/config/
 export default defineConfig({
