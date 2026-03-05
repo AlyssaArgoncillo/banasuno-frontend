@@ -232,8 +232,12 @@
   --title-color-hover: #88c789;
 }
 
-/* Responsive design */
-@media (max-width: 1024px) {
+/* Tablet: 768–1023px */
+@media (max-width: 1023px) {
+  .heat-safety-section {
+    padding: 6rem 2rem 6rem 2rem;
+  }
+
   .cards-container {
     gap: 1.5rem;
   }
@@ -244,7 +248,8 @@
   }
 }
 
-@media (max-width: 768px) {
+/* Mobile: up to 767px – cards stack, 16px body text, touch-friendly buttons */
+@media (max-width: 767px) {
   .heat-safety-section {
     padding: 4rem 1.5rem 3rem 1.5rem;
   }
@@ -261,7 +266,19 @@
   .card {
     width: 100%;
     max-width: 20rem;
-    height: 32rem;
+    height: auto;
+    min-height: 28rem;
+  }
+
+  .card p,
+  .card ul {
+    font-size: 1rem;
+  }
+
+  .card button {
+    min-height: 44px;
+    min-width: 44px;
+    padding: 0.75rem 1.5rem;
   }
 }
 
@@ -275,7 +292,7 @@
   }
 
   .card {
-    height: 30rem;
+    min-height: 26rem;
   }
 }
 
@@ -288,14 +305,17 @@
     font-size: 1.25rem;
   }
 
-  .card p {
-    font-size: 0.9rem;
+  .card p,
+  .card ul {
+    font-size: 1rem;
   }
 
   .card button {
-    width: 7rem;
-    padding: 0.6rem 1rem 0.6rem 2rem;
-    font-size: 0.9rem;
+    width: auto;
+    min-width: 44px;
+    min-height: 44px;
+    padding: 0.75rem 1.5rem 0.75rem 2.5rem;
+    font-size: 1rem;
   }
 }
 
@@ -310,14 +330,15 @@
   }
 
   .card {
-    height: 28rem;
+    min-height: 24rem;
   }
 
   .card h2 {
     font-size: 1.125rem;
   }
 
-  .card p {
-    font-size: 0.875rem;
+  .card p,
+  .card ul {
+    font-size: 1rem;
   }
 }

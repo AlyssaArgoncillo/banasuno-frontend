@@ -211,9 +211,11 @@
   box-shadow: 0 6px 16px rgba(253, 111, 0, 0.4);
 }
 
-@media (max-width: 1024px) {
+/* Tablet: 768–1023px */
+@media (max-width: 1023px) {
   .contact-card {
     width: 100%;
+    max-width: 100%;
     height: auto;
   }
 
@@ -222,7 +224,8 @@
   }
 }
 
-@media (max-width: 768px) {
+/* Mobile: up to 767px – stack layout, 16px body text, touch-friendly */
+@media (max-width: 767px) {
   .contact-section {
     padding: 4rem 1.5rem 3rem 1.5rem;
   }
@@ -252,11 +255,13 @@
   .contact-card {
     height: auto;
     gap: 1.5rem;
+    padding: 1.5rem;
   }
 
   .contact-visual {
     width: 120px;
     height: 120px;
+    max-width: 100%;
   }
 
   .contact-value {
@@ -266,6 +271,15 @@
   .team-cards {
     flex-direction: column;
     align-items: center;
+  }
+
+  .team-btn {
+    min-height: 44px;
+    min-width: 44px;
+    padding: 0.75rem 1.5rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
   }
 }
 
@@ -287,6 +301,10 @@
   .contact-card {
     padding: 1.25rem;
   }
+
+  .contact-description {
+    font-size: 1rem;
+  }
 }
 
 @media (max-width: 320px) {
@@ -299,11 +317,12 @@
   }
 
   .contact-description {
-    font-size: 0.9375rem;
+    font-size: 1rem;
   }
 
   .contact-visual {
     width: 100px;
     height: 100px;
+    max-width: 100%;
   }
 }

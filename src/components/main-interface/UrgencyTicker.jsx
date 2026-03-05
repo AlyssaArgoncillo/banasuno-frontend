@@ -1,4 +1,6 @@
 import { useState, useEffect, useRef } from "react";
+import { fetchHeatAdvisory } from "../../services/heatAdvisoryService.js";
+import { getFallbackAdvisoryForFrontend } from "../../utils/heatAdvisoryFallback.js";
 import {
   SmileIcon,
   WarningIcon,
@@ -164,11 +166,37 @@ function AISpinner({ color }) {
 // ─── URGENCY TICKER ───────────────────────────────────
 const RISK_KEYS = ["not_hazardous", "caution", "extreme_caution", "danger", "extreme_danger"];
 
-export function UrgencyTicker({ barangay, riskKey }) {
+/** Build cache key for advisory: same (barangay_id, risk_level) reuses cached response (backend also caches ~10 min). */
+function advisoryCacheKey(barangayId, riskLevel) {
+  return `${barangayId ?? ''}|${riskLevel ?? ''}`;
+}
+
+/** Normalize risk_label for comparison (trim, lowercase) so "Extreme Caution" matches "extreme caution". */
+function normalizeLabel(label) {
+  return (label == null || typeof label !== 'string') ? '' : String(label).trim().toLowerCase();
+}
+
+/** Not Hazardous tagline (fallback) – if API returns this for a level >= 2 request, reject and use our fallback. */
+const NOT_HAZARDOUS_TAGLINE = "Conditions are comfortable. Stay hydrated and dress for the weather.";
+function looksLikeNotHazardousContent(tagline) {
+  if (!tagline || typeof tagline !== 'string') return false;
+  const t = tagline.trim().toLowerCase();
+  return t === NOT_HAZARDOUS_TAGLINE.toLowerCase() || t.startsWith('conditions are comfortable');
+}
+
+export function UrgencyTicker({ barangay, riskKey, selectedZone }) {
   const initialKey = riskKey && RISK_KEYS.includes(riskKey) ? riskKey : "extreme_caution";
   const [selected, setSelected] = useState(initialKey);
   const [loading, setLoading] = useState(false);
   const [visible, setVisible] = useState(true);
+  const [apiAdvisory, setApiAdvisory] = useState(null);
+  const requestIdRef = useRef(0);
+  /** Params we sent for the in-flight request; used to ignore responses that don't match (e.g. late default). */
+  const requestedParamsRef = useRef(null);
+  /** Cache by (barangay_id, risk_level) to avoid calling API again for the same selection; reuse last response when possible. */
+  const advisoryCacheRef = useRef(Object.create(null));
+  /** Last selection key we ran the effect for; avoids duplicate work when deps are stable. */
+  const lastSelectionKeyRef = useRef('');
 
   const prevRiskKeyRef = useRef(riskKey);
   useEffect(() => {
@@ -178,6 +206,7 @@ export function UrgencyTicker({ barangay, riskKey }) {
     setLoading(true);
     setVisible(false);
     setSelected(next);
+    setApiAdvisory(null);
     const t = setTimeout(() => {
       setLoading(false);
       setVisible(true);
@@ -185,7 +214,99 @@ export function UrgencyTicker({ barangay, riskKey }) {
     return () => clearTimeout(t);
   }, [riskKey]);
 
+  // Call API only once per user action (barangay or level change). Reuse cached advisory for same (barangay_id, risk_level).
+  // Only call when user has chosen a barangay; do not call on every render, gauge hover, or for every gauge level on page load.
+  const zoneBarangayId = selectedZone?.barangayId ?? '';
+  const zoneRiskLevel = selectedZone?.riskLevel?.level;
+  const selectedZoneRef = useRef(selectedZone);
+  selectedZoneRef.current = selectedZone;
+  useEffect(() => {
+    const selectedZone = selectedZoneRef.current;
+    if (!selectedZone) {
+      requestedParamsRef.current = null;
+      setApiAdvisory(null);
+      lastSelectionKeyRef.current = '';
+      return;
+    }
+    const level = riskLevels.find(l => l.key === selected);
+    const requestedRiskLevel = level?.level ?? zoneRiskLevel;
+    const requestedRiskLabel = level?.label ?? selectedZone?.riskLevel?.label ?? null;
+    const requestedBarangayId = selectedZone?.barangayId ?? null;
+    const requestedBarangayName = selectedZone?.name ?? barangay ?? undefined;
+    const key = advisoryCacheKey(requestedBarangayId, requestedRiskLevel);
+    if (lastSelectionKeyRef.current === key) return;
+    lastSelectionKeyRef.current = key;
+
+    const cached = advisoryCacheRef.current[key];
+    if (cached && cached.tagline && Array.isArray(cached.advices) && cached.advices.length > 0) {
+      const cacheLevelOk = cached.risk_level == null || cached.risk_level === requestedRiskLevel;
+      const cacheLabelOk = requestedRiskLabel == null || cached.risk_label == null || normalizeLabel(cached.risk_label) === normalizeLabel(requestedRiskLabel);
+      const cacheNotWrongContent = requestedRiskLevel < 2 || !looksLikeNotHazardousContent(cached.tagline);
+      if (cacheLevelOk && cacheLabelOk && cacheNotWrongContent) {
+        setApiAdvisory(cached);
+        requestedParamsRef.current = { risk_level: requestedRiskLevel, risk_label: requestedRiskLabel, barangay_id: requestedBarangayId, barangay_name: requestedBarangayName };
+        return;
+      }
+      if (process.env.NODE_ENV === 'development' && (!cacheLevelOk || !cacheLabelOk || !cacheNotWrongContent)) {
+        console.warn('[UrgencyTicker] Cached advisory does not match selection or has wrong content - refetching');
+      }
+    }
+
+    const id = ++requestIdRef.current;
+    requestedParamsRef.current = { risk_level: requestedRiskLevel, risk_label: requestedRiskLabel, barangay_id: requestedBarangayId, barangay_name: requestedBarangayName };
+    setApiAdvisory(null);
+    const minDelay = new Promise(r => setTimeout(r, 400));
+    const req = fetchHeatAdvisory({
+      barangay_id: requestedBarangayId ?? undefined,
+      barangay_name: requestedBarangayName,
+      risk_level: requestedRiskLevel,
+      risk_label: requestedRiskLabel ?? undefined,
+      temperature_c: selectedZone?.temperature,
+    });
+    Promise.all([req, minDelay]).then(([data]) => {
+      if (requestIdRef.current !== id) return;
+      const requested = requestedParamsRef.current;
+      if (!requested) return;
+      if (!data) return;
+      if (requested.risk_level != null && (data.risk_level == null || data.risk_level !== requested.risk_level)) {
+        if (process.env.NODE_ENV === 'development') {
+          console.warn('[UrgencyTicker] Response risk_level missing or mismatch: got', data.risk_level, 'expected', requested.risk_level, '- not showing (avoids Not Hazardous for higher-risk selection)');
+        }
+        return;
+      }
+      if (requested.risk_label != null && data.risk_label != null && normalizeLabel(data.risk_label) !== normalizeLabel(requested.risk_label)) {
+        if (process.env.NODE_ENV === 'development') {
+          console.warn('[UrgencyTicker] Response risk_label mismatch: got', data.risk_label, 'expected', requested.risk_label, '- not showing');
+        }
+        return;
+      }
+      if (requested.barangay_id != null && requested.barangay_name != null && data.barangay_name != null) {
+        if (String(data.barangay_name).trim().toLowerCase() !== String(requested.barangay_name).trim().toLowerCase()) return;
+      }
+      if (requested.risk_level >= 2 && looksLikeNotHazardousContent(data.tagline)) {
+        if (process.env.NODE_ENV === 'development') {
+          console.warn('[UrgencyTicker] Response tagline is Not Hazardous but requested level was', requested.risk_level, '- using frontend fallback instead');
+        }
+        return;
+      }
+      advisoryCacheRef.current[advisoryCacheKey(requested.barangay_id, requested.risk_level)] = data;
+      setApiAdvisory(data);
+    });
+  }, [zoneBarangayId, zoneRiskLevel, selected, barangay]);
+
   const r = riskLevels.find(l => l.key === selected) || riskLevels[2];
+  const displayLevel = r.level;
+  const displayLabel = r.label;
+  const fallbackForLevel = getFallbackAdvisoryForFrontend(displayLabel, displayLevel);
+  const apiMatchesSelection = apiAdvisory && (apiAdvisory.risk_level == null || apiAdvisory.risk_level === displayLevel);
+  const hasApiContent = apiMatchesSelection && typeof apiAdvisory.tagline === "string" && Array.isArray(apiAdvisory.advices) && apiAdvisory.advices.length > 0;
+  if (apiAdvisory && !apiMatchesSelection && process.env.NODE_ENV === 'development') {
+    console.warn('[UrgencyTicker] Ignoring stale apiAdvisory (level', apiAdvisory.risk_level, ') – current selection is level', displayLevel, '; using fallback');
+  }
+  const effectiveTagline = hasApiContent ? apiAdvisory.tagline : fallbackForLevel.tagline;
+  const effectiveAdvices = hasApiContent
+    ? apiAdvisory.advices.map((a, i) => ({ ...a, iconKey: (r.advices[i]?.iconKey) ?? r.advices[0]?.iconKey ?? "droplet" }))
+    : fallbackForLevel.advices.map((a, i) => ({ ...a, iconKey: (r.advices[i]?.iconKey) ?? r.advices[0]?.iconKey ?? "droplet" }));
 
   const handleSelect = (key) => {
     if (key === selected) return;
@@ -261,7 +382,7 @@ export function UrgencyTicker({ barangay, riskKey }) {
         </div>
 
         <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: "rgba(255,255,255,0.72)", margin: "14px 0 20px", lineHeight: 1.6, position: "relative", zIndex: 1, maxWidth: 520 }}>
-          {r.tagline}
+          {effectiveTagline}
         </p>
 
         {/* ── RISK LEVEL SELECTOR (step gauge) ── */}
@@ -328,7 +449,7 @@ export function UrgencyTicker({ barangay, riskKey }) {
         gap: 10,
       }}>
         <div style={{ width: 3, height: 16, borderRadius: 2, background: r.color, flexShrink: 0 }} />
-        <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: r.dark, margin: 0, fontStyle: "italic", lineHeight: 1.5 }}>"{r.tagline}"</p>
+        <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: r.dark, margin: 0, fontStyle: "italic", lineHeight: 1.5 }}>"{effectiveTagline}"</p>
       </div>
 
       {/* ── ADVICE ROWS ── */}
@@ -339,7 +460,7 @@ export function UrgencyTicker({ barangay, riskKey }) {
             <span style={{ fontFamily: "'DM Mono', monospace", fontSize: 10, color: P.gray500, letterSpacing: "0.08em" }}>GENERATING ADVISORY...</span>
           </div>
         ) : (
-          r.advices.map((a, i) => {
+          effectiveAdvices.map((a, i) => {
             const numBg = [r.color, r.dark, r.light][i];
             const numColor = i === 2 ? r.dark : P.white;
             return (
@@ -347,7 +468,7 @@ export function UrgencyTicker({ barangay, riskKey }) {
                 key={`${selected}-${i}`}
                 style={{
                   display: "flex",
-                  borderBottom: i < r.advices.length - 1 ? `1px solid ${P.gray100}` : "none",
+                  borderBottom: i < effectiveAdvices.length - 1 ? `1px solid ${P.gray100}` : "none",
                   animation: visible ? `urgency-fadeUp 0.38s ${i * 0.11}s both` : "none",
                 }}
               >

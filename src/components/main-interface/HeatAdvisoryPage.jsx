@@ -35,7 +35,7 @@ export default function HeatAdvisoryPage({ selectedZone }) {
           AI-generated advisories based on the current PAGASA heat index for your selected area. Select a barangay on the Heat Map or use the gauge below to preview recommendations by risk level.
         </p>
       </div>
-      <UrgencyTicker barangay={barangay} riskKey={riskKey} />
+      <UrgencyTicker barangay={barangay} riskKey={riskKey} selectedZone={selectedZone} />
     </div>
   );
 }

@@ -9,14 +9,13 @@ export default defineConfig({
   server: {
     host: true,
     port: 5173,
-    // Proxy disabled while fixing UI – re-enable when backend is ready
-    // proxy: {
-    //   '/api': {
-    //     target: proxyTarget,
-    //     changeOrigin: true,
-    //     secure: false,
-    //   },
-    // },
+    proxy: {
+      '/api': {
+        target: proxyTarget,
+        changeOrigin: true,
+        secure: false,
+      },
+    },
   },
   plugins: [
     react({

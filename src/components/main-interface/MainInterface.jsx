@@ -8,7 +8,16 @@ function MainInterface() {
   const [activeView, setActiveView] = useState('heatmap');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [selectedZone, setSelectedZone] = useState(null);
+  const [facilityToFocusOnMap, setFacilityToFocusOnMap] = useState(null);
   const location = useLocation();
+
+  const onFocusFacilityOnMap = (facility) => {
+    if (facility && (facility.lat != null || facility.latitude != null) && (facility.lng != null || facility.longitude != null)) {
+      setFacilityToFocusOnMap(facility);
+      setActiveView('heatmap');
+      closeMobileMenu();
+    }
+  };
 
   useEffect(() => {
     const params = new URLSearchParams(location.search);
@@ -34,7 +43,15 @@ function MainInterface() {
 
       <div className="main-interface-body">
         <main className="main-interface-content main-interface-content-card">
-          <MainContent view={activeView} selectedZone={selectedZone} onZoneSelected={setSelectedZone} onGoToDashboard={onGoToDashboard} />
+          <MainContent
+            view={activeView}
+            selectedZone={selectedZone}
+            onZoneSelected={setSelectedZone}
+            onGoToDashboard={onGoToDashboard}
+            onFocusFacilityOnMap={onFocusFacilityOnMap}
+            facilityToFocusOnMap={facilityToFocusOnMap}
+            onClearFocusFacility={() => setFacilityToFocusOnMap(null)}
+          />
         </main>
       </div>
 

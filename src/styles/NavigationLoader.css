@@ -120,3 +120,44 @@
     font-size: 0.8rem;
   }
 }
+
+/* Wrapper so overlay only covers main content (right side), not the sidebar */
+.dashboard-loading-wrapper {
+  position: relative;
+  width: 100%;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Dashboard loading: same look as Heat Map loading (light overlay, centered) but with radar animation; only covers main content area */
+.dashboard-loading-overlay {
+  --loader-accent: #FF6B1A;
+  --loader-accent-dim: rgba(255, 107, 26, 0.25);
+  --loader-accent-glow: rgba(255, 107, 26, 0.5);
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.85);
+  animation: loader-fade-in 0.2s ease-out;
+  overflow: hidden;
+}
+
+.dashboard-loading-overlay .navigation-loader-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.dashboard-loading-overlay .navigation-loader-text {
+  color: var(--text-primary, #1a1a1a);
+  font-size: 14px;
+  font-weight: 500;
+}

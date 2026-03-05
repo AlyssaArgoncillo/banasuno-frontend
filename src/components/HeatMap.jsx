@@ -1,5 +1,6 @@
 import React, { startTransition, useEffect, useRef, useState } from 'react';
 import '../styles/HeatMap.css';
+import '../styles/NavigationLoader.css';
 import { fetchDavaoBoundaries } from '../services/boundariesService.js';
 import { getBarangayHeatData } from '../services/heatService.js';
 import { getHealthFacilitiesNearBarangay } from '../services/healthFacilitiesService.js';
@@ -7,18 +8,19 @@ import { geocodeQuery } from '../services/geocodeService.js';
 import { getPolygonRing, ringCentroid } from '../utils/geo.js';
 import { getBarangayId, getColorForTemp, tempToHeatRiskLevel, HEAT_RISK_LEVELS } from '../utils/heatMap.js';
 import { getUserLocationWithFallback, setManualLocation } from '../api/location.js';
-import { fetchAccessibility } from '../api/ors.js';
+import { fetchAccessibility, fetchDirections } from '../api/ors.js';
 import ZoneInfoCard from './ZoneInfoCard.jsx';
 
 /* global L */
 
-const HeatMap = ({ compact = false, selectedZone: propSelectedZone, onZoneSelected, onGoToDashboard }) => {
+const HeatMap = ({ compact = false, selectedZone: propSelectedZone, onZoneSelected, onGoToDashboard, facilityToFocusOnMap, onClearFocusFacility }) => {
   const mapRef = useRef(null);
   const mapInstanceRef = useRef(null);
   const barangayLayerRef = useRef(null);
   const heatDataRef = useRef({ tempByBarangayId: null, tempMin: 26, tempMax: 39 });
   const barangayFeaturesRef = useRef([]);
   const locationMarkerRef = useRef(null);
+  const focusFacilityMarkerRef = useRef(null);
   const facilitiesRequestSeqRef = useRef(0);
   const lastPolygonClickTimeRef = useRef(0);
   const cancelledRef = useRef(false);
@@ -30,13 +32,45 @@ const HeatMap = ({ compact = false, selectedZone: propSelectedZone, onZoneSelect
   const [selectedZone, setSelectedZone] = useState(null);
   const [accessibilityData, setAccessibilityData] = useState(null);
   const zoneInfoCardRef = useRef(null);
+  const routeLayerRef = useRef(null);
   const resizeCleanupRef = useRef(null);
   const compactRef = useRef(compact);
   compactRef.current = compact;
   const showDeviceLocation = searchQuery.trim().length > 0;
   const errorDismissTimeoutRef = useRef(null);
+  const [routeToFacility, setRouteToFacility] = useState(null);
+  const [routeProfile, setRouteProfile] = useState('driving-car');
+  const [routeGeometry, setRouteGeometry] = useState(null);
+  const [routeSummary, setRouteSummary] = useState(null);
+  const [routeLoading, setRouteLoading] = useState(false);
+  const routeMarkersRef = useRef([]);
+  /** Origin for route: 'user' = from my location, 'barangay' = from barangay center. */
+  const [routeOrigin, setRouteOrigin] = useState('barangay');
+  /** User position when "from my location" is used (from Geolocation API). Null when not yet requested or unavailable. */
+  const [userPositionForRoute, setUserPositionForRoute] = useState(null);
+  /** Location status for routing: 'on' | 'unavailable' | 'using_barangay'. */
+  const [locationStatusForRoute, setLocationStatusForRoute] = useState(null);
+  /** Per-facility route summary from POST /api/ors/directions (distance m, duration s); used for panel + list display. */
+  const [routeSummaryByFacilityId, setRouteSummaryByFacilityId] = useState({});
+  /** Per-facility route error when ORS directions fails. */
+  const [routeErrorByFacilityId, setRouteErrorByFacilityId] = useState({});
+  /** Cache of directions results keyed by barangayId|facilityId|profile|origin to avoid repeated ORS calls. */
+  const routeCacheRef = useRef({});
+  /** Sequence for in-flight route requests so we can ignore outdated responses. */
+  const routeRequestSeqRef = useRef(0);
+  /** Debounce timer for profile changes while a route is active. */
+  const profileChangeTimeoutRef = useRef(null);
+  const [heatIndexLegendOpen, setHeatIndexLegendOpen] = useState(false);
+  const [focusFacilityMarkerVisible, setFocusFacilityMarkerVisible] = useState(false);
 
-
+  /** Haversine distance in km for route tooltip. */
+  const haversineKm = (lat1, lng1, lat2, lng2) => {
+    const R = 6371;
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLng = (lng2 - lng1) * Math.PI / 180;
+    const a = Math.sin(dLat / 2) ** 2 + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLng / 2) ** 2;
+    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  };
 
   const setLocationError = (message) => {
     if (errorDismissTimeoutRef.current) clearTimeout(errorDismissTimeoutRef.current);
@@ -50,8 +84,45 @@ const HeatMap = ({ compact = false, selectedZone: propSelectedZone, onZoneSelect
   useEffect(() => {
     return () => {
       if (errorDismissTimeoutRef.current) clearTimeout(errorDismissTimeoutRef.current);
+      if (profileChangeTimeoutRef.current) clearTimeout(profileChangeTimeoutRef.current);
     };
   }, []);
+
+  // When redirected from Dashboard (e.g. Health Facility Directory "Map" button), fly to facility location and show a location-pin marker
+  useEffect(() => {
+    if (!facilityToFocusOnMap || mapLoading) return;
+    const map = mapInstanceRef.current;
+    if (!map) return;
+    const lat = facilityToFocusOnMap.lat ?? facilityToFocusOnMap.latitude;
+    const lng = facilityToFocusOnMap.lng ?? facilityToFocusOnMap.longitude;
+    if (lat == null || lng == null || !Number.isFinite(lat) || !Number.isFinite(lng)) return;
+    map.flyTo([lat, lng], 16, { duration: 0.6 });
+    if (focusFacilityMarkerRef.current && map.hasLayer(focusFacilityMarkerRef.current)) {
+      map.removeLayer(focusFacilityMarkerRef.current);
+      focusFacilityMarkerRef.current = null;
+    }
+    const marker = L.marker([lat, lng], {
+      icon: L.divIcon({
+        className: 'heatmap-facility-focus-indicator',
+        html: '<span class="heatmap-facility-focus-pin" aria-hidden="true"></span>',
+        iconSize: [28, 28],
+        iconAnchor: [14, 28]
+      })
+    }).addTo(map);
+    focusFacilityMarkerRef.current = marker;
+    setFocusFacilityMarkerVisible(true);
+    onClearFocusFacility?.();
+  }, [facilityToFocusOnMap, mapLoading, onClearFocusFacility]);
+
+  const handleExitFacilityFocus = () => {
+    const map = mapInstanceRef.current;
+    if (focusFacilityMarkerRef.current && map && map.hasLayer(focusFacilityMarkerRef.current)) {
+      map.removeLayer(focusFacilityMarkerRef.current);
+      focusFacilityMarkerRef.current = null;
+    }
+    setFocusFacilityMarkerVisible(false);
+  };
+
 
   const setLocationIndicator = (lat, lng) => {
     const map = mapInstanceRef.current;
@@ -230,6 +301,13 @@ const HeatMap = ({ compact = false, selectedZone: propSelectedZone, onZoneSelect
               if (now - lastPolygonClickTimeRef.current < 120) return;
               lastPolygonClickTimeRef.current = now;
 
+              const map = mapInstanceRef.current;
+              if (focusFacilityMarkerRef.current && map && map.hasLayer(focusFacilityMarkerRef.current)) {
+                map.removeLayer(focusFacilityMarkerRef.current);
+                focusFacilityMarkerRef.current = null;
+                setFocusFacilityMarkerVisible(false);
+              }
+
               const id = getBarangayId(feature);
               const name = feature.properties?.adm4_en ?? feature.properties?.name ?? 'Barangay';
               const { tempByBarangayId: temps } = heatDataRef.current;
@@ -246,7 +324,10 @@ const HeatMap = ({ compact = false, selectedZone: propSelectedZone, onZoneSelect
                 requestAnimationFrame(() => {
                   if (cancelledRef.current) return;
                   setSelectedZone({
+                    barangayId: id,
                     name,
+                    lat,
+                    lng,
                     temperature: temp,
                     riskLevel,
                     riskScore,
@@ -266,13 +347,16 @@ const HeatMap = ({ compact = false, selectedZone: propSelectedZone, onZoneSelect
                   const facilities = result.facilities ?? [];
                   const zoneData = {
                     barangayId: id,
-                    name: name,
+                    name,
+                    lat,
+                    lng,
                     temperature: temp,
                     riskLevel,
                     riskScore,
                     facilities,
                     isNearbyFallback: result.isNearbyFallback ?? false,
-                    facilitiesLoading: false
+                    facilitiesLoading: false,
+                    facilitiesTotalLabel: result.total_label ?? null
                   };
                   setSelectedZone(zoneData);
                   onZoneSelected?.(zoneData);
@@ -294,7 +378,10 @@ const HeatMap = ({ compact = false, selectedZone: propSelectedZone, onZoneSelect
                   if (cancelledRef.current) return;
                   if (requestSeq !== facilitiesRequestSeqRef.current) return;
                   const zoneData = {
-                    name: name,
+                    barangayId: id,
+                    name,
+                    lat,
+                    lng,
                     temperature: temp,
                     riskLevel,
                     riskScore,
@@ -355,14 +442,246 @@ const HeatMap = ({ compact = false, selectedZone: propSelectedZone, onZoneSelect
     };
   }, []);
 
+  useEffect(() => {
+    setRouteToFacility(null);
+    setRouteGeometry(null);
+    setRouteSummary(null);
+    setRouteSummaryByFacilityId({});
+    setRouteErrorByFacilityId({});
+    setRouteOrigin('barangay');
+    setUserPositionForRoute(null);
+    setLocationStatusForRoute(null);
+    routeCacheRef.current = {};
+  }, [selectedZone?.barangayId ?? 'none']);
+
+  /** Get user position for routing (Geolocation API). Resolves to { lat, lng } or null; updates locationStatusForRoute. */
+  const getUserPositionForRoute = () => {
+    return new Promise((resolve) => {
+      if (!window.isSecureContext || !navigator.geolocation) {
+        setLocationStatusForRoute('unavailable');
+        resolve(null);
+        return;
+      }
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          const lat = pos.coords.latitude;
+          const lng = pos.coords.longitude;
+          if (Number.isFinite(lat) && Number.isFinite(lng) && lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180) {
+            setUserPositionForRoute({ lat, lng });
+            setLocationStatusForRoute('on');
+            resolve({ lat, lng });
+          } else {
+            setLocationStatusForRoute('unavailable');
+            resolve(null);
+          }
+        },
+        (err) => {
+          const code = err?.code;
+          if (code === 1) setLocationStatusForRoute('unavailable'); // denied
+          else if (code === 2) setLocationStatusForRoute('unavailable'); // unavailable
+          else if (code === 3) setLocationStatusForRoute('unavailable'); // timeout
+          else setLocationStatusForRoute('unavailable');
+          resolve(null);
+        },
+        { enableHighAccuracy: true, timeout: 12000, maximumAge: 60000 }
+      );
+    });
+  };
+
+  const handleShowRoute = (fac, profileOverride, fromUserLocation = false) => {
+    if (!selectedZone || !fac) return;
+    const profile = profileOverride ?? routeProfile;
+    const facId = String(fac.id);
+    const useUserOrigin = Boolean(fromUserLocation);
+    setRouteOrigin(useUserOrigin ? 'user' : 'barangay');
+
+    const runWithStart = (startLngLat) => {
+      const cacheKey = useUserOrigin
+        ? `${facId}|${profile}|user|${Number(startLngLat[1]).toFixed(4)}|${Number(startLngLat[0]).toFixed(4)}`
+        : `${selectedZone.barangayId}|${facId}|${profile}|barangay`;
+
+      const cached = routeCacheRef.current[cacheKey];
+      if (cached) {
+        setRouteToFacility(fac);
+        if (cached.type === 'success') {
+          setRouteGeometry(cached.geometry);
+          setRouteSummary(cached.summary);
+          setRouteSummaryByFacilityId(prev => ({ ...prev, [facId]: cached.summary }));
+          setRouteErrorByFacilityId(prev => {
+            const next = { ...prev };
+            delete next[facId];
+            return next;
+          });
+        } else if (cached.type === 'error') {
+          setRouteErrorByFacilityId(prev => ({ ...prev, [facId]: cached.reason }));
+        }
+        setRouteLoading(false);
+        return;
+      }
+
+      setRouteToFacility(fac);
+      setRouteLoading(true);
+      setRouteGeometry(null);
+      setRouteSummary(null);
+      setRouteErrorByFacilityId(prev => {
+        const next = { ...prev };
+        delete next[facId];
+        return next;
+      });
+      setRouteSummaryByFacilityId(prev => {
+        const next = { ...prev };
+        delete next[facId];
+        return next;
+      });
+      const end = [fac.lng ?? fac.longitude, fac.lat ?? fac.latitude];
+      const seq = ++routeRequestSeqRef.current;
+
+      fetchDirections(startLngLat, end, profile)
+        .then((geojson) => {
+          if (routeRequestSeqRef.current !== seq) return;
+          const feature = geojson?.features?.[0];
+          const coords = feature?.geometry?.coordinates;
+          const summary = feature?.properties?.summary;
+          if (Array.isArray(coords) && coords.length > 0 && summary) {
+            setRouteGeometry(coords);
+            setRouteSummary(summary);
+            setRouteSummaryByFacilityId(prev => ({ ...prev, [facId]: summary }));
+            setRouteErrorByFacilityId(prev => {
+              const next = { ...prev };
+              delete next[facId];
+              return next;
+            });
+            routeCacheRef.current[cacheKey] = { type: 'success', geometry: coords, summary };
+          } else {
+            setRouteErrorByFacilityId(prev => ({ ...prev, [facId]: 'no_route' }));
+            routeCacheRef.current[cacheKey] = { type: 'error', reason: 'no_route' };
+          }
+        })
+        .catch((err) => {
+          const code =
+            err?.body?.code ??
+            err?.body?.ors_code ??
+            (Array.isArray(err?.body?.details) ? err.body.details[0]?.code : undefined);
+          const reason = err?.status === 404 && code === 2010 ? 'no_routable_point' : 'no_route';
+          setRouteErrorByFacilityId(prev => ({ ...prev, [facId]: reason }));
+          routeCacheRef.current[cacheKey] = { type: 'error', reason };
+        })
+        .finally(() => setRouteLoading(false));
+    };
+
+    if (useUserOrigin) {
+      setRouteLoading(true);
+      setRouteToFacility(fac);
+      setRouteGeometry(null);
+      setRouteSummary(null);
+      setRouteErrorByFacilityId(prev => {
+        const next = { ...prev };
+        delete next[facId];
+        return next;
+      });
+      setRouteSummaryByFacilityId(prev => {
+        const next = { ...prev };
+        delete next[facId];
+        return next;
+      });
+      getUserPositionForRoute().then((userPos) => {
+        if (userPos) {
+          runWithStart([userPos.lng, userPos.lat]);
+        } else {
+          setLocationStatusForRoute('using_barangay');
+          runWithStart([selectedZone.lng, selectedZone.lat]);
+        }
+      });
+      return;
+    }
+
+    setLocationStatusForRoute('using_barangay');
+    runWithStart([selectedZone.lng, selectedZone.lat]);
+  };
+
+  /** Facility icon for route end: 🏥 hospital, 💊 pharmacy, else 🏥. */
+  const getFacilityRouteIcon = (facility) => {
+    const t = (facility?.facility_type ?? '').toLowerCase();
+    if (t.includes('pharma') || t.includes('drugstore')) return '💊';
+    return '🏥';
+  };
+
+  useEffect(() => {
+    const map = mapInstanceRef.current;
+    if (routeLayerRef.current && map) {
+      map.removeLayer(routeLayerRef.current);
+      routeLayerRef.current = null;
+    }
+    routeMarkersRef.current.forEach((m) => { if (m && map) map.removeLayer(m); });
+    routeMarkersRef.current = [];
+    const zone = selectedZone;
+    const fac = routeToFacility;
+    if (!map || !zone || !fac || typeof window.L === 'undefined') return;
+    const L = window.L;
+    const fromUser = routeOrigin === 'user' && userPositionForRoute;
+    const startLat = fromUser ? userPositionForRoute.lat : zone.lat;
+    const startLng = fromUser ? userPositionForRoute.lng : zone.lng;
+    const fLat = fac.lat ?? fac.latitude;
+    const fLng = fac.lng ?? fac.longitude;
+    if (startLat == null || startLng == null || fLat == null || fLng == null) return;
+    let latLngs;
+    let distanceLabel = '';
+    if (Array.isArray(routeGeometry) && routeGeometry.length > 0) {
+      latLngs = routeGeometry.map((c) => [c[1], c[0]]);
+      if (routeSummary?.distance != null) distanceLabel = `${(routeSummary.distance / 1000).toFixed(1)} km`;
+      if (routeSummary?.duration != null) distanceLabel += (distanceLabel ? ' · ' : '') + `${Math.round(routeSummary.duration / 60)} min`;
+    } else {
+      latLngs = [[startLat, startLng], [fLat, fLng]];
+      const km = Number.isFinite(fac.distance_km) ? fac.distance_km : (typeof fac.distance === 'string' ? parseFloat(fac.distance) : null);
+      const distanceKm = Number.isFinite(km) ? km : haversineKm(startLat, startLng, fLat, fLng);
+      distanceLabel = Number.isFinite(distanceKm) ? `${distanceKm.toFixed(1)} km` : '';
+    }
+    const polyline = L.polyline(latLngs, { color: '#FF9559', weight: 4, opacity: 1 }).addTo(map);
+    const fromLabel = fromUser ? 'your location' : (zone.name ?? 'Barangay');
+    polyline.bindTooltip(
+      `From ${fromLabel} to ${fac.name ?? 'Facility'}${distanceLabel ? ` · ${distanceLabel}` : ''}`,
+      { permanent: false, direction: 'top', className: 'heatmap-route-tooltip' }
+    );
+    routeLayerRef.current = polyline;
+    const startIcon = fromUser
+      ? L.divIcon({
+          className: 'heatmap-route-marker heatmap-route-marker--user',
+          html: '<span class="heatmap-route-user-dot" aria-hidden="true"></span>',
+          iconSize: [20, 20],
+          iconAnchor: [10, 10]
+        })
+      : L.divIcon({ className: 'heatmap-route-marker', html: '📍', iconSize: [24, 24] });
+    const startMarker = L.marker(latLngs[0], { icon: startIcon }).addTo(map);
+    const endIconHtml = getFacilityRouteIcon(fac);
+    const endMarker = L.marker(latLngs[latLngs.length - 1], { icon: L.divIcon({ className: 'heatmap-route-marker', html: endIconHtml, iconSize: [24, 24] }) }).addTo(map);
+    routeMarkersRef.current = [startMarker, endMarker];
+    if (latLngs.length > 0) {
+      const bounds = L.latLngBounds(latLngs);
+      if (bounds.isValid()) map.fitBounds(bounds, { padding: [40, 40], maxZoom: 14 });
+    }
+    return () => {
+      routeMarkersRef.current.forEach((m) => { if (m && mapInstanceRef.current) mapInstanceRef.current.removeLayer(m); });
+      routeMarkersRef.current = [];
+      if (routeLayerRef.current && mapInstanceRef.current) {
+        mapInstanceRef.current.removeLayer(routeLayerRef.current);
+        routeLayerRef.current = null;
+      }
+    };
+  }, [selectedZone, routeToFacility, routeGeometry, routeSummary, routeOrigin, userPositionForRoute]);
+
   return (
     <div className="heatmap-wrapper">
       <div className={`heatmap-container ${compact ? 'heatmap-compact heatmap-compact-hide-mobile-legend' : ''}`}>
         <div id="heatmap" ref={mapRef} />
         {mapLoading && (
           <div className="heatmap-loading" aria-live="polite" aria-busy="true">
-            <div className="heatmap-loading-spinner" aria-hidden />
-            <span className="heatmap-loading-text">Loading map and temperatures…</span>
+            <div className="navigation-loader-content">
+              <div className="radar-loader" aria-hidden>
+                <span className="radar-ring" aria-hidden />
+                <span className="radar-ring" aria-hidden />
+              </div>
+              <p className="navigation-loader-text">Loading map and temperatures…</p>
+            </div>
           </div>
         )}
         {error && (
@@ -381,28 +700,79 @@ const HeatMap = ({ compact = false, selectedZone: propSelectedZone, onZoneSelect
               facilities={selectedZone.facilities}
               isNearbyFallback={selectedZone.isNearbyFallback}
               facilitiesLoading={selectedZone.facilitiesLoading}
-              onClose={() => { setSelectedZone(null); setAccessibilityData(null); }}
-              onFacilityClick={() => {}}
+              facilitiesTotalLabel={selectedZone.facilitiesTotalLabel}
+              onClose={() => { setSelectedZone(null); setAccessibilityData(null); setRouteToFacility(null); setRouteGeometry(null); setRouteSummary(null); }}
+              highlightedFacilityId={routeToFacility?.id}
               onGoToDashboard={onGoToDashboard}
+              onShowRoute={(fac, profileOverride) => handleShowRoute(fac, profileOverride, routeOrigin === 'user')}
+              onExitRoute={() => { setRouteToFacility(null); setRouteGeometry(null); setRouteSummary(null); }}
+              routeProfile={routeProfile}
+              onRouteProfileChange={(p) => {
+                setRouteProfile(p);
+                if (!routeToFacility) return;
+                if (profileChangeTimeoutRef.current) clearTimeout(profileChangeTimeoutRef.current);
+                profileChangeTimeoutRef.current = setTimeout(() => {
+                  if (routeToFacility) handleShowRoute(routeToFacility, p, routeOrigin === 'user');
+                }, 300);
+              }}
+              routeSummary={routeSummary}
+              routeLoading={routeLoading}
+              routeSummaryByFacilityId={routeSummaryByFacilityId}
+              routeErrorByFacilityId={routeErrorByFacilityId}
+              routeOrigin={routeOrigin}
+              onRouteOriginChange={(origin) => {
+                setRouteOrigin(origin);
+                setRouteToFacility(null);
+                setRouteGeometry(null);
+                setRouteSummary(null);
+              }}
+              routeFromLabel={routeToFacility ? (routeOrigin === 'user' ? 'Routing from your location' : `Routing from ${selectedZone?.name ?? 'Barangay'}`) : null}
+              locationStatusForRoute={locationStatusForRoute}
             />
           </div>
         )}
 
-        {/* Desktop layout: top-left overlay (heat index legend then search + budget), gradient temp, horizontal zoom + crosshair */}
+        {/* Exit facility location button – shown when viewing a facility from the directory */}
+        {focusFacilityMarkerVisible && (
+          <div className="heatmap-exit-facility-wrap">
+            <button
+              type="button"
+              className="heatmap-exit-facility-btn"
+              onClick={handleExitFacilityFocus}
+              aria-label="Exit facility location view"
+            >
+              <span className="heatmap-exit-facility-icon" aria-hidden>✕</span>
+              <span>Exit location</span>
+            </button>
+          </div>
+        )}
+
+        {/* Desktop layout: heat index as dropdown to save map space, then search */}
         <div className="heatmap-desktop-ui">
           <div className="heatmap-overlay-bar heatmap-overlay-bar-desktop">
-            <div className="heatmap-panel heatmap-panel-legend heatmap-desktop-legend">
-              <div className="heatmap-panel-corner" aria-hidden />
-              <h3 className="heatmap-index-legend-title">HEAT INDEX (PAGASA)</h3>
-              <ul className="heatmap-index-legend-list">
-                {HEAT_RISK_LEVELS.map((r) => (
-                  <li key={r.level} className="heatmap-index-legend-item" style={{ '--risk-color': r.color }}>
-                    <span className="heatmap-index-dot" style={{ background: r.color }} />
-                    <span className="heatmap-index-range">{r.rangeLabel}</span>
-                    <span className="heatmap-index-label">{r.label}</span>
-                  </li>
-                ))}
-              </ul>
+            <div className={`heatmap-legend-dropdown ${heatIndexLegendOpen ? 'heatmap-legend-dropdown--open' : ''}`}>
+              <button
+                type="button"
+                className="heatmap-legend-dropdown-trigger"
+                onClick={() => setHeatIndexLegendOpen((o) => !o)}
+                aria-expanded={heatIndexLegendOpen}
+                aria-controls="heatmap-legend-dropdown-list"
+                aria-label={heatIndexLegendOpen ? 'Close heat index legend' : 'Open heat index legend'}
+              >
+                <span className="heatmap-legend-dropdown-label">Heat Index (PAGASA)</span>
+                <span className="heatmap-legend-dropdown-chevron" aria-hidden>{heatIndexLegendOpen ? '▼' : '▶'}</span>
+              </button>
+              <div id="heatmap-legend-dropdown-list" className="heatmap-legend-dropdown-list" hidden={!heatIndexLegendOpen}>
+                <ul className="heatmap-index-legend-list">
+                  {HEAT_RISK_LEVELS.map((r) => (
+                    <li key={r.level} className="heatmap-index-legend-item" style={{ '--risk-color': r.color }}>
+                      <span className="heatmap-index-dot" style={{ background: r.color }} />
+                      <span className="heatmap-index-range">{r.rangeLabel}</span>
+                      <span className="heatmap-index-label">{r.label}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
             </div>
             <div className="heatmap-search-block heatmap-search-block-desktop">
               <div className="heatmap-search-row">

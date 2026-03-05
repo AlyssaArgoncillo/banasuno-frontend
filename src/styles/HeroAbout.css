@@ -9,7 +9,7 @@
 
 .hero-about-visual {
   width: calc(100% - 4rem);
-  max-width: 1400px;
+  max-width: 100%;
   height: 400px;
   background: linear-gradient(135deg, #FD6F00 0%, #FF9559 100%);
   border-radius: 12px;
@@ -45,18 +45,38 @@
   margin: 0;
 }
 
-/* Responsive design */
-@media (max-width: 768px) {
+/* Tablet: 768–1023px */
+@media (max-width: 1023px) {
   .hero-about-section {
-    padding: 1.5rem;
+    padding: 4rem 1.5rem 3rem;
+    gap: 2.5rem;
+  }
+
+  .hero-about-visual {
+    width: calc(100% - 2rem);
+    max-width: 100%;
+    height: 280px;
+    margin: 0 1rem;
+  }
+
+  .hero-about-title {
+    font-size: 2.25rem;
+  }
+}
+
+/* Mobile: up to 767px – readable body text (16px), no horizontal scroll */
+@media (max-width: 767px) {
+  .hero-about-section {
+    padding: 2rem 1rem 2.5rem;
     gap: 2rem;
   }
 
   .hero-about-visual {
     width: calc(100% - 2rem);
+    max-width: 100%;
     height: 250px;
     margin: 0 1rem;
-    object-position: left center;
+    object-position: center center;
   }
 
   .hero-about-content {
@@ -70,6 +90,7 @@
 
   .hero-about-description {
     font-size: 1rem;
+    line-height: 1.7;
   }
 }
 
@@ -93,7 +114,7 @@
   }
 
   .hero-about-description {
-    font-size: 0.95rem;
+    font-size: 1rem;
   }
 }
 
@@ -106,6 +127,7 @@
   .hero-about-visual {
     height: 180px;
     width: calc(100% - 1.5rem);
+    max-width: 100%;
     margin: 0 0.75rem;
   }
 
@@ -114,6 +136,6 @@
   }
 
   .hero-about-description {
-    font-size: 0.875rem;
+    font-size: 1rem;
   }
 }
