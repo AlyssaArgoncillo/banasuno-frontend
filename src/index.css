@@ -1,4 +1,4 @@
-/* Import Google Fonts */
+/* Import global fonts */
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Manrope:wght@400;500;600;700&display=swap');
 
 /* CSS Variables - Design System */
@@ -85,6 +85,21 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   line-height: 1.6;
+}
+
+/* Enforce global typography across the full app, including inline-styled nodes */
+#root,
+#root * {
+  font-family: var(--font-body) !important;
+}
+
+#root h1,
+#root h2,
+#root h3,
+#root h4,
+#root h5,
+#root h6 {
+  font-family: var(--font-header) !important;
 }
 
 @media (max-width: 767px) {

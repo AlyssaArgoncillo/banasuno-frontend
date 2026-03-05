@@ -1,10 +1,11 @@
 /* Main interface – reference layout with Banasuno light palette; allow full-page scrolling */
 .main-interface {
+  height: 100vh;
   min-height: 100vh;
   display: flex;
   background-color: var(--primary-50);
   position: relative;
-  overflow-x: hidden;
+  overflow: hidden;
 }
 
 .main-interface-body {
@@ -14,9 +15,7 @@
   min-width: 0;
   min-height: 100vh;
   background: var(--surface-secondary);
-  overflow-y: auto;
-  overflow-x: hidden;
-  -webkit-overflow-scrolling: touch;
+  overflow: hidden;
 }
 
 /* Slight padding so map container spans close to edges */
@@ -45,6 +44,10 @@
   min-height: 400px;
   width: 100%;
   overflow: visible;
+}
+
+.heat-advisory-page::-webkit-scrollbar {
+  display: none;
 }
 
 .main-interface-dashboard-placeholder {
@@ -213,15 +216,18 @@
 }
 
 .main-interface-burger {
-  display: flex;
+  display: inline-flex;
   flex-direction: column;
-  justify-content: space-between;
-  width: 28px;
-  height: 22px;
+  justify-content: center;
+  align-items: center;
+  gap: 5px;
+  width: 44px;
+  height: 44px;
   background: transparent;
   border: none;
   cursor: pointer;
-  padding: 0;
+  padding: 10px;
+  border-radius: 10px;
   transition: transform 0.2s ease;
 }
 
@@ -230,7 +236,9 @@
 }
 
 .main-interface-burger-line {
-  width: 100%;
+  display: block;
+  flex: 0 0 auto;
+  width: 22px;
   height: 2.5px;
   background-color: var(--primary-700);
   border-radius: 2px;
@@ -239,7 +247,7 @@
 }
 
 .main-interface-burger.active .main-interface-burger-line:nth-child(1) {
-  transform: translateY(9.75px) rotate(45deg);
+  transform: translateY(7.5px) rotate(45deg);
   background-color: var(--orange-500);
 }
 
@@ -249,7 +257,7 @@
 }
 
 .main-interface-burger.active .main-interface-burger-line:nth-child(3) {
-  transform: translateY(-9.75px) rotate(-45deg);
+  transform: translateY(-7.5px) rotate(-45deg);
   background-color: var(--orange-500);
 }
 
@@ -350,24 +358,46 @@
   }
 }
 
-/* Tablet: 768px–1023px – narrower sidebar or same, smooth transition */
+/* Tablet: 768px–1023px – non-desktop nav behavior with hamburger */
 @media (min-width: 768px) and (max-width: 1023px) {
   .main-interface-sidebar {
-    width: 240px;
-    min-width: 240px;
+    display: none;
   }
 
   .main-interface-body {
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
-  }
-
-  .main-interface-map-area {
-    min-height: 420px;
+    padding-top: 56px;
+    height: 100vh;
+    min-height: 100vh;
+    box-sizing: border-box;
+    overflow: hidden;
   }
 
   .main-interface-content {
     padding: 0.75rem 1rem;
+    min-height: 0;
+    height: 100%;
+  }
+
+  .main-interface-map-area {
+    min-height: 420px;
+    flex: 1 1 auto;
+  }
+
+  .main-interface-mobile-header {
+    display: flex;
+  }
+
+  .main-interface-mobile-overlay {
+    display: block;
+  }
+
+  .main-interface-mobile-backdrop {
+    display: block;
+  }
+
+  .main-interface-burger {
+    min-width: 44px;
+    min-height: 44px;
   }
 }
 
@@ -379,14 +409,16 @@
 
   .main-interface-body {
     padding-top: 56px;
+    height: 100vh;
     min-height: 100vh;
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
+    box-sizing: border-box;
+    overflow: hidden;
   }
 
   .main-interface-content {
     padding: 1rem;
-    min-height: min-content;
+    min-height: 0;
+    height: 100%;
   }
 
   .main-interface-map-area {
@@ -418,10 +450,6 @@
   .main-interface-burger {
     min-width: 44px;
     min-height: 44px;
-    padding: 11px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
   }
 }
 

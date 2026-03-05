@@ -1,7 +1,6 @@
 /* Zone Info popup card – HazardPanel-style layout + FacilityList no-route row */
 
 .zone-info-card {
-  font-family: 'DM Sans', sans-serif;
   background: #fff;
   border-radius: 16px;
   overflow: hidden;
@@ -128,7 +127,6 @@
 }
 
 .zone-info-card-chip-val {
-  font-family: 'DM Mono', monospace;
   font-size: 18px;
   font-weight: 500;
   color: #111;
@@ -142,7 +140,6 @@
 .zone-info-card-chip-unit {
   font-size: 11px;
   color: #aaa;
-  font-family: 'DM Sans', sans-serif;
   font-weight: 400;
 }
 
@@ -179,7 +176,6 @@
 }
 
 .zone-info-card-fcount {
-  font-family: 'DM Mono', monospace;
   font-size: 9px;
   color: #aaa;
   background: #f7f8fa;
@@ -227,7 +223,6 @@
 
 .zone-info-card-profile-trigger {
   width: 100%;
-  font-family: 'DM Sans', sans-serif;
   font-size: 11px;
   font-weight: 500;
   color: #111;
@@ -355,7 +350,6 @@
 }
 
 .zone-info-card-origin-btn {
-  font-family: 'DM Sans', sans-serif;
   font-size: 11px;
   font-weight: 600;
   padding: 5px 10px;
@@ -483,7 +477,6 @@
 
 /* Route button (green) – reserved width so “Route →” is always fully visible */
 .zone-info-card-rbtn {
-  font-family: 'DM Sans', sans-serif;
   font-size: 11px;
   font-weight: 600;
   color: #fff;
@@ -513,7 +506,6 @@
 
 /* Exit button – reserved width so “✕ Exit” is always fully visible */
 .zone-info-card-xbtn {
-  font-family: 'DM Sans', sans-serif;
   font-size: 11px;
   font-weight: 600;
   color: #fff;
@@ -637,7 +629,6 @@
 }
 
 .zone-info-card-rbtn-amber {
-  font-family: 'DM Sans', sans-serif;
   font-size: 11px;
   font-weight: 600;
   color: #fff;
@@ -678,7 +669,6 @@
   padding: 11px;
   margin-top: 12px;
   color: #fff;
-  font-family: 'DM Sans', sans-serif;
   font-size: 12px;
   font-weight: 600;
   border: none;

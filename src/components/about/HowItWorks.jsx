@@ -157,9 +157,8 @@ function HowItWorks() {
   const sc = active !== null ? stepColors[active] : null;
 
   return (
-    <section className="how-it-works-section" style={{ fontFamily: "'DM Sans', sans-serif" }}>
-      <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800;900&family=DM+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
-      <style>{`
+    <section className="how-it-works-section" style={{  }}>
+            <style>{`
         @keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes pulse  { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.5;transform:scale(1.4)} }
         .how-it-works-section * { box-sizing: border-box; }
@@ -193,11 +192,11 @@ function HowItWorks() {
           <div className="how-it-works-header-inner" style={{ position: "relative", zIndex: 1 }}>
             <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
               <div style={{ width: 7, height: 7, borderRadius: "50%", background: "#86EFAC", animation: "pulse 2s infinite" }} />
-              <span className="how-it-works-header-label" style={{ fontFamily: "'DM Mono', monospace", fontSize: 9, fontWeight: 700, letterSpacing: "0.14em", color: "rgba(255,255,255,0.6)" }}>
+              <span className="how-it-works-header-label" style={{ fontSize: 9, fontWeight: 700, letterSpacing: "0.14em", color: "rgba(255,255,255,0.6)" }}>
                 DATA PIPELINE
               </span>
             </div>
-            <div className="how-it-works-title" style={{ fontFamily: "'DM Sans', sans-serif", fontWeight: 900, fontSize: 22, color: P.white, letterSpacing: "-0.025em" }}>
+            <div className="how-it-works-title" style={{ fontWeight: 900, fontSize: 22, color: P.white, letterSpacing: "-0.025em" }}>
               How BanasUno <span style={{ color: P.yellow500 }}>Works</span>
             </div>
           </div>
@@ -240,7 +239,7 @@ function HowItWorks() {
                     </div>
 
                     <div className="how-it-works-node-step-num" style={{
-                      fontFamily: "'DM Mono', monospace", fontSize: 7, fontWeight: 700,
+                      fontSize: 7, fontWeight: 700,
                       letterSpacing: "0.1em",
                       color: isAct ? sc2.color : P.orange100,
                       textAlign: "center", transition: "color 0.2s",
@@ -249,7 +248,7 @@ function HowItWorks() {
                     </div>
 
                     <div className="how-it-works-node-step-title" style={{
-                      fontFamily: "'DM Sans', sans-serif", fontSize: 10, fontWeight: 700,
+                      fontSize: 10, fontWeight: 700,
                       color: isAct ? sc2.color : P.orange700,
                       textAlign: "center", lineHeight: 1.3, letterSpacing: "-0.01em",
                       transition: "color 0.2s",
@@ -301,7 +300,7 @@ function HowItWorks() {
                   background: "linear-gradient(145deg, rgba(255,255,255,0.28) 0%, rgba(255,255,255,0.12) 100%)",
                   border: "1.5px solid rgba(255,255,255,0.28)",
                   display: "flex", alignItems: "center", justifyContent: "center",
-                  fontFamily: "'DM Sans', sans-serif", fontWeight: 900, fontSize: 18,
+                  fontWeight: 900, fontSize: 18,
                   color: sc.color === P.yellow500 || sc.color === P.amber500 ? P.gray900 : P.white,
                   flexShrink: 0,
                 }}>
@@ -310,14 +309,14 @@ function HowItWorks() {
 
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div className="how-it-works-detail-short" style={{
-                    fontFamily: "'DM Mono', monospace", fontSize: 8, fontWeight: 700,
+                    fontSize: 8, fontWeight: 700,
                     letterSpacing: "0.14em", marginBottom: 3,
                     color: sc.color === P.yellow500 || sc.color === P.amber500 ? "rgba(0,0,0,0.5)" : "rgba(255,255,255,0.6)",
                   }}>
                     STEP {s.num} · {s.short.toUpperCase()}
                   </div>
                   <div className="how-it-works-detail-title" style={{
-                    fontFamily: "'DM Sans', sans-serif", fontWeight: 900, fontSize: 17,
+                    fontWeight: 900, fontSize: 17,
                     letterSpacing: "-0.02em",
                     color: sc.color === P.yellow500 || sc.color === P.amber500 ? P.gray900 : P.white,
                   }}>
@@ -329,7 +328,7 @@ function HowItWorks() {
                   <div style={{ display: "flex", gap: 5, flexWrap: "wrap", justifyContent: "flex-end", maxWidth: 280 }}>
                     {s.sources.map((src, si) => (
                       <span key={si} style={{
-                        fontFamily: "'DM Mono', monospace", fontSize: 7, fontWeight: 700,
+                        fontSize: 7, fontWeight: 700,
                         color: sc.color === P.yellow500 || sc.color === P.amber500 ? P.gray900 : P.white,
                         background: sc.color === P.yellow500 || sc.color === P.amber500 ? "rgba(255,255,255,0.92)" : "rgba(122,45,0,0.62)",
                         border: sc.color === P.yellow500 || sc.color === P.amber500 ? "1px solid rgba(0,0,0,0.1)" : "1px solid rgba(255,255,255,0.2)",
@@ -356,13 +355,13 @@ function HowItWorks() {
                       width: 22, height: 22, borderRadius: 7,
                       background: sc.gradient,
                       display: "flex", alignItems: "center", justifyContent: "center",
-                      fontFamily: "'DM Mono', monospace", fontWeight: 700, fontSize: 10,
+                      fontWeight: 700, fontSize: 10,
                       color: sc.color === P.yellow500 || sc.color === P.amber500 ? P.gray900 : P.white,
                       flexShrink: 0, marginTop: 1,
                     }}>
                       {bi + 1}
                     </div>
-                    <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: P.gray700, lineHeight: 1.7 }}>
+                    <span style={{ fontSize: 12, color: P.gray700, lineHeight: 1.7 }}>
                       {text}
                     </span>
                   </div>
@@ -376,7 +375,7 @@ function HowItWorks() {
                   <div key={i} style={{ width: 9, height: 9, borderRadius: "50%", background: sc2.color, opacity: 0.3 }} />
                 ))}
               </div>
-              <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: P.orange100, letterSpacing: "-0.01em" }}>
+              <span style={{ fontSize: 13, color: P.orange100, letterSpacing: "-0.01em" }}>
                 Click any step above to explore
               </span>
             </div>
@@ -390,7 +389,7 @@ function HowItWorks() {
           borderTop: `1px solid ${P.orange100}`,
         }}>
           <div style={{ width: 16, height: 16, borderRadius: "50%", background: P.green500, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 8, color: P.white, fontWeight: 700, flexShrink: 0 }}>✓</div>
-          <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 10, color: P.gray500, margin: 0, lineHeight: 1.55 }}>
+          <p style={{ fontSize: 12, color: P.gray500, margin: 0, lineHeight: 1.6 }}>
             BanasUno integrates open-source weather APIs, official PAGASA classifications, and community health data to generate real-time risk intelligence for Davao City.
           </p>
         </div>

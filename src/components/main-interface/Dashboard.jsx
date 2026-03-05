@@ -59,6 +59,28 @@ const facilityMeta = {
   doctor:    { label: "Doctor's Facility", icon: "/doctor.png",   color: P.green700, bg: P.green100 },
 };
 
+const RISK_FILTER_OPTIONS = [
+  "NOT HAZARDOUS",
+  "CAUTION",
+  "EXTREME CAUTION",
+  "DANGER",
+  "EXTREME DANGER",
+];
+
+const TEMP_FILTER_OPTIONS = [
+  ["any", "Any"],
+  ["low", "Below 26C"],
+  ["mid", "26-33C"],
+  ["high", "Above 33C"],
+];
+
+const FACILITY_FILTER_OPTIONS = [
+  ["any", "Any"],
+  ["few", "1-5"],
+  ["some", "6-15"],
+  ["many", "15+"],
+];
+
 // ─── HISTORICAL TRENDS GRAPH HELPERS (Neon Noon–style) ─────────────
 function clamp(v, lo, hi) {
   return Math.max(lo, Math.min(hi, v));
@@ -189,31 +211,32 @@ function haversineKm(lat1, lng1, lat2, lng2) {
 }
 
 // ─── MICRO COMPONENTS ─────────────────────────────────
-function RiskPill({ risk, mini }) {
+function RiskPill({ risk, mini, fontSize, padding }) {
   const m = riskMeta[risk] || riskMeta["EXTREME CAUTION"];
   return (
     <span style={{
-      display: "inline-flex", alignItems: "center", gap: 4,
+      display: "inline-flex", alignItems: "center", gap: 6,
       background: m.bg, border: `1.5px solid ${m.border}`,
-      borderRadius: 20, padding: mini ? "1px 7px" : "3px 10px",
-      fontFamily: "'DM Mono', monospace", fontSize: mini ? 8 : 9,
-      fontWeight: 700, letterSpacing: "0.06em", color: m.color, whiteSpace: "nowrap",
+      borderRadius: 999,
+      padding: padding ?? (mini ? "2px 9px" : "4px 12px"),
+      fontSize: fontSize ?? (mini ? 9.5 : 11),
+      fontWeight: 800, letterSpacing: "0.03em", color: m.color, whiteSpace: "nowrap",
+      lineHeight: 1.2,
     }}>
-      <span style={{ width: 5, height: 5, borderRadius: "50%", background: m.color, display: "inline-block" }} />
+      <span style={{ width: 6, height: 6, borderRadius: "50%", background: m.color, display: "inline-block" }} />
       {risk}
     </span>
   );
 }
 
-function TypeChip({ type }) {
+function TypeChip({ type, fontSize = 10, padding = "1px 7px", iconSizeOverride }) {
   const key = normalizeFacilityTypeKey(type) || (facilityMeta[type] ? type : null) || "healthctr";
   const m = facilityMeta[key] || facilityMeta.healthctr;
-  const iconSize = key === "hospital" ? 14 : 16;
+  const iconSize = iconSizeOverride ?? (key === "hospital" ? 14 : 16);
   return (
     <span style={{
       background: m.bg, color: m.color, borderRadius: 6,
-      padding: "1px 7px", fontSize: 10, fontWeight: 600,
-      fontFamily: "'DM Sans', sans-serif",
+      padding, fontSize, fontWeight: 700,
       display: "inline-flex", alignItems: "center", gap: 6,
     }}>
       <img src={m.icon} alt="" style={{ width: iconSize, height: iconSize }} />
@@ -222,14 +245,14 @@ function TypeChip({ type }) {
   );
 }
 
-function TempWithRiskColor({ temp, riskKey }) {
+function TempWithRiskColor({ temp, riskKey, fontSize = 11, minWidth = 38 }) {
   const valid = temp != null && Number.isFinite(temp);
   const meta = riskMeta[riskKey] || riskMeta["EXTREME CAUTION"];
   const color = valid ? meta.color : P.gray500;
   return (
     <span style={{
-      fontFamily: "'DM Mono', monospace", fontSize: 11,
-      fontWeight: 700, color, minWidth: 38,
+      fontSize,
+      fontWeight: 700, color, minWidth,
     }}>{valid ? `${Number(temp).toFixed(1)}°C` : "—"}</span>
   );
 }
@@ -273,7 +296,6 @@ function ExportDisclaimer() {
     }}>
       <span style={{ fontSize: 12, flexShrink: 0 }}>⚠️</span>
       <p style={{
-        fontFamily: "'DM Sans', sans-serif",
         fontSize: 10.5, color: "#78350F",
         lineHeight: 1.55, margin: 0,
       }}>
@@ -294,7 +316,7 @@ function ExportToast({ msg, onClose }) {
       position: "fixed", bottom: 24, right: 24,
       background: P.green500, color: P.white,
       borderRadius: 12, padding: "11px 20px",
-      fontFamily: "'DM Sans', sans-serif", fontSize: 13, fontWeight: 600,
+      fontSize: 13, fontWeight: 600,
       boxShadow: "0 8px 24px rgba(0,0,0,0.18)",
       zIndex: 9999, display: "flex", alignItems: "center", gap: 10,
       animation: "dashboard-slideUp 0.3s both",
@@ -308,9 +330,13 @@ function ExportToast({ msg, onClose }) {
 // ─── DASHBOARD ────────────────────────────────────────
 export default function Dashboard({ selectedZone, onFocusFacilityOnMap }) {
   const [trendDays, setTrendDays] = useState(7);
-  const [isDesktop, setIsDesktop] = useState(() => typeof window !== "undefined" && window.matchMedia("(min-width: 768px)").matches);
+  const [isDesktop, setIsDesktop] = useState(() => typeof window !== "undefined" && window.matchMedia("(min-width: 1024px)").matches);
   const [allBarangaysPanelOpen, setAllBarangaysPanelOpen] = useState(false);
   const [barangayQuery, setBarangayQuery] = useState("");
+  const [filtersOpen, setFiltersOpen] = useState(false);
+  const [riskFilters, setRiskFilters] = useState(() => new Set());
+  const [tempFilter, setTempFilter] = useState("any");
+  const [facilityFilter, setFacilityFilter] = useState("any");
   const [dirType, setDirType]     = useState("all");
   const [dirSort, setDirSort]     = useState("asc");
   const [facilitiesPanel, setFacilitiesPanel] = useState(null);
@@ -337,7 +363,7 @@ export default function Dashboard({ selectedZone, onFocusFacilityOnMap }) {
 
   // Desktop breakpoint for trends chart (expand graph, no scroll)
   useEffect(() => {
-    const mq = window.matchMedia("(min-width: 768px)");
+    const mq = window.matchMedia("(min-width: 1024px)");
     const fn = () => setIsDesktop(mq.matches);
     mq.addEventListener("change", fn);
     return () => mq.removeEventListener("change", fn);
@@ -608,10 +634,43 @@ export default function Dashboard({ selectedZone, onFocusFacilityOnMap }) {
 
   const activeRiskKey = riskLabelToKey(activeZone?.riskLevel?.label);
 
+  const toggleRiskFilter = (risk) => {
+    setRiskFilters((prev) => {
+      const next = new Set(prev);
+      if (next.has(risk)) next.delete(risk);
+      else next.add(risk);
+      return next;
+    });
+  };
+
+  const clearBarangayFilters = () => {
+    setRiskFilters(new Set());
+    setTempFilter("any");
+    setFacilityFilter("any");
+  };
+
+  const hasActiveFilters = riskFilters.size > 0 || tempFilter !== "any" || facilityFilter !== "any";
+  const activeFilterCount = (riskFilters.size > 0 ? 1 : 0) + (tempFilter !== "any" ? 1 : 0) + (facilityFilter !== "any" ? 1 : 0);
+
   const normalizedQuery = barangayQuery.trim().toLowerCase();
-  const filteredBarangays = normalizedQuery
-    ? barangayRows.filter((b) => (b.name || "").toLowerCase().includes(normalizedQuery))
-    : barangayRows;
+  const filteredBarangays = barangayRows.filter((b) => {
+    if (normalizedQuery && !(b.name || "").toLowerCase().includes(normalizedQuery)) return false;
+
+    const rowRisk = riskLabelToKey(b.riskLevel?.label) ?? "EXTREME CAUTION";
+    if (riskFilters.size > 0 && !riskFilters.has(rowRisk)) return false;
+
+    const t = Number(b.temperature);
+    if (tempFilter === "low" && !(Number.isFinite(t) && t < 26)) return false;
+    if (tempFilter === "mid" && !(Number.isFinite(t) && t >= 26 && t < 33)) return false;
+    if (tempFilter === "high" && !(Number.isFinite(t) && t >= 33)) return false;
+
+    const count = getDisplayFacilityCount(b, facilitiesPanel, facilityCountCache);
+    if (facilityFilter === "few" && !(count >= 1 && count <= 5)) return false;
+    if (facilityFilter === "some" && !(count >= 6 && count <= 15)) return false;
+    if (facilityFilter === "many" && !(count >= 15)) return false;
+
+    return true;
+  });
   const displayed = filteredBarangays.slice(0, 15);
 
   // Derive risk counts from the same barangay data shown in the list/map so the count always matches what the user sees.
@@ -668,12 +727,24 @@ export default function Dashboard({ selectedZone, onFocusFacilityOnMap }) {
           </div>
         </div>
       )}
-      <div style={{ height: "100vh", overflow: "auto", background: P.surfaceSecondary, fontFamily: "'DM Sans', sans-serif" }}>
-      <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800;900&family=DM+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
-      <style>{`
+      <div
+        className="dashboard-panel-scroll"
+        style={{
+          height: "100%",
+          minHeight: 0,
+          overflowY: "auto",
+          overflowX: "hidden",
+          scrollbarWidth: "none",
+          msOverflowStyle: "none",
+          WebkitOverflowScrolling: "touch",
+          background: P.surfaceSecondary,
+          }}
+      >
+            <style>{`
         * { box-sizing: border-box; }
         ::-webkit-scrollbar { width: 4px; }
         ::-webkit-scrollbar-thumb { background: #FF6B1A55; border-radius: 2px; }
+        .dashboard-panel-scroll::-webkit-scrollbar { display: none; }
         .dashboard-kpi { display: grid; grid-template-columns: 1fr; gap: 16px; }
         @media (min-width: 900px) {
           .dashboard-kpi { grid-template-columns: 210px 1fr auto; align-items: center; }
@@ -691,20 +762,17 @@ export default function Dashboard({ selectedZone, onFocusFacilityOnMap }) {
             justify-content: center;
           }
         }
-        .trend-data { margin-top: 8px; display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 8px; }
+        .trend-data { margin-top: 0; display: grid; grid-template-columns: repeat(7, 1fr); gap: 10px; }
         .trend-data-item { min-width: 0; }
-        .trend-layout { display: flex; flex-direction: column; gap: 12px; }
-        .trend-graph-wrap { width: 100%; flex: 1 1 auto; min-height: 280px; }
+        .trend-layout { display: flex; flex-direction: column; gap: 14px; width: 100%; }
+        .trend-graph-wrap { width: 100%; flex: 1 1 auto; min-height: 240px; }
         .trend-left-col { display: flex; flex-direction: column; gap: 10px; min-width: 0; flex: 1; width: 100%; }
         .trend-right-col { min-width: 0; }
         @media (min-width: 768px) {
-          .trend-layout { flex-direction: row; align-items: start; }
+          .trend-layout { flex-direction: column; }
           .trend-left-col { flex: 1; min-width: 0; }
           .trend-right-col { width: 240px; flex-shrink: 0; }
-          .trend-graph-wrap { min-height: 320px; }
-        }
-        @media (min-width: 1024px) {
-          .trend-left-col { max-width: 640px; }
+          .trend-graph-wrap { min-height: 280px; }
         }
         .trend-insights { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; }
         @media (max-width: 700px) {
@@ -714,14 +782,28 @@ export default function Dashboard({ selectedZone, onFocusFacilityOnMap }) {
         @media (max-width: 700px) {
           .trend-insights { grid-template-columns: repeat(2, minmax(0, 1fr)); }
         }
-        @media (max-width: 700px) {
-          .trend-data { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        @media (max-width: 768px) {
+          .trend-data { grid-template-columns: repeat(auto-fit, minmax(95px, 1fr)); }
+        }
+        @media (min-width: 769px) and (max-width: 1100px) {
+          .trend-data { grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); }
         }
         .trend-chart-scroll-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
-        @media (min-width: 768px) {
-          .trend-chart-scroll-wrap { overflow-x: visible; }
-          .trend-chart-scroll-inner { min-width: 100% !important; }
-          .dashboard-trends-content { padding-left: 14px; padding-right: 14px; }
+        .trend-chart-scroll-wrap::-webkit-scrollbar { height: 5px; }
+        .trend-chart-scroll-wrap::-webkit-scrollbar-track { background: transparent; }
+        .trend-chart-scroll-wrap::-webkit-scrollbar-thumb { background: rgba(236, 169, 124, 0.95); border-radius: 999px; }
+        .trend-chart-scroll-wrap::-webkit-scrollbar-thumb:hover { background: rgba(228, 156, 108, 0.98); }
+        .all-barangays-scroll, .dashboard-match-scroll {
+          scrollbar-width: thin;
+          scrollbar-color: rgba(236, 169, 124, 0.95) transparent;
+        }
+        .all-barangays-scroll::-webkit-scrollbar, .dashboard-match-scroll::-webkit-scrollbar { width: 5px; height: 5px; }
+        .all-barangays-scroll::-webkit-scrollbar-track, .dashboard-match-scroll::-webkit-scrollbar-track { background: transparent; }
+        .all-barangays-scroll::-webkit-scrollbar-thumb, .dashboard-match-scroll::-webkit-scrollbar-thumb { background: rgba(236, 169, 124, 0.95); border-radius: 999px; }
+        .all-barangays-scroll::-webkit-scrollbar-thumb:hover, .dashboard-match-scroll::-webkit-scrollbar-thumb:hover { background: rgba(228, 156, 108, 0.98); }
+        .all-barangays-scroll::-webkit-scrollbar-button, .dashboard-match-scroll::-webkit-scrollbar-button { display: none; width: 0; height: 0; }
+        @media (min-width: 1024px) {
+          .dashboard-trends-content { padding-left: 10px; padding-right: 6px; }
         }
         .topbar-right { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
         .topbar-pill { display: inline-flex; align-items: center; gap: 8px; flex-wrap: wrap; }
@@ -760,14 +842,14 @@ export default function Dashboard({ selectedZone, onFocusFacilityOnMap }) {
           flexShrink: 0,
         }}>
           <span style={{
-            fontFamily: "'DM Mono', monospace", fontSize: "9px",
+            fontSize: "9px",
             letterSpacing: "0.08em", color: "rgba(255,255,255,0.85)",
           }}>
             BARANGAY
           </span>
           <div style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
             <span className="topbar-name" style={{
-              fontFamily: "'DM Sans', sans-serif", fontSize: "13px",
+              fontSize: "13px",
               fontWeight: 800, color: P.white, letterSpacing: "0.01em",
             }}>
               {noSelection ? "No area selected" : (activeZone?.name ?? (barangaysLoading ? "Loading…" : "—"))}
@@ -777,7 +859,7 @@ export default function Dashboard({ selectedZone, onFocusFacilityOnMap }) {
         </div>
         <div className="topbar-right" style={{ marginLeft: "auto" }}>
           <span className="topbar-date" style={{
-            fontFamily: "'DM Mono', monospace", fontSize: "clamp(10px, 2vw, 11px)",
+            fontSize: "clamp(10px, 2vw, 11px)",
             color: P.white, opacity: 0.85,
           }}>
             {dateStr}
@@ -786,7 +868,7 @@ export default function Dashboard({ selectedZone, onFocusFacilityOnMap }) {
             background: "rgba(255,255,255,0.22)",
             border: "1px solid rgba(255,255,255,0.45)",
             color: P.white,
-            fontFamily: "'DM Mono', monospace", fontSize: "clamp(9px, 1.5vw, 11px)", fontWeight: 700,
+            fontSize: "clamp(9px, 1.5vw, 11px)", fontWeight: 700,
             padding: "4px clamp(8px, 2vw, 12px)", borderRadius: 10, letterSpacing: "0.04em",
             backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)",
             boxShadow: "0 6px 16px rgba(0,0,0,0.2)",
@@ -813,20 +895,20 @@ export default function Dashboard({ selectedZone, onFocusFacilityOnMap }) {
             textAlign: "center",
           }}>
             <div style={{ position: "absolute", top: -12, right: -12, width: 72, height: 72, borderRadius: "50%", background: "rgba(255,255,255,0.1)" }} />
-            <div style={{ fontFamily: "'DM Mono', monospace", fontSize: "clamp(7px, 1.5vw, 8px)", fontWeight: 700, letterSpacing: "0.14em", color: "rgba(255,255,255,0.75)", marginBottom: 6 }}>
+            <div style={{ fontSize: "clamp(7px, 1.5vw, 8px)", fontWeight: 700, letterSpacing: "0.14em", color: "rgba(255,255,255,0.75)", marginBottom: 6 }}>
               AVG TEMPERATURE
             </div>
-            <div style={{ fontFamily: "'DM Sans', sans-serif", fontWeight: 900, fontSize: "clamp(32px, 8vw, 46px)", color: P.white, lineHeight: 1, letterSpacing: "-0.03em" }}>
+            <div style={{ fontWeight: 900, fontSize: "clamp(32px, 8vw, 46px)", color: P.white, lineHeight: 1, letterSpacing: "-0.03em" }}>
               {noSelection ? "—°C" : (avgCityTemp ?? avgT).toFixed(1) + "°"}
             </div>
             <div className="avg-date" style={{
-              fontFamily: "'DM Mono', monospace", fontSize: "clamp(9px, 2.2vw, 11px)",
+              fontSize: "clamp(9px, 2.2vw, 11px)",
               color: "rgba(255,255,255,0.75)", marginTop: 6, textAlign: "center",
             }}>
               {noSelection ? "" : dateStr}
             </div>
             <div style={{
-              fontFamily: "'DM Sans', sans-serif", fontSize: "clamp(10px, 2.4vw, 12px)",
+              fontSize: "clamp(10px, 2.4vw, 12px)",
               color: noSelection ? "rgba(255,255,255,0.7)" : "rgba(255,255,255,0.8)", marginTop: 6,
             }}>
               {noSelection ? "No barangay selected" : "Davao City"}
@@ -835,7 +917,7 @@ export default function Dashboard({ selectedZone, onFocusFacilityOnMap }) {
 
           {/* Risk zone count grid */}
           <div>
-            <div style={{ fontFamily: "'DM Sans', sans-serif", fontWeight: 700, fontSize: "clamp(11px, 2vw, 13px)", color: P.gray700, marginBottom: 12 }}>
+            <div style={{ fontWeight: 700, fontSize: "clamp(11px, 2vw, 13px)", color: P.gray700, marginBottom: 12 }}>
               Heat-Risk Zone Count
             </div>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(80px, 1fr))", gap: "clamp(6px, 2vw, 8px)" }}>
@@ -846,8 +928,8 @@ export default function Dashboard({ selectedZone, onFocusFacilityOnMap }) {
                     background: rm2.bg, border: `1.5px solid ${rm2.border}`,
                     borderRadius: 12, padding: "clamp(8px, 2vw, 10px) 6px", textAlign: "center",
                   }}>
-                    <div style={{ fontFamily: "'DM Mono', monospace", fontSize: "clamp(6px, 1.5vw, 7px)", fontWeight: 700, letterSpacing: "0.05em", color: rm2.color, marginBottom: 4, lineHeight: 1.35 }}>{r}</div>
-                    <div style={{ fontFamily: "'DM Sans', sans-serif", fontWeight: 900, fontSize: "clamp(20px, 5vw, 28px)", color: rm2.color, lineHeight: 1 }}>{noSelection ? "—" : count}</div>
+                    <div style={{ fontSize: "clamp(6px, 1.5vw, 7px)", fontWeight: 700, letterSpacing: "0.05em", color: rm2.color, marginBottom: 4, lineHeight: 1.35 }}>{r}</div>
+                    <div style={{ fontWeight: 900, fontSize: "clamp(20px, 5vw, 28px)", color: rm2.color, lineHeight: 1 }}>{noSelection ? "—" : count}</div>
                   </div>
                 );
               })}
@@ -865,41 +947,174 @@ export default function Dashboard({ selectedZone, onFocusFacilityOnMap }) {
               padding: "18px 28px", background: "#FF6B1A",
               display: "flex", justifyContent: "space-between", alignItems: "center", gap: 20,
             }}>
-              <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", color: P.white }}>
+              <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", color: P.white }}>
                 ALL BARANGAYS — HEAT RISK OVERVIEW
               </div>
             </div>
 
-            <div style={{ padding: "10px 12px", borderBottom: `1px solid ${P.gray100}`, background: P.white }}>
-              <input
-                value={barangayQuery}
-                onChange={(e) => setBarangayQuery(e.target.value)}
-                placeholder="Search barangay"
-                disabled={noSelection}
+            <div style={{ padding: "12px 14px", borderBottom: `1px solid ${P.gray100}`, background: P.white }}>
+              <div style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
+                <input
+                  value={barangayQuery}
+                  onChange={(e) => setBarangayQuery(e.target.value)}
+                  placeholder="Search barangay"
+                  disabled={noSelection}
+                  style={{
+                    flex: 1,
+                    minWidth: 240,
+                    maxWidth: 360,
+                    border: `1.5px solid ${P.gray100}`,
+                    borderRadius: 10,
+                    padding: "9px 12px",
+                    fontSize: 13,
+                    outline: "none",
+                    background: noSelection ? P.gray100 : P.gray50,
+                    cursor: noSelection ? "not-allowed" : "text",
+                    opacity: noSelection ? 0.8 : 1,
+                  }}
+                />
+                <button
+                  type="button"
+                  disabled={noSelection}
+                  onClick={() => !noSelection && setFiltersOpen((o) => !o)}
+                  style={{
+                    display: "inline-flex", alignItems: "center", gap: 6,
+                    padding: "8px 13px", borderRadius: 10,
+                    border: `1.5px solid ${(filtersOpen || hasActiveFilters) ? P.orange500 : P.gray100}`,
+                    background: filtersOpen ? P.orange50 : P.white,
+                    color: hasActiveFilters ? P.orange500 : P.gray700,
+                    fontWeight: 700, fontSize: 12,
+                    cursor: noSelection ? "not-allowed" : "pointer",
+                    opacity: noSelection ? 0.7 : 1,
+                  }}
+                >
+                  Filters
+                  {activeFilterCount > 0 && (
+                    <span style={{ background: P.orange500, color: P.white, borderRadius: 99, fontSize: 10, fontWeight: 800, padding: "1px 6px" }}>
+                      {activeFilterCount}
+                    </span>
+                  )}
+                </button>
+              </div>
+
+              <div
                 style={{
-                  width: "min(320px, 100%)",
-                  border: `1px solid ${P.gray100}`,
-                  borderRadius: 10,
-                  padding: "8px 12px",
-                  fontFamily: "'DM Sans', sans-serif",
-                  fontSize: 12,
-                  outline: "none",
-                  background: noSelection ? P.gray100 : P.gray50,
-                  cursor: noSelection ? "not-allowed" : "text",
-                  opacity: noSelection ? 0.8 : 1,
+                  overflow: "hidden",
+                  maxHeight: filtersOpen ? 360 : 0,
+                  transition: "max-height 0.25s ease",
                 }}
-              />
+              >
+                <div style={{ marginTop: 10, background: P.white, border: `1px solid ${P.gray100}`, borderRadius: 12, padding: 12 }}>
+                  <div style={{ fontSize: 10, fontWeight: 700, color: P.gray500, textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 8 }}>Risk Level</div>
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 12 }}>
+                    {RISK_FILTER_OPTIONS.map((risk) => {
+                      const on = riskFilters.has(risk);
+                      const m = riskMeta[risk];
+                      return (
+                        <button
+                          key={risk}
+                          type="button"
+                          onClick={() => toggleRiskFilter(risk)}
+                          style={{
+                            padding: "6px 12px", borderRadius: 99,
+                            border: `1.5px solid ${on ? m.color : P.gray100}`,
+                            background: on ? m.bg : P.gray50,
+                            color: on ? m.color : P.gray700,
+                            fontWeight: on ? 700 : 600,
+                            fontSize: 12,
+                            display: "inline-flex", alignItems: "center", gap: 5,
+                            cursor: "pointer",
+                          }}
+                        >
+                          <span style={{ width: 6, height: 6, borderRadius: "50%", background: m.color }} />
+                          {risk}
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  <div style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: 14 }}>
+                    <div>
+                      <div style={{ fontSize: 10, fontWeight: 700, color: P.gray500, textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 8 }}>Temperature</div>
+                      <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                        {TEMP_FILTER_OPTIONS.map(([val, label]) => {
+                          const on = tempFilter === val;
+                          return (
+                            <button
+                              key={val}
+                              type="button"
+                              onClick={() => setTempFilter(val)}
+                              style={{
+                                width: "100%", textAlign: "left",
+                                padding: "8px 10px", borderRadius: 9,
+                                border: `1.5px solid ${on ? P.orange500 : P.gray100}`,
+                                background: on ? P.orange50 : P.gray50,
+                                color: on ? P.orange500 : P.gray700,
+                                fontWeight: on ? 700 : 600,
+                                fontSize: 12,
+                                cursor: "pointer",
+                              }}
+                            >
+                              {label}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+
+                    <div>
+                      <div style={{ fontSize: 10, fontWeight: 700, color: P.gray500, textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 8 }}>Nearby Facilities</div>
+                      <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                        {FACILITY_FILTER_OPTIONS.map(([val, label]) => {
+                          const on = facilityFilter === val;
+                          return (
+                            <button
+                              key={val}
+                              type="button"
+                              onClick={() => setFacilityFilter(val)}
+                              style={{
+                                width: "100%", textAlign: "left",
+                                padding: "8px 10px", borderRadius: 9,
+                                border: `1.5px solid ${on ? P.orange500 : P.gray100}`,
+                                background: on ? P.orange50 : P.gray50,
+                                color: on ? P.orange500 : P.gray700,
+                                fontWeight: on ? 700 : 600,
+                                fontSize: 12,
+                                cursor: "pointer",
+                              }}
+                            >
+                              {label}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  </div>
+
+                  {hasActiveFilters && (
+                    <div style={{ textAlign: "right", marginTop: 10 }}>
+                      <button
+                        type="button"
+                        onClick={clearBarangayFilters}
+                        style={{ background: "none", border: "none", color: P.orange500, fontSize: 12, fontWeight: 700, cursor: "pointer" }}
+                      >
+                        Clear all filters
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </div>
             </div>
 
-            <div style={{ flex: 1, overflowY: "auto" }}>
+            <div className="all-barangays-scroll" style={{ flex: 1, overflowY: "auto" }}>
               <table style={{ width: "100%", borderCollapse: "collapse" }}>
                 <thead style={{ position: "sticky", top: 0, background: P.gray50, zIndex: 2 }}>
                   <tr>
                     {["Barangay", "Temperature", "Risk Level", "Nearby Facilities", ""].map(h => (
                       <th key={h} style={{
-                        padding: "9px 16px", textAlign: "left",
-                        fontFamily: "'DM Mono', monospace", fontSize: 8,
-                        fontWeight: 700, letterSpacing: "0.1em", color: P.gray500,
+                        padding: "12px 16px", textAlign: "left",
+                        fontSize: 12,
+                        fontWeight: 700, letterSpacing: "0.04em", color: P.gray700,
                         borderBottom: `1px solid ${P.gray100}`,
                       }}>{h}</th>
                     ))}
@@ -910,26 +1125,26 @@ export default function Dashboard({ selectedZone, onFocusFacilityOnMap }) {
                     <tr>
                       <td colSpan={5} style={{ padding: 32, textAlign: "center", verticalAlign: "middle" }}>
                         <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8 }}>
-                          <span style={{ fontFamily: "'DM Sans', sans-serif", fontWeight: 700, fontSize: 14, color: P.gray700 }}>Select a barangay to begin</span>
-                          <p style={{ margin: 0, fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: P.gray500, maxWidth: 320 }}>
+                          <span style={{ fontWeight: 700, fontSize: 14, color: P.gray700 }}>Select a barangay to begin</span>
+                          <p style={{ margin: 0, fontSize: 12, color: P.gray500, maxWidth: 320 }}>
                             Click any area on the map or use search above to view heat risk and facilities.
                           </p>
                         </div>
                       </td>
                     </tr>
                   ) : barangaysLoading ? (
-                    <tr><td colSpan={5} style={{ padding: 24, textAlign: "center", fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: P.gray500 }}>Loading barangays…</td></tr>
+                    <tr><td colSpan={5} style={{ padding: 24, textAlign: "center", fontSize: 12, color: P.gray500 }}>Loading barangays…</td></tr>
                   ) : barangaysError ? (
-                    <tr><td colSpan={5} style={{ padding: 24, textAlign: "center", fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: P.red500 }}>{barangaysError}</td></tr>
+                    <tr><td colSpan={5} style={{ padding: 24, textAlign: "center", fontSize: 12, color: P.red500 }}>{barangaysError}</td></tr>
                   ) : (
                     displayed.map((b, i) => {
                       const riskKey = riskLabelToKey(b.riskLevel?.label) ?? "EXTREME CAUTION";
                       return (
                         <tr key={b.id} style={{ background: i % 2 === 0 ? P.white : P.gray50 }}>
-                          <td style={{ padding: "10px 16px", fontFamily: "'DM Sans', sans-serif", fontSize: 12, fontWeight: 700, color: P.gray900 }}>{b.name}</td>
+                          <td style={{ padding: "10px 16px", fontSize: 12, fontWeight: 700, color: P.gray900 }}>{b.name}</td>
                           <td style={{ padding: "10px 16px", minWidth: 80 }}><TempWithRiskColor temp={b.temperature} riskKey={riskKey} /></td>
-                          <td style={{ padding: "10px 16px" }}><RiskPill risk={riskKey} mini /></td>
-                          <td style={{ padding: "10px 16px", fontFamily: "'DM Sans', sans-serif", fontSize: 11, color: P.gray500 }}>{facilityCountLabel(getDisplayFacilityCount(b, facilitiesPanel, facilityCountCache))}</td>
+                          <td style={{ padding: "10px 16px" }}><RiskPill risk={riskKey} mini fontSize={10.5} padding="4px 10px" /></td>
+                          <td style={{ padding: "10px 16px", fontSize: 11, color: P.gray500 }}>{facilityCountLabel(getDisplayFacilityCount(b, facilitiesPanel, facilityCountCache))}</td>
                           <td style={{ padding: "10px 16px" }}>
                             <button
                               onClick={() => {
@@ -940,7 +1155,7 @@ export default function Dashboard({ selectedZone, onFocusFacilityOnMap }) {
                               }}
                               style={{
                                 border: "none", background: P.orange50, color: P.orange700,
-                                fontFamily: "'DM Sans', sans-serif", fontWeight: 700, fontSize: 10,
+                                fontWeight: 700, fontSize: 10,
                                 padding: "3px 10px", borderRadius: 6, cursor: "pointer",
                               }}>
                               View
@@ -959,7 +1174,7 @@ export default function Dashboard({ selectedZone, onFocusFacilityOnMap }) {
               display: "flex", justifyContent: "space-between", alignItems: "center",
               background: P.gray50,
             }}>
-              <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, color: P.gray500 }}>
+              <span style={{ fontSize: 11, color: P.gray500 }}>
                 {noSelection ? "Select a barangay on the map to see the list" : `Showing ${displayed.length} of ${filteredBarangays.length} barangays${barangayQuery ? " (filtered)" : ""}`}
               </span>
               <button
@@ -969,7 +1184,7 @@ export default function Dashboard({ selectedZone, onFocusFacilityOnMap }) {
                 style={{
                   border: `1px solid ${noSelection ? P.gray300 : P.orange100}`, borderRadius: 8,
                   background: noSelection ? P.gray100 : P.orange50, color: noSelection ? P.gray500 : P.orange500,
-                  fontFamily: "'DM Sans', sans-serif", fontWeight: 700, fontSize: 11,
+                  fontWeight: 700, fontSize: 11,
                   padding: "5px 14px", cursor: noSelection ? "not-allowed" : "pointer",
                   opacity: noSelection ? 0.8 : 1,
                 }}>
@@ -984,11 +1199,11 @@ export default function Dashboard({ selectedZone, onFocusFacilityOnMap }) {
           <div style={{ background: P.white, borderRadius: 16, overflow: "hidden", border: `1px solid ${P.green100}`, display: "flex", flexDirection: "column" }}>
             <div style={{ padding: "14px 18px", background: P.green700 }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
-                <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 9, fontWeight: 700, letterSpacing: "0.1em", color: P.green100 }}>HEALTH FACILITY DIRECTORY</div>
+                <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.06em", color: P.green100 }}>HEALTH FACILITY DIRECTORY</div>
                 <span style={{
-                  fontFamily: "'DM Mono', monospace", fontSize: 9, color: P.green100,
+                  fontSize: 11, color: P.green100,
                   background: "rgba(255,255,255,0.18)", borderRadius: 20,
-                  padding: "6px 12px", fontWeight: 700,
+                  padding: "7px 13px", fontWeight: 700,
                   display: "inline-flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 0,
                   textAlign: "center", minWidth: 72,
                 }}>
@@ -999,21 +1214,21 @@ export default function Dashboard({ selectedZone, onFocusFacilityOnMap }) {
               </div>
               <div style={{ display: "flex", gap: 4, flexWrap: "wrap", marginBottom: 8 }}>
                 {[{ key: "all", label: "All Types" }, ...Object.entries(facilityMeta).map(([k, v]) => ({ key: k, label: v.label }))].map(f => (
-                  <button key={f.key} disabled={noSelection} onClick={() => !noSelection && setDirType(f.key)} style={{ border: `1px solid ${dirType === f.key ? P.white : "rgba(255,255,255,0.2)"}`, borderRadius: 8, padding: "2px 8px", fontFamily: "'DM Sans', sans-serif", fontWeight: 600, fontSize: 9, cursor: noSelection ? "not-allowed" : "pointer", background: dirType === f.key ? P.white : "transparent", color: dirType === f.key ? P.green700 : "rgba(255,255,255,0.7)", opacity: noSelection ? 0.6 : 1 }}>{f.label}</button>
+                  <button key={f.key} disabled={noSelection} onClick={() => !noSelection && setDirType(f.key)} style={{ border: `1px solid ${dirType === f.key ? P.white : "rgba(255,255,255,0.2)"}`, borderRadius: 8, padding: "4px 10px", fontWeight: 700, fontSize: 11, cursor: noSelection ? "not-allowed" : "pointer", background: dirType === f.key ? P.white : "transparent", color: dirType === f.key ? P.green700 : "rgba(255,255,255,0.78)", opacity: noSelection ? 0.6 : 1 }}>{f.label}</button>
                 ))}
               </div>
-              <button disabled={noSelection} onClick={() => !noSelection && setDirSort(dirSort === "asc" ? "desc" : "asc")} style={{ border: "1px solid rgba(255,255,255,0.25)", borderRadius: 8, padding: "3px 10px", background: "rgba(255,255,255,0.1)", fontFamily: "'DM Sans', sans-serif", fontWeight: 600, fontSize: 10, cursor: noSelection ? "not-allowed" : "pointer", color: "rgba(255,255,255,0.75)", opacity: noSelection ? 0.6 : 1 }}>Distance {dirSort === "asc" ? "↑ Near–Far" : "↓ Far–Near"}</button>
+              <button disabled={noSelection} onClick={() => !noSelection && setDirSort(dirSort === "asc" ? "desc" : "asc")} style={{ border: "1px solid rgba(255,255,255,0.25)", borderRadius: 8, padding: "5px 12px", background: "rgba(255,255,255,0.1)", fontWeight: 700, fontSize: 12, cursor: noSelection ? "not-allowed" : "pointer", color: "rgba(255,255,255,0.8)", opacity: noSelection ? 0.6 : 1 }}>Distance {dirSort === "asc" ? "↑ Near–Far" : "↓ Far–Near"}</button>
             </div>
-            <div style={{ flex: 1, overflowY: "auto" }}>
+            <div className="dashboard-match-scroll" style={{ flex: 1, overflowY: "auto" }}>
               {noSelection ? (
                 <div style={{ padding: 24, textAlign: "center" }}>
-                  <p style={{ margin: 0, fontFamily: "'DM Sans', sans-serif", fontWeight: 600, fontSize: 13, color: P.gray700 }}>No facilities shown</p>
-                  <p style={{ margin: "8px 0 0", fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: P.gray500 }}>Select a barangay on the map to see facilities here.</p>
+                  <p style={{ margin: 0, fontWeight: 700, fontSize: 15, color: P.gray700 }}>No facilities shown</p>
+                  <p style={{ margin: "8px 0 0", fontSize: 13, color: P.gray500 }}>Select a barangay on the map to see facilities here.</p>
                 </div>
               ) : nearbyLoading ? (
-                <p style={{ padding: 16, margin: 0, fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: P.gray500 }}>Loading facilities…</p>
+                <p style={{ padding: 16, margin: 0, fontSize: 13, color: P.gray500 }}>Loading facilities…</p>
               ) : dirFacilities.length === 0 ? (
-                <p style={{ padding: 16, margin: 0, fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: P.gray500 }}>No facilities in this barangay.</p>
+                <p style={{ padding: 16, margin: 0, fontSize: 13, color: P.gray500 }}>No facilities in this barangay.</p>
               ) : (
                 dirFacilities.map((f, i) => {
                   const key = normalizeFacilityTypeKey(f.facility_type);
@@ -1028,11 +1243,11 @@ export default function Dashboard({ selectedZone, onFocusFacilityOnMap }) {
                       onClick={() => hasCoords && onFocusFacilityOnMap?.(f)}
                       onKeyDown={(e) => hasCoords && (e.key === "Enter" || e.key === " ") && (e.preventDefault(), onFocusFacilityOnMap?.(f))}
                       style={{
-                        padding: "10px 18px",
+                        padding: "12px 18px",
                         borderBottom: i < dirFacilities.length - 1 ? `1px solid ${P.gray100}` : "none",
                         display: "flex",
                         alignItems: "center",
-                        gap: 10,
+                        gap: 12,
                         background: i % 2 === 0 ? P.white : P.green100 + "44",
                         cursor: hasCoords ? "pointer" : "default",
                         transition: "background 0.2s ease, box-shadow 0.2s ease",
@@ -1049,20 +1264,20 @@ export default function Dashboard({ selectedZone, onFocusFacilityOnMap }) {
                       }}
                       aria-label={hasCoords ? `Show ${f.name} on map` : undefined}
                     >
-                      <div style={{ width: 32, height: 32, borderRadius: 8, background: fm.bg, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}><img src={fm.icon} alt="" style={{ width: key === "hospital" ? 18 : 22, height: key === "hospital" ? 18 : 22 }} /></div>
+                      <div style={{ width: 36, height: 36, borderRadius: 8, background: fm.bg, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}><img src={fm.icon} alt="" style={{ width: key === "hospital" ? 20 : 24, height: key === "hospital" ? 20 : 24 }} /></div>
                       <div style={{ flex: 1, minWidth: 0 }}>
-                        <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 700, color: P.gray900, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{f.name}</div>
-                        <TypeChip type={f.facility_type} />
+                        <div style={{ fontSize: 13, fontWeight: 700, color: P.gray900, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{f.name}</div>
+                        <TypeChip type={f.facility_type} fontSize={11} padding="3px 9px" iconSizeOverride={16} />
                       </div>
                       <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 3, flexShrink: 0 }}>
-                        <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 11, fontWeight: 700, color: P.orange500 }}>{distLabel}</div>
+                        <div style={{ fontSize: 13, fontWeight: 700, color: P.orange500 }}>{distLabel}</div>
                         <button
                           type="button"
                           onClick={(e) => { e.stopPropagation(); hasCoords && onFocusFacilityOnMap?.(f); }}
-                          style={{ border: "none", background: P.blue100, color: P.blue700, fontFamily: "'DM Sans', sans-serif", fontWeight: 600, fontSize: 8, padding: "1px 6px", borderRadius: 5, cursor: hasCoords ? "pointer" : "default", display: "inline-flex", alignItems: "center", gap: 4 }}
+                          style={{ border: "none", background: P.blue100, color: P.blue700, fontWeight: 700, fontSize: 11, padding: "3px 8px", borderRadius: 6, cursor: hasCoords ? "pointer" : "default", display: "inline-flex", alignItems: "center", gap: 4 }}
                           aria-label={`Show ${f.name} on map`}
                         >
-                          <img src="/pin.png" alt="" style={{ width: 10, height: 10 }} />Map
+                          <img src="/pin.png" alt="" style={{ width: 12, height: 12 }} />Map
                         </button>
                       </div>
                     </div>
@@ -1075,27 +1290,27 @@ export default function Dashboard({ selectedZone, onFocusFacilityOnMap }) {
 
         {/* ROW 4: Historical Trends */}
         <div className="dashboard-row4" ref={trendsRef}>
-          <div style={{ background: P.surfaceAccent, borderRadius: 16, border: `1px solid ${P.yellow100}`, overflow: "hidden", display: "flex", flexDirection: "column" }}>
+          <div style={{ background: P.surfaceAccent, borderRadius: 16, border: `1px solid ${P.yellow100}`, overflowX: "hidden", overflowY: "visible", display: "flex", flexDirection: "column" }}>
             <div className="dashboard-trends-header-row" style={{ padding: "14px 20px", background: P.yellow500, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-              <div style={{ fontFamily: "'DM Sans', sans-serif", fontWeight: 700, fontSize: 13, color: P.gray900 }}>Historical Trends</div>
+              <div style={{ fontWeight: 700, fontSize: 13, color: P.gray900 }}>Historical Trends</div>
               <div className="dashboard-trends-header-controls" style={{ display: "flex", gap: 6, alignItems: "center" }}>
                 {[7, 14].map(d => (
-                  <button key={d} disabled={noSelection} onClick={() => !noSelection && setTrendDays(d)} style={{ border: `1.5px solid ${trendDays === d ? P.gray900 : "rgba(0,0,0,0.2)"}`, borderRadius: 8, padding: "4px 12px", fontFamily: "'DM Sans', sans-serif", fontWeight: 700, fontSize: 11, cursor: noSelection ? "not-allowed" : "pointer", background: trendDays === d ? P.gray900 : "rgba(255,255,255,0.35)", color: trendDays === d ? P.white : P.gray700, opacity: noSelection ? 0.6 : 1 }}>{d} Days</button>
+                  <button key={d} disabled={noSelection} onClick={() => !noSelection && setTrendDays(d)} style={{ border: `1.5px solid ${trendDays === d ? P.gray900 : "rgba(0,0,0,0.2)"}`, borderRadius: 8, padding: "4px 12px", fontWeight: 700, fontSize: 11, cursor: noSelection ? "not-allowed" : "pointer", background: trendDays === d ? P.gray900 : "rgba(255,255,255,0.35)", color: trendDays === d ? P.white : P.gray700, opacity: noSelection ? 0.6 : 1 }}>{d} Days</button>
                 ))}
               </div>
             </div>
-            <div className="dashboard-trends-content" style={{ padding: "20px 24px", display: "flex", flexDirection: "column", gap: 14 }}>
+            <div className="dashboard-trends-content" style={{ padding: "16px 16px 16px 20px", display: "flex", flexDirection: "column", gap: 14 }}>
               {noSelection ? (
                 <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 10, minHeight: 200, background: "rgba(255,255,255,0.5)", borderRadius: 12, border: `1px dashed ${P.yellow100}` }}>
-                  <div style={{ fontFamily: "'DM Sans', sans-serif", fontWeight: 700, fontSize: 14, color: P.gray700 }}>No data to display</div>
-                  <p style={{ margin: 0, fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: P.gray500, textAlign: "center", maxWidth: 280 }}>
+                  <div style={{ fontWeight: 700, fontSize: 14, color: P.gray700 }}>No data to display</div>
+                  <p style={{ margin: 0, fontSize: 12, color: P.gray500, textAlign: "center", maxWidth: 280 }}>
                     Select a barangay on the map to view temperature trends.
                   </p>
                 </div>
               ) : trendError ? (
-                <p style={{ margin: 0, fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: P.red500 }}>{trendError}</p>
+                <p style={{ margin: 0, fontSize: 12, color: P.red500 }}>{trendError}</p>
               ) : chartData.length === 0 ? (
-                <p style={{ margin: 0, fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: P.gray500 }}>Loading forecast…</p>
+                <p style={{ margin: 0, fontSize: 12, color: P.gray500 }}>Loading forecast…</p>
               ) : (
                 (() => {
                   const trendData = chartData.map((d) => ({
@@ -1103,8 +1318,8 @@ export default function Dashboard({ selectedZone, onFocusFacilityOnMap }) {
                     date: d.dateLabel,
                     temp: d.temp,
                   }));
-                  const W = 620;
-                  const H = 230;
+                  const W = Math.round(620 * (trendDays / 7));
+                  const H = 210;
                   const PX = isDesktop ? 20 : 44;
                   const PY = isDesktop ? 24 : 30;
                   const { linePath, areaPath, pts } = buildTrendPath(trendData, W, H, PX, PY, trendProg);
@@ -1141,14 +1356,12 @@ export default function Dashboard({ selectedZone, onFocusFacilityOnMap }) {
                           minWidth: 0,
                           flex: 1,
                           width: "100%",
-                          maxWidth: 800,
-                          margin: "0 auto",
                         }}
                       >
                         {/* Line graph */}
                         <div className="trend-chart-scroll-wrap" style={{ width: "100%" }}>
-                          <div className="trend-chart-scroll-inner" style={{ minWidth: isDesktop ? "100%" : Math.max(360, trendDays * 60) }}>
-                            <div className="trend-graph-wrap" onClick={() => setTrendTooltip(null)}>
+                          <div className="trend-chart-scroll-inner" style={{ minWidth: W }}>
+                            <div className="trend-graph-wrap" onClick={() => setTrendTooltip(null)} style={{ overflow: "visible" }}>
                               <svg
                                 viewBox={`0 0 ${W} ${H}`}
                                 style={{ width: "100%", height: "auto", display: "block", overflow: "visible" }}
@@ -1215,8 +1428,8 @@ export default function Dashboard({ selectedZone, onFocusFacilityOnMap }) {
                                   const active = trendTooltip && trendTooltip.index === i;
                                   const d = trendData[i];
                                   const tempLabel = `${Number(d.temp).toFixed(1)}°C`;
-                                  const tooltipW = 72;
-                                  const tooltipH = 38;
+                                  const tooltipW = 56;
+                                  const tooltipH = 30;
                                   const arrowH = 6;
                                   const baseRadius = 4.5;
                                   const hoverRadius = 7;
@@ -1224,8 +1437,8 @@ export default function Dashboard({ selectedZone, onFocusFacilityOnMap }) {
                                   const placeBelow = pt.y < PY + 40;
                                   const tooltipDy = placeBelow ? 28 : -(tooltipH + arrowH + 4);
                                   const tooltipLabelY = placeBelow ? -tooltipH - arrowH : 0;
-                                  const tooltipTempY = tooltipLabelY + 14;
-                                  const tooltipDateY = tooltipLabelY + 26;
+                                  const tooltipTempY = tooltipLabelY + 11;
+                                  const tooltipDateY = tooltipLabelY + 21;
                                   const labelBg = P.orange500;
                                   const labelDateColor = "rgba(255,255,255,0.9)";
 
@@ -1262,8 +1475,8 @@ export default function Dashboard({ selectedZone, onFocusFacilityOnMap }) {
                                             y={tooltipLabelY}
                                             width={tooltipW}
                                             height={tooltipH}
-                                            rx={10}
-                                            ry={10}
+                                            rx={7}
+                                            ry={7}
                                             fill={labelBg}
                                           />
                                           {placeBelow ? (
@@ -1279,8 +1492,7 @@ export default function Dashboard({ selectedZone, onFocusFacilityOnMap }) {
                                             y={tooltipTempY}
                                             textAnchor="middle"
                                             fill={P.white}
-                                            fontFamily="'DM Sans', sans-serif"
-                                            fontSize={12}
+                                            fontSize={8}
                                             fontWeight={800}
                                           >
                                             {tempLabel}
@@ -1290,8 +1502,7 @@ export default function Dashboard({ selectedZone, onFocusFacilityOnMap }) {
                                             y={tooltipDateY}
                                             textAnchor="middle"
                                             fill={labelDateColor}
-                                            fontFamily="'DM Mono', monospace"
-                                            fontSize={8}
+                                            fontSize={6}
                                           >
                                             {d.date}
                                           </text>
@@ -1332,7 +1543,6 @@ export default function Dashboard({ selectedZone, onFocusFacilityOnMap }) {
                                       textAnchor="middle"
                                       fill={P.white}
                                       fontSize={11}
-                                      fontFamily="'DM Sans', sans-serif"
                                       fontWeight={800}
                                     >
                                       PEAK ↑
@@ -1353,7 +1563,6 @@ export default function Dashboard({ selectedZone, onFocusFacilityOnMap }) {
                                       textAnchor="middle"
                                       fill={labelClr}
                                       fontSize={10}
-                                      fontFamily="'DM Mono', monospace"
                                       fontWeight={700}
                                     >
                                       {d.day}
@@ -1366,14 +1575,13 @@ export default function Dashboard({ selectedZone, onFocusFacilityOnMap }) {
                         </div>
 
                         {/* Day-by-day cards */}
-                        <div className="trend-day-section">
+                        <div className="trend-day-section" style={{ paddingTop: 6 }}>
                           <div
                             style={{
-                              fontFamily: "'DM Sans', sans-serif",
                               fontWeight: 700,
                               fontSize: 12,
                               color: P.gray700,
-                              marginBottom: 8,
+                              marginBottom: 12,
                             }}
                           >
                             Day-by-day temperatures
@@ -1391,7 +1599,7 @@ export default function Dashboard({ selectedZone, onFocusFacilityOnMap }) {
                                     WebkitBackdropFilter: "blur(12px)",
                                     border: `1.5px solid ${tempBorder(d.temp)}`,
                                     borderRadius: 10,
-                                    padding: "8px 10px",
+                                    padding: "14px 16px",
                                     boxShadow:
                                       "inset 0 1px 0 rgba(255,255,255,0.9), 0 2px 8px rgba(200,160,100,0.08)",
                                     animation: trendCardsIn ? `dashboard-fadeUp 0.4s ${i * 0.05}s both` : "none",
@@ -1415,10 +1623,9 @@ export default function Dashboard({ selectedZone, onFocusFacilityOnMap }) {
                                 >
                                   <div
                                     style={{
-                                      fontFamily: "'DM Mono', monospace",
-                                      fontSize: 8,
+                                      fontSize: 10,
                                       color: "rgba(160,140,120,0.7)",
-                                      marginBottom: 4,
+                                      marginBottom: 5,
                                       letterSpacing: "0.08em",
                                       fontWeight: 700,
                                     }}
@@ -1427,9 +1634,8 @@ export default function Dashboard({ selectedZone, onFocusFacilityOnMap }) {
                                   </div>
                                   <div
                                     style={{
-                                      fontFamily: "'DM Sans', sans-serif",
                                       fontWeight: 800,
-                                      fontSize: 14,
+                                      fontSize: 18,
                                       color: gc,
                                       letterSpacing: "-0.02em",
                                     }}
@@ -1438,10 +1644,9 @@ export default function Dashboard({ selectedZone, onFocusFacilityOnMap }) {
                                   </div>
                                   <div
                                     style={{
-                                      fontFamily: "'DM Mono', monospace",
-                                      fontSize: 8,
+                                      fontSize: 10,
                                       color: P.gray700,
-                                      marginTop: 3,
+                                      marginTop: 4,
                                     }}
                                   >
                                     {d.date}
@@ -1466,20 +1671,20 @@ export default function Dashboard({ selectedZone, onFocusFacilityOnMap }) {
           {/* KPI Heat Risk card */}
           <div style={{ borderRadius: 20, boxShadow: "0 8px 36px rgba(0,0,0,0.12)", overflow: "hidden", display: "flex", flexDirection: "column" }}>
             <div style={{ background: `linear-gradient(135deg, ${P.orange500} 0%, ${P.orange700} 100%)`, padding: "20px 18px 18px", display: "flex", flexDirection: "column", gap: 4 }}>
-              <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 8, fontWeight: 500, letterSpacing: "0.14em", color: "rgba(255,255,255,0.55)", textTransform: "uppercase" }}>Hourly Export</div>
-              <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 18, fontWeight: 700, lineHeight: 1.2, color: P.white }}>KPI Heat Risk</div>
-              <div style={{ display: "inline-flex", alignSelf: "flex-start", marginTop: 7, borderRadius: 20, padding: "3px 11px", fontFamily: "'DM Mono', monospace", fontSize: 9, fontWeight: 500, background: "rgba(255,255,255,0.18)", color: "rgba(255,255,255,0.9)" }}>7-Day Window</div>
+              <div style={{ fontSize: 8, fontWeight: 500, letterSpacing: "0.14em", color: "rgba(255,255,255,0.55)", textTransform: "uppercase" }}>Hourly Export</div>
+              <div style={{ fontSize: 18, fontWeight: 700, lineHeight: 1.2, color: P.white }}>KPI Heat Risk</div>
+              <div style={{ display: "inline-flex", alignSelf: "flex-start", marginTop: 7, borderRadius: 20, padding: "3px 11px", fontSize: 9, fontWeight: 500, background: "rgba(255,255,255,0.18)", color: "rgba(255,255,255,0.9)" }}>7-Day Window</div>
             </div>
             <div style={{ background: P.white, padding: "16px 18px 18px", display: "flex", flexDirection: "column", gap: 13, flex: 1 }}>
               <div style={{ display: "flex", alignItems: "center", gap: 9, flexWrap: "wrap" }}>
                 <StyledCalendar value={exportDateKpi} onChange={setExportDateKpi} min={daysAgo(6)} max={todayStr()} accent="orange" />
-                <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, fontWeight: 500, color: P.gray500 }}>{fmtDate(exportDateKpi)}</span>
+                <span style={{ fontSize: 12, fontWeight: 500, color: P.gray500 }}>{fmtDate(exportDateKpi)}</span>
               </div>
               <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-                <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 9, fontWeight: 700, letterSpacing: "0.1em", color: P.gray300 }}>FILE</div>
-                <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 10, color: P.orange700, background: P.orange50, border: `1px solid ${P.orange100}`, borderRadius: 8, padding: "7px 11px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>kpi_barangay_heat_risk_{exportDateKpi}.csv</div>
+                <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: "0.1em", color: P.gray300 }}>FILE</div>
+                <div style={{ fontSize: 10, color: P.orange700, background: P.orange50, border: `1px solid ${P.orange100}`, borderRadius: 8, padding: "7px 11px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>kpi_barangay_heat_risk_{exportDateKpi}.csv</div>
               </div>
-              <button type="button" onClick={() => handleExportCsv("city", exportDateKpi, `kpi_barangay_heat_risk_${exportDateKpi}.csv`, null, { barangayId: activeZone?.barangayId ?? activeZone?.id ?? "", selectedZoneName: activeZone?.name ?? "", avgCityTemp, riskCounts })} disabled={!!exportLoading} style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8, fontFamily: "'DM Sans', sans-serif", fontSize: 12, fontWeight: 700, color: P.white, background: P.orange700, border: "none", borderRadius: 11, padding: 11, cursor: exportLoading ? "not-allowed" : "pointer", boxShadow: "0 4px 16px rgba(255,107,26,0.35)" }}>
+              <button type="button" onClick={() => handleExportCsv("city", exportDateKpi, `kpi_barangay_heat_risk_${exportDateKpi}.csv`, null, { barangayId: activeZone?.barangayId ?? activeZone?.id ?? "", selectedZoneName: activeZone?.name ?? "", avgCityTemp, riskCounts })} disabled={!!exportLoading} style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8, fontSize: 12, fontWeight: 700, color: P.white, background: P.orange700, border: "none", borderRadius: 11, padding: 11, cursor: exportLoading ? "not-allowed" : "pointer", boxShadow: "0 4px 16px rgba(255,107,26,0.35)" }}>
                 {exportLoading ? <><ExportSpinner color={P.white} /> Exporting…</> : <>↓ Download CSV</>}
               </button>
             </div>
@@ -1488,25 +1693,25 @@ export default function Dashboard({ selectedZone, onFocusFacilityOnMap }) {
           {/* Historical Trends card */}
           <div style={{ borderRadius: 20, boxShadow: "0 8px 36px rgba(0,0,0,0.12)", overflow: "hidden", display: "flex", flexDirection: "column" }}>
             <div style={{ background: `linear-gradient(135deg, ${P.green500} 0%, ${P.green700} 100%)`, padding: "20px 18px 18px", display: "flex", flexDirection: "column", gap: 4 }}>
-              <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 8, fontWeight: 500, letterSpacing: "0.14em", color: "rgba(255,255,255,0.6)", textTransform: "uppercase" }}>Daily Export</div>
-              <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 18, fontWeight: 700, lineHeight: 1.2, color: P.white }}>Historical Trends</div>
-              <div style={{ display: "inline-flex", alignSelf: "flex-start", marginTop: 7, borderRadius: 20, padding: "3px 11px", fontFamily: "'DM Mono', monospace", fontSize: 9, fontWeight: 500, background: "rgba(255,255,255,0.2)", color: "rgba(255,255,255,0.92)" }}>{trendDays}-Day Window</div>
+              <div style={{ fontSize: 8, fontWeight: 500, letterSpacing: "0.14em", color: "rgba(255,255,255,0.6)", textTransform: "uppercase" }}>Daily Export</div>
+              <div style={{ fontSize: 18, fontWeight: 700, lineHeight: 1.2, color: P.white }}>Historical Trends</div>
+              <div style={{ display: "inline-flex", alignSelf: "flex-start", marginTop: 7, borderRadius: 20, padding: "3px 11px", fontSize: 9, fontWeight: 500, background: "rgba(255,255,255,0.2)", color: "rgba(255,255,255,0.92)" }}>{trendDays}-Day Window</div>
             </div>
             <div style={{ background: P.white, padding: "16px 18px 18px", display: "flex", flexDirection: "column", gap: 13, flex: 1 }}>
               <div style={{ display: "flex", gap: 2, background: "rgba(0,0,0,0.05)", borderRadius: 8, padding: 3 }}>
                 {[7, 14].map(d => (
-                  <button key={d} type="button" onClick={() => setTrendDays(d)} style={{ flex: 1, fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 600, border: "none", borderRadius: 6, padding: "5px 12px", cursor: "pointer", background: trendDays === d ? P.white : "transparent", color: trendDays === d ? P.yellow500 : P.gray500, boxShadow: trendDays === d ? "0 1px 4px rgba(0,0,0,0.1)" : "none" }}>{d}-Day</button>
+                  <button key={d} type="button" onClick={() => setTrendDays(d)} style={{ flex: 1, fontSize: 11, fontWeight: 600, border: "none", borderRadius: 6, padding: "5px 12px", cursor: "pointer", background: trendDays === d ? P.white : "transparent", color: trendDays === d ? P.yellow500 : P.gray500, boxShadow: trendDays === d ? "0 1px 4px rgba(0,0,0,0.1)" : "none" }}>{d}-Day</button>
                 ))}
               </div>
               <div style={{ display: "flex", alignItems: "center", gap: 9, flexWrap: "wrap" }}>
                 <StyledCalendar value={exportDateTrends} onChange={setExportDateTrends} min={daysAgo(29)} max={todayStr()} accent="green" />
-                <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, fontWeight: 500, color: P.gray500 }}>{fmtDate(exportDateTrends)}</span>
+                <span style={{ fontSize: 12, fontWeight: 500, color: P.gray500 }}>{fmtDate(exportDateTrends)}</span>
               </div>
               <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-                <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 9, fontWeight: 700, letterSpacing: "0.1em", color: P.gray300 }}>FILE</div>
-                <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 10, color: "#92400E", background: P.yellow50, border: `1px solid ${P.yellow100}`, borderRadius: 8, padding: "7px 11px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>historical_trends_{exportDateTrends}.csv</div>
+                <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: "0.1em", color: P.gray300 }}>FILE</div>
+                <div style={{ fontSize: 10, color: "#92400E", background: P.yellow50, border: `1px solid ${P.yellow100}`, borderRadius: 8, padding: "7px 11px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>historical_trends_{exportDateTrends}.csv</div>
               </div>
-              <button type="button" onClick={() => handleExportCsv("trends", trendDays, `historical_trends_${exportDateTrends}.csv`, exportDateTrends)} disabled={!!exportLoading} style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8, fontFamily: "'DM Sans', sans-serif", fontSize: 12, fontWeight: 700, color: P.white, background: P.gray900, border: "none", borderRadius: 11, padding: 11, cursor: exportLoading ? "not-allowed" : "pointer", boxShadow: "0 4px 16px rgba(0,0,0,0.22)" }}>
+              <button type="button" onClick={() => handleExportCsv("trends", trendDays, `historical_trends_${exportDateTrends}.csv`, exportDateTrends)} disabled={!!exportLoading} style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8, fontSize: 12, fontWeight: 700, color: P.white, background: P.gray900, border: "none", borderRadius: 11, padding: 11, cursor: exportLoading ? "not-allowed" : "pointer", boxShadow: "0 4px 16px rgba(0,0,0,0.22)" }}>
                 {exportLoading ? <><ExportSpinner color={P.white} /> Exporting…</> : <>↓ Download CSV</>}
               </button>
             </div>
@@ -1536,7 +1741,7 @@ export default function Dashboard({ selectedZone, onFocusFacilityOnMap }) {
           onClick={(e) => e.stopPropagation()}
         >
           <div style={{ padding: "14px 20px", background: "#FF6B1A", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-            <span style={{ fontFamily: "'DM Mono', monospace", fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", color: P.white }}>ALL BARANGAYS</span>
+            <span style={{ fontSize: 14, fontWeight: 700, letterSpacing: "0.1em", color: P.white }}>ALL BARANGAYS</span>
             <button
               type="button"
               onClick={() => setAllBarangaysPanelOpen(false)}
@@ -1544,20 +1749,20 @@ export default function Dashboard({ selectedZone, onFocusFacilityOnMap }) {
               style={{ border: "none", background: "rgba(255,255,255,0.2)", color: P.white, width: 32, height: 32, borderRadius: 8, cursor: "pointer", fontSize: 18, lineHeight: 1 }}
             >×</button>
           </div>
-          <div style={{ padding: "10px 16px", borderBottom: `1px solid ${P.gray100}` }}>
+          <div style={{ padding: "12px 16px", borderBottom: `1px solid ${P.gray100}` }}>
             <input
               value={barangayQuery}
               onChange={(e) => setBarangayQuery(e.target.value)}
               placeholder="Search barangay"
-              style={{ width: "100%", maxWidth: 320, border: `1px solid ${P.gray100}`, borderRadius: 10, padding: "8px 12px", fontFamily: "'DM Sans', sans-serif", fontSize: 12 }}
+              style={{ width: "100%", maxWidth: 380, border: `1px solid ${P.gray300}`, borderRadius: 10, padding: "12px 15px", fontSize: 15, color: P.gray900 }}
             />
           </div>
-          <div style={{ flex: 1, minHeight: 0, overflowY: "auto", padding: "0 16px 16px" }}>
+          <div className="all-barangays-scroll" style={{ flex: 1, minHeight: 0, overflowY: "auto", padding: "0 16px 16px" }}>
             <table style={{ width: "100%", borderCollapse: "collapse", marginTop: 8 }}>
-              <thead style={{ position: "sticky", top: 0, background: P.gray50, zIndex: 2 }}>
+              <thead style={{ position: "sticky", top: 0, background: "#f2f2f2", zIndex: 2 }}>
                 <tr>
                   {["Barangay", "Temperature", "Risk Level", "Nearby Facilities", ""].map(h => (
-                    <th key={h} style={{ padding: "9px 12px", textAlign: "left", fontFamily: "'DM Mono', monospace", fontSize: 8, fontWeight: 700, letterSpacing: "0.1em", color: P.gray500, borderBottom: `1px solid ${P.gray100}` }}>{h}</th>
+                    <th key={h} style={{ padding: "14px 12px", textAlign: "left", fontSize: 13, fontWeight: 700, letterSpacing: "0.04em", color: P.gray700, borderBottom: `1px solid ${P.gray100}` }}>{h}</th>
                   ))}
                 </tr>
               </thead>
@@ -1565,15 +1770,15 @@ export default function Dashboard({ selectedZone, onFocusFacilityOnMap }) {
                 {filteredBarangays.map((b, i) => {
                   const riskKey = riskLabelToKey(b.riskLevel?.label) ?? "EXTREME CAUTION";
                   return (
-                    <tr key={b.id} style={{ background: i % 2 === 0 ? P.white : P.gray50 }}>
-                      <td style={{ padding: "8px 12px", fontFamily: "'DM Sans', sans-serif", fontSize: 12, fontWeight: 700, color: P.gray900 }}>{b.name}</td>
-                      <td style={{ padding: "8px 12px", minWidth: 80 }}><TempWithRiskColor temp={b.temperature} riskKey={riskKey} /></td>
-                      <td style={{ padding: "8px 12px" }}><RiskPill risk={riskKey} mini /></td>
-                      <td style={{ padding: "8px 12px", fontFamily: "'DM Sans', sans-serif", fontSize: 11, color: P.gray500 }}>{facilityCountLabel(getDisplayFacilityCount(b, facilitiesPanel, facilityCountCache))}</td>
-                      <td style={{ padding: "8px 12px" }}>
+                    <tr key={b.id} style={{ background: i % 2 === 0 ? P.white : "#f7f7f7" }}>
+                      <td style={{ padding: "13px 12px", fontSize: 15, fontWeight: 700, color: P.gray900, lineHeight: 1.5 }}>{b.name}</td>
+                      <td style={{ padding: "13px 12px", minWidth: 102, lineHeight: 1.5 }}><TempWithRiskColor temp={b.temperature} riskKey={riskKey} fontSize={15} minWidth={62} /></td>
+                      <td style={{ padding: "13px 12px", lineHeight: 1.5 }}><RiskPill risk={riskKey} fontSize={12.5} padding="6px 13px" /></td>
+                      <td style={{ padding: "13px 12px", fontSize: 14, color: P.gray700, lineHeight: 1.5 }}>{facilityCountLabel(getDisplayFacilityCount(b, facilitiesPanel, facilityCountCache))}</td>
+                      <td style={{ padding: "12px 12px" }}>
                         <button
                           onClick={() => setFacilitiesPanel((prev) => (prev && prev.barangayId === b.id ? null : { barangay: b.name, barangayId: b.id, list: null }))}
-                          style={{ border: "none", background: P.orange50, color: P.orange700, fontFamily: "'DM Sans', sans-serif", fontWeight: 700, fontSize: 10, padding: "3px 10px", borderRadius: 6, cursor: "pointer" }}
+                          style={{ border: `1px solid ${P.orange100}`, background: "#fff1e8", color: P.orange700, fontWeight: 700, fontSize: 13, padding: "7px 14px", borderRadius: 7, cursor: "pointer" }}
                         >View</button>
                       </td>
                     </tr>
@@ -1631,14 +1836,14 @@ export default function Dashboard({ selectedZone, onFocusFacilityOnMap }) {
               }}
             >×</button>
           </div>
-          <div style={{ padding: "16px 20px", borderBottom: "1px solid rgba(253,111,0,0.2)", fontFamily: "'DM Sans', sans-serif", fontWeight: 700, fontSize: 14, color: P.gray900 }}>
+          <div style={{ padding: "16px 20px", borderBottom: "1px solid rgba(253,111,0,0.2)", fontWeight: 700, fontSize: 14, color: P.gray900 }}>
             Facilities in {facilitiesPanel.barangay}{facilitiesPanel.totalLabel ? ` (${facilitiesPanel.totalLabel})` : ""}
           </div>
-          <div style={{ flex: 1, minHeight: 0, overflowY: "auto", padding: 16, background: "#fff6ef" }}>
+          <div className="dashboard-match-scroll" style={{ flex: 1, minHeight: 0, overflowY: "auto", padding: 16, background: "#fff6ef" }}>
             {facilitiesPanel.list == null ? (
-              <p style={{ margin: 0, fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: P.gray500 }}>Loading…</p>
+              <p style={{ margin: 0, fontSize: 12, color: P.gray500 }}>Loading…</p>
             ) : facilitiesPanel.list.length === 0 ? (
-              <p style={{ margin: 0, fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: P.gray500 }}>No facilities.</p>
+              <p style={{ margin: 0, fontSize: 12, color: P.gray500 }}>No facilities.</p>
             ) : (
               <div style={{ display: "grid", gap: 8 }}>
                 {facilitiesPanel.list.map((f) => {
@@ -1651,10 +1856,10 @@ export default function Dashboard({ selectedZone, onFocusFacilityOnMap }) {
                         <img src={fm.icon} alt="" style={{ width: key === "hospital" ? 18 : 22, height: key === "hospital" ? 18 : 22 }} />
                       </div>
                       <div style={{ flex: 1, minWidth: 0 }}>
-                        <div style={{ fontFamily: "'DM Sans', sans-serif", fontWeight: 700, fontSize: 12, color: P.gray900, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{f.name}</div>
+                        <div style={{ fontWeight: 700, fontSize: 12, color: P.gray900, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{f.name}</div>
                         <TypeChip type={f.facility_type} />
                       </div>
-                      <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 11, fontWeight: 700, color: P.orange500, flexShrink: 0 }}>{distLabel}</div>
+                      <div style={{ fontSize: 11, fontWeight: 700, color: P.orange500, flexShrink: 0 }}>{distLabel}</div>
                     </div>
                   );
                 })}

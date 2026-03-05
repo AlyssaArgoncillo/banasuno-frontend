@@ -83,7 +83,6 @@ function NeedProvideCard({ label, text, color, isNeed }) {
             )}
           </div>
           <span style={{
-            fontFamily: "'DM Mono', monospace",
             fontSize: 12,
             fontWeight: 700,
             letterSpacing: "0.12em",
@@ -94,7 +93,6 @@ function NeedProvideCard({ label, text, color, isNeed }) {
           </span>
         </div>
         <p style={{
-          fontFamily: "'DM Sans', sans-serif",
           fontSize: 17,
           color: "#2D2D2D",
           margin: 0,
@@ -152,7 +150,6 @@ function PersonaSection({ persona }) {
       }}>
         {/* Heading */}
         <h2 className="built-for-persona-heading" style={{
-          fontFamily: "'DM Sans', sans-serif",
           fontSize: "3.75rem",
           fontWeight: 700,
           color: persona.color,
@@ -195,10 +192,6 @@ function PersonaSection({ persona }) {
 function BuiltForSection() {
   return (
     <section className="built-for-section">
-      <link
-        href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;600;700;800;900&family=DM+Mono:wght@400;700&display=swap"
-        rel="stylesheet"
-      />
       <div className="built-for-container">
         <div className="built-for-content">
           {/* Heading Section with Visual */}

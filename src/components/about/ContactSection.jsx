@@ -41,7 +41,6 @@ function Avatar({ name, size = 80 }) {
       background: ORANGE_GRAD,
       display: "flex", alignItems: "center", justifyContent: "center",
       fontSize: size * 0.32,
-      fontFamily: "'DM Sans', sans-serif",
       fontWeight: 900, color: "#fff",
       flexShrink: 0,
       boxShadow: `0 8px 24px rgba(255,107,26,0.35)`,
@@ -90,7 +89,6 @@ function ContactIcon({ type, size = 52 }) {
 const tagStyle = {
   display: "inline-flex",
   alignItems: "center",
-  fontFamily: "'DM Mono', monospace",
   fontSize: 9,
   fontWeight: 700,
   letterSpacing: "0.14em",
@@ -105,7 +103,6 @@ const btnStyle = {
   border: "none",
   background: ORANGE_GRAD,
   color: WHITE,
-  fontFamily: "'DM Sans', sans-serif",
   fontWeight: 700,
   fontSize: 15,
   padding: "12px 28px",
@@ -121,7 +118,7 @@ export default function ContactSection() {
   const [hovC, setHovC] = useState(null);
 
   return (
-    <div className="contact-section-wrapper" style={{ background: "#111", minHeight: "100vh", padding: "8rem 3rem 10rem 3rem", fontFamily: "'DM Sans', sans-serif" }}>
+    <div className="contact-section-wrapper" style={{ background: "#111", minHeight: "100vh", padding: "8rem 3rem 10rem 3rem",  }}>
       <style>{`
         .contact-section-wrapper { box-sizing: border-box; }
         .contact-section-wrapper * { box-sizing: border-box; }
@@ -245,8 +242,7 @@ export default function ContactSection() {
           .contact-heading { font-size: 20px !important; }
         }
       `}</style>
-      <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;600;700;800;900&family=DM+Mono:wght@400;700&display=swap" rel="stylesheet" />
-
+      
       <div className="contact-main" style={{
         maxWidth: 1200,
         margin: "0 auto",
@@ -264,7 +260,6 @@ export default function ContactSection() {
         <div className="contact-left" style={{ padding: "52px 36px", display: "flex", flexDirection: "column", borderRight: `1px solid rgba(255,107,26,0.15)` }}>
           <div style={tagStyle}>REACH OUT</div>
           <h2 style={{
-            fontFamily: "'DM Sans', sans-serif",
             fontWeight: 900,
             fontSize: 36,
             color: WHITE,
@@ -275,7 +270,7 @@ export default function ContactSection() {
           }} className="contact-heading">
             GET IN<br /><span style={{ color: ORANGE }}>TOUCH</span>
           </h2>
-          <p className="contact-desc" style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: GRAY, marginBottom: 32, lineHeight: 1.6, margin: "0 0 32px" }}>
+          <p className="contact-desc" style={{ fontSize: 14, color: GRAY, marginBottom: 32, lineHeight: 1.6, margin: "0 0 32px" }}>
             Questions? Feedback? Opportunities?<br />We'd love to hear from you.
           </p>
 
@@ -304,9 +299,9 @@ export default function ContactSection() {
                   <ContactIcon type={c.type} size={64} />
                 </div>
                 <div className="contact-card-text">
-                  <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 10, fontWeight: 700, letterSpacing: "0.14em", color: ORANGE, marginBottom: 5 }}>{c.label}</div>
-                  <div style={{ fontFamily: "'DM Sans', sans-serif", fontWeight: 700, fontSize: 17, color: WHITE }}>{c.value}</div>
-                  <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: GRAY, marginTop: 2 }}>{c.sub}</div>
+                  <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.14em", color: ORANGE, marginBottom: 5 }}>{c.label}</div>
+                  <div style={{ fontWeight: 700, fontSize: 17, color: WHITE }}>{c.value}</div>
+                  <div style={{ fontSize: 12, color: GRAY, marginTop: 2 }}>{c.sub}</div>
                 </div>
               </div>
             ))}
@@ -317,7 +312,6 @@ export default function ContactSection() {
         <div className="contact-right" style={{ padding: "52px 40px" }}>
           <div style={tagStyle}>THE PEOPLE BEHIND IT</div>
           <h2 className="contact-heading" style={{
-            fontFamily: "'DM Sans', sans-serif",
             fontWeight: 900,
             fontSize: 36,
             color: WHITE,
@@ -367,14 +361,13 @@ export default function ContactSection() {
                   )}
                 </div>
                 <div className="contact-team-content" style={{ flex: 1, minWidth: 0 }}>
-                  <div className="contact-team-name" style={{ fontFamily: "'DM Sans', sans-serif", fontWeight: 800, fontSize: 16, color: WHITE, letterSpacing: "-0.01em" }}>{m.name}</div>
-                  <div className="contact-team-role" style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: ORANGE, marginTop: 2, fontWeight: 600 }}>{m.role}</div>
+                  <div className="contact-team-name" style={{ fontWeight: 800, fontSize: 16, color: WHITE, letterSpacing: "-0.01em" }}>{m.name}</div>
+                  <div className="contact-team-role" style={{ fontSize: 13, color: ORANGE, marginTop: 2, fontWeight: 600 }}>{m.role}</div>
                   <div className="contact-team-bio" style={{
                     marginTop: 12,
                     padding: "10px 14px",
                     border: `1.5px dashed ${ORANGE}55`,
                     borderRadius: 10,
-                    fontFamily: "'DM Sans', sans-serif",
                     fontSize: 13, color: GRAY, lineHeight: 1.6,
                   }}>{m.bio}</div>
                   <button

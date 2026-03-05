@@ -5,7 +5,17 @@ import MainContent from './MainContent';
 import '../../styles/MainInterface.css';
 
 function MainInterface() {
-  const [activeView, setActiveView] = useState('heatmap');
+  const [activeView, setActiveView] = useState(() => {
+    try {
+      const saved = localStorage.getItem('activeView');
+      if (saved && ['dashboard', 'heatmap', 'heat-advisory'].includes(saved)) {
+        return saved;
+      }
+    } catch (err) {
+      console.error('Failed to read activeView from localStorage:', err);
+    }
+    return 'heatmap';
+  });
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [selectedZone, setSelectedZone] = useState(null);
   const [facilityToFocusOnMap, setFacilityToFocusOnMap] = useState(null);
@@ -25,12 +35,46 @@ function MainInterface() {
     if (view === 'dashboard' || view === 'heatmap' || view === 'heat-advisory') {
       setActiveView(view);
     }
+    
+    // Restore selected barangay from localStorage
+    try {
+      const savedZone = localStorage.getItem('selectedZone');
+      if (savedZone) {
+        setSelectedZone(JSON.parse(savedZone));
+      }
+    } catch (err) {
+      console.error('Failed to restore selected zone from localStorage:', err);
+    }
   }, [location.search]);
+
+  // Persist activeView to localStorage whenever it changes
+  useEffect(() => {
+    try {
+      localStorage.setItem('activeView', activeView);
+    } catch (err) {
+      console.error('Failed to save activeView to localStorage:', err);
+    }
+  }, [activeView]);
 
   const closeMobileMenu = () => setIsMobileMenuOpen(false);
   const setViewAndClose = (view) => {
     setActiveView(view);
     closeMobileMenu();
+  };
+  
+  const handleZoneSelected = (zone) => {
+    setSelectedZone(zone);
+    
+    // Persist selected zone to localStorage
+    try {
+      if (zone) {
+        localStorage.setItem('selectedZone', JSON.stringify(zone));
+      } else {
+        localStorage.removeItem('selectedZone');
+      }
+    } catch (err) {
+      console.error('Failed to save selected zone to localStorage:', err);
+    }
   };
   const onGoToDashboard = () => {
     setActiveView('dashboard');
@@ -46,7 +90,7 @@ function MainInterface() {
           <MainContent
             view={activeView}
             selectedZone={selectedZone}
-            onZoneSelected={setSelectedZone}
+            onZoneSelected={handleZoneSelected}
             onGoToDashboard={onGoToDashboard}
             onFocusFacilityOnMap={onFocusFacilityOnMap}
             facilityToFocusOnMap={facilityToFocusOnMap}

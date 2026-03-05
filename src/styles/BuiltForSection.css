@@ -34,7 +34,6 @@
   margin: 0 0 0.5rem 0;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  font-family: 'DM Sans', sans-serif;
 }
 
 .built-for-title {
@@ -44,7 +43,6 @@
   margin: 0 0 3rem 0;
   line-height: 1.2;
   letter-spacing: -0.03em;
-  font-family: 'DM Sans', sans-serif;
   text-align: center;
 }
 

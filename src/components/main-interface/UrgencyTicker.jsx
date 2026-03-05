@@ -323,7 +323,7 @@ export function UrgencyTicker({ barangay, riskKey, selectedZone }) {
   const stepLabels = ["Not\nHazardous", "Caution", "Extreme\nCaution", "Danger", "Extreme\nDanger"];
 
   return (
-    <div style={{ borderRadius: 20, overflow: "hidden", boxShadow: "0 8px 48px rgba(0,0,0,0.13)", fontFamily: "'DM Sans', sans-serif" }}>
+    <div style={{ borderRadius: 20, overflow: "hidden", boxShadow: "0 8px 48px rgba(0,0,0,0.13)",  }}>
       <style>{`
         @keyframes urgency-fadeUp {
           from { opacity: 0; transform: translateY(14px); }
@@ -357,31 +357,31 @@ export function UrgencyTicker({ barangay, riskKey, selectedZone }) {
           <div style={{ flex: 1 }}>
             <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8, flexWrap: "wrap" }}>
               <div style={{ background: "rgba(255,255,255,0.2)", border: "1px solid rgba(255,255,255,0.35)", borderRadius: 7, padding: "3px 11px" }}>
-                <span style={{ fontFamily: "'DM Mono', monospace", fontSize: 9, fontWeight: 700, color: P.white, letterSpacing: "0.12em" }}>LEVEL {r.level}</span>
+                <span style={{ fontSize: 9, fontWeight: 700, color: P.white, letterSpacing: "0.12em" }}>LEVEL {r.level}</span>
               </div>
               <div style={{ display: "flex", alignItems: "center", gap: 5, background: "rgba(255,255,255,0.13)", borderRadius: 7, padding: "3px 11px" }}>
                 <div style={{ width: 5, height: 5, borderRadius: "50%", background: P.green300, animation: "urgency-pulse 2s infinite" }} />
-                <span style={{ fontFamily: "'DM Mono', monospace", fontSize: 8, fontWeight: 700, color: "rgba(255,255,255,0.75)", letterSpacing: "0.1em" }}>AI ADVISORY</span>
+                <span style={{ fontSize: 8, fontWeight: 700, color: "rgba(255,255,255,0.75)", letterSpacing: "0.1em" }}>AI ADVISORY</span>
               </div>
               <div style={{ background: "rgba(255,255,255,0.1)", border: "1px solid rgba(255,255,255,0.2)", borderRadius: 7, padding: "3px 11px" }}>
-                <span style={{ fontFamily: "'DM Mono', monospace", fontSize: 9, color: "rgba(255,255,255,0.65)", letterSpacing: "0.08em" }}>{r.temp}</span>
+                <span style={{ fontSize: 9, color: "rgba(255,255,255,0.65)", letterSpacing: "0.08em" }}>{r.temp}</span>
               </div>
               {barangay && (
                 <div style={{ background: "rgba(255,255,255,0.1)", border: "1px solid rgba(255,255,255,0.2)", borderRadius: 7, padding: "3px 11px" }}>
-                  <span style={{ fontFamily: "'DM Mono', monospace", fontSize: 9, color: "rgba(255,255,255,0.65)", letterSpacing: "0.06em" }}>📍 {barangay}</span>
+                  <span style={{ fontSize: 9, color: "rgba(255,255,255,0.65)", letterSpacing: "0.06em" }}>📍 {barangay}</span>
                 </div>
               )}
             </div>
-            <div style={{ fontFamily: "'DM Sans', sans-serif", fontWeight: 900, fontSize: 28, color: P.white, letterSpacing: "-0.025em", lineHeight: 1.1 }}>
+            <div style={{ fontWeight: 900, fontSize: 28, color: P.white, letterSpacing: "-0.025em", lineHeight: 1.1 }}>
               {r.label}{" "}<span style={{ opacity: 0.55, fontSize: 18, fontWeight: 600 }}>Advisory</span>
             </div>
           </div>
           <div style={{ flexShrink: 0, textAlign: "right", userSelect: "none" }}>
-            <div style={{ fontFamily: "'DM Sans', sans-serif", fontWeight: 900, fontSize: 72, color: P.white, lineHeight: 1, opacity: 0.1, letterSpacing: "-0.05em" }}>{r.level}</div>
+            <div style={{ fontWeight: 900, fontSize: 72, color: P.white, lineHeight: 1, opacity: 0.1, letterSpacing: "-0.05em" }}>{r.level}</div>
           </div>
         </div>
 
-        <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: "rgba(255,255,255,0.72)", margin: "14px 0 20px", lineHeight: 1.6, position: "relative", zIndex: 1, maxWidth: 520 }}>
+        <p style={{ fontSize: 13, color: "rgba(255,255,255,0.72)", margin: "14px 0 20px", lineHeight: 1.6, position: "relative", zIndex: 1, maxWidth: 520 }}>
           {effectiveTagline}
         </p>
 
@@ -412,7 +412,7 @@ export function UrgencyTicker({ barangay, riskKey, selectedZone }) {
                   borderRadius: "50%",
                   background: isActive ? P.white : isPast ? stepColors[i] : "rgba(255,255,255,0.22)",
                   display: "flex", alignItems: "center", justifyContent: "center",
-                  fontFamily: "'DM Sans', sans-serif", fontWeight: 900,
+                  fontWeight: 900,
                   fontSize: isActive ? 14 : 11,
                   color: isActive ? stepColors[i] : P.white,
                   marginTop: -4,
@@ -423,7 +423,6 @@ export function UrgencyTicker({ barangay, riskKey, selectedZone }) {
                   {rl.level}
                 </div>
                 <div style={{
-                  fontFamily: "'DM Mono', monospace",
                   fontSize: 7, fontWeight: 700,
                   color: isActive ? P.white : "rgba(255,255,255,0.4)",
                   letterSpacing: "0.04em", textAlign: "center",
@@ -449,7 +448,7 @@ export function UrgencyTicker({ barangay, riskKey, selectedZone }) {
         gap: 10,
       }}>
         <div style={{ width: 3, height: 16, borderRadius: 2, background: r.color, flexShrink: 0 }} />
-        <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: r.dark, margin: 0, fontStyle: "italic", lineHeight: 1.5 }}>"{effectiveTagline}"</p>
+        <p style={{ fontSize: 12, color: r.dark, margin: 0, fontStyle: "italic", lineHeight: 1.5 }}>"{effectiveTagline}"</p>
       </div>
 
       {/* ── ADVICE ROWS ── */}
@@ -457,7 +456,7 @@ export function UrgencyTicker({ barangay, riskKey, selectedZone }) {
         {loading ? (
           <div style={{ display: "flex", alignItems: "center", justifyContent: "center", padding: "48px 0", gap: 12 }}>
             <AISpinner color={r.color} />
-            <span style={{ fontFamily: "'DM Mono', monospace", fontSize: 10, color: P.gray500, letterSpacing: "0.08em" }}>GENERATING ADVISORY...</span>
+            <span style={{ fontSize: 10, color: P.gray500, letterSpacing: "0.08em" }}>GENERATING ADVISORY...</span>
           </div>
         ) : (
           effectiveAdvices.map((a, i) => {
@@ -484,7 +483,7 @@ export function UrgencyTicker({ barangay, riskKey, selectedZone }) {
                   position: "relative",
                 }}>
                   <div style={{ position: "absolute", inset: 0, opacity: 0.06, backgroundImage: "radial-gradient(circle, white 1px, transparent 1px)", backgroundSize: "10px 10px" }} />
-                  <div style={{ fontFamily: "'DM Sans', sans-serif", fontWeight: 900, fontSize: 22, color: numColor, position: "relative", zIndex: 1, opacity: i === 2 ? 0.65 : 1 }}>0{i + 1}</div>
+                  <div style={{ fontWeight: 900, fontSize: 22, color: numColor, position: "relative", zIndex: 1, opacity: i === 2 ? 0.65 : 1 }}>0{i + 1}</div>
                 </div>
                 <div style={{ flex: 1, padding: "22px 28px", display: "flex", gap: 18, alignItems: "flex-start" }}>
                   <div style={{
@@ -497,10 +496,10 @@ export function UrgencyTicker({ barangay, riskKey, selectedZone }) {
                   </div>
                   <div style={{ flex: 1 }}>
                     <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
-                      <div style={{ fontFamily: "'DM Sans', sans-serif", fontWeight: 800, fontSize: 15, color: P.gray900, letterSpacing: "-0.01em" }}>{a.title}</div>
+                      <div style={{ fontWeight: 800, fontSize: 15, color: P.gray900, letterSpacing: "-0.01em" }}>{a.title}</div>
                       <div style={{ width: 28, height: 2, background: r.color, borderRadius: 1, opacity: 0.6 }} />
                     </div>
-                    <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: P.gray500, lineHeight: 1.75, margin: 0 }}>{a.body}</p>
+                    <p style={{ fontSize: 12, color: P.gray500, lineHeight: 1.75, margin: 0 }}>{a.body}</p>
                   </div>
                 </div>
               </div>
@@ -521,7 +520,7 @@ export function UrgencyTicker({ barangay, riskKey, selectedZone }) {
         <div style={{ width: 18, height: 18, borderRadius: "50%", background: P.green500, color: P.white, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
           <CheckIcon width={10} height={10} strokeWidth={3} />
         </div>
-        <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 10, color: P.gray500, margin: 0, lineHeight: 1.55 }}>
+        <p style={{ fontSize: 12, color: P.gray500, margin: 0, lineHeight: 1.6 }}>
           Advisory generated by BanasUno AI based on PAGASA heat index classification for <strong style={{ color: P.gray700 }}>{barangay || "the selected area"}</strong>.
           Always monitor official PAGASA channels for the most accurate and up-to-date local weather information.
         </p>

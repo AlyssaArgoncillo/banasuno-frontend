@@ -145,15 +145,14 @@ function AboutPage() {
 
   return (
     <div className="about-page">
-      <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800;900&family=DM+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
-      <style>{`
+            <style>{`
         @keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
       `}</style>
       <Header />
       <HeroAbout />
 
       {/* New sections: Purpose, Quote, Objectives, Disclaimer, SDG */}
-      <div className="about-detail-sections" style={{ background: "transparent", fontFamily: "'DM Sans', sans-serif" }}>
+      <div className="about-detail-sections" style={{ background: "transparent",  }}>
         <div className="about-detail-sections-wrap">
 
           {/* BENTO: PURPOSE + QUOTE */}
@@ -161,21 +160,21 @@ function AboutPage() {
             <div style={{ background: `linear-gradient(135deg, ${P.orange700} 0%, ${P.orange500} 100%)`, borderRadius: 20, padding: "30px 32px", position: "relative", overflow: "hidden" }}>
               <div style={{ position: "absolute", right: -30, bottom: -30, width: 140, height: 140, borderRadius: "50%", border: "28px solid rgba(255,255,255,0.08)" }} />
               <div style={{ position: "absolute", left: -20, top: -20, width: 90, height: 90, borderRadius: "50%", border: "20px solid rgba(255,255,255,0.05)" }} />
-              <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 9, fontWeight: 700, letterSpacing: "0.14em", color: "rgba(255,255,255,0.5)", marginBottom: 10, display: "flex", alignItems: "center", gap: 6 }}>
+              <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: "0.14em", color: "rgba(255,255,255,0.5)", marginBottom: 10, display: "flex", alignItems: "center", gap: 6 }}>
                 <span style={{ display: "inline-flex", color: "rgba(255,255,255,0.85)" }}><IconPurpose /></span>
                 PURPOSE
               </div>
-              <h2 style={{ fontFamily: "'DM Sans', sans-serif", fontWeight: 900, fontSize: 20, color: P.white, letterSpacing: "-0.02em", margin: "0 0 12px" }}>Why We Built This</h2>
-              <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: "rgba(255,255,255,0.82)", lineHeight: 1.8, margin: 0 }}>{purpose}</p>
+              <h2 style={{ fontWeight: 900, fontSize: 20, color: P.white, letterSpacing: "-0.02em", margin: "0 0 12px" }}>Why We Built This</h2>
+              <p style={{ fontSize: 13, color: "rgba(255,255,255,0.82)", lineHeight: 1.8, margin: 0 }}>{purpose}</p>
             </div>
             <div style={{ background: P.yellow50, border: `1.5px solid ${P.yellow100}`, borderRadius: 20, padding: "28px 26px", display: "flex", flexDirection: "column", justifyContent: "center" }}>
               <div style={{ fontSize: 40, lineHeight: 1, marginBottom: 12, fontFamily: "Georgia, serif", color: P.orange700, opacity: 0.25 }}>"</div>
-              <p style={{ fontFamily: "'DM Sans', sans-serif", fontStyle: "italic", fontSize: 13.5, color: P.gray700, lineHeight: 1.75, margin: 0 }}>
+              <p style={{ fontStyle: "italic", fontSize: 13.5, color: P.gray700, lineHeight: 1.75, margin: 0 }}>
                 {overview.p2}
               </p>
               <div style={{ marginTop: 18, display: "flex", alignItems: "center", gap: 8 }}>
                 <div style={{ width: 28, height: 3, borderRadius: 2, background: P.orange500 }} />
-                <span style={{ fontFamily: "'DM Mono', monospace", fontSize: 8, fontWeight: 700, letterSpacing: "0.1em", color: P.orange700 }}>OVERVIEW</span>
+                <span style={{ fontSize: 8, fontWeight: 700, letterSpacing: "0.1em", color: P.orange700 }}>OVERVIEW</span>
               </div>
             </div>
           </div>
@@ -183,7 +182,7 @@ function AboutPage() {
           {/* DIVIDER */}
           <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 44 }}>
             <div style={{ flex: 1, height: 1, background: P.creamBorder }} />
-            <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 8, fontWeight: 700, letterSpacing: "0.14em", color: P.gray300 }}>DETAILED SECTIONS</div>
+            <div style={{ fontSize: 8, fontWeight: 700, letterSpacing: "0.14em", color: P.gray300 }}>DETAILED SECTIONS</div>
             <div style={{ flex: 1, height: 1, background: P.creamBorder }} />
           </div>
 
@@ -195,8 +194,8 @@ function AboutPage() {
                 <IconObjectives />
               </div>
               <div>
-                <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 8, fontWeight: 700, letterSpacing: "0.12em", color: P.orange500, marginBottom: 2 }}>SECTION 03</div>
-                <h2 style={{ fontFamily: "'DM Sans', sans-serif", fontWeight: 900, fontSize: 22, color: P.gray900, letterSpacing: "-0.02em", margin: 0 }}>Objectives</h2>
+                <div style={{ fontSize: 8, fontWeight: 700, letterSpacing: "0.12em", color: P.orange500, marginBottom: 2 }}>SECTION 03</div>
+                <h2 style={{ fontWeight: 900, fontSize: 22, color: P.gray900, letterSpacing: "-0.02em", margin: 0 }}>Objectives</h2>
               </div>
             </div>
             <div className="about-detail-objectives" style={{ paddingLeft: 16 }}>
@@ -220,11 +219,11 @@ function AboutPage() {
                     width: 26, height: 26, borderRadius: 8,
                     background: hovObj === i ? P.orange500 : P.orange100,
                     display: "flex", alignItems: "center", justifyContent: "center",
-                    fontFamily: "'DM Mono', monospace", fontWeight: 700, fontSize: 11,
+                    fontWeight: 700, fontSize: 11,
                     color: hovObj === i ? P.white : P.orange700,
                     flexShrink: 0, marginTop: 1, transition: "all 0.18s",
                   }}>{i + 1}</div>
-                  <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12.5, color: P.gray700, lineHeight: 1.65, margin: 0 }}>{obj}</p>
+                  <p style={{ fontSize: 12.5, color: P.gray700, lineHeight: 1.65, margin: 0 }}>{obj}</p>
                 </div>
               ))}
             </div>
@@ -238,8 +237,8 @@ function AboutPage() {
                 <IconDisclaimer />
               </div>
               <div>
-                <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 8, fontWeight: 700, letterSpacing: "0.12em", color: P.orange500, marginBottom: 2 }}>SECTION 04</div>
-                <h2 style={{ fontFamily: "'DM Sans', sans-serif", fontWeight: 900, fontSize: 22, color: P.gray900, letterSpacing: "-0.02em", margin: 0 }}>Disclaimer</h2>
+                <div style={{ fontSize: 8, fontWeight: 700, letterSpacing: "0.12em", color: P.orange500, marginBottom: 2 }}>SECTION 04</div>
+                <h2 style={{ fontWeight: 900, fontSize: 22, color: P.gray900, letterSpacing: "-0.02em", margin: 0 }}>Disclaimer</h2>
               </div>
             </div>
             <div style={{ paddingLeft: 16, borderRadius: 16, overflow: "hidden", border: `1.5px solid ${P.yellow100}` }}>
@@ -254,8 +253,8 @@ function AboutPage() {
                 }}
               >
                 <div style={{ flex: 1 }}>
-                  <div style={{ fontFamily: "'DM Sans', sans-serif", fontWeight: 700, fontSize: 14, color: P.gray900 }}>Accuracy & Scope of the System</div>
-                  <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, color: "#8B6914", marginTop: 2 }}>
+                  <div style={{ fontWeight: 700, fontSize: 14, color: P.gray900 }}>Accuracy & Scope of the System</div>
+                  <div style={{ fontSize: 11, color: "#8B6914", marginTop: 2 }}>
                     {openDisc ? "Click to collapse" : "Click to read the full disclaimer"}
                   </div>
                 </div>
@@ -263,14 +262,14 @@ function AboutPage() {
                   width: 28, height: 28, borderRadius: 8,
                   background: openDisc ? P.orange500 : "#8B6914",
                   display: "flex", alignItems: "center", justifyContent: "center",
-                  fontFamily: "'DM Mono', monospace", fontSize: 18, color: P.white,
+                  fontSize: 18, color: P.white,
                   flexShrink: 0, transition: "all 0.2s",
                   transform: openDisc ? "rotate(45deg)" : "none",
                 }}>+</div>
               </button>
               {openDisc && (
                 <div style={{ padding: "20px 24px", background: P.white, animation: "fadeUp 0.25s both", borderTop: `1px solid ${P.yellow100}` }}>
-                  <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: P.gray700, lineHeight: 1.85, margin: 0 }}>{disclaimer}</p>
+                  <p style={{ fontSize: 13, color: P.gray700, lineHeight: 1.85, margin: 0 }}>{disclaimer}</p>
                 </div>
               )}
             </div>
@@ -284,8 +283,8 @@ function AboutPage() {
                 <IconSdgClimate />
               </div>
               <div>
-                <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 8, fontWeight: 700, letterSpacing: "0.12em", color: P.orange500, marginBottom: 2 }}>SECTION 05 · SDG ALIGNMENT</div>
-                <h2 style={{ fontFamily: "'DM Sans', sans-serif", fontWeight: 900, fontSize: 22, color: P.gray900, letterSpacing: "-0.02em", margin: 0 }}>Strategic Goals</h2>
+                <div style={{ fontSize: 8, fontWeight: 700, letterSpacing: "0.12em", color: P.orange500, marginBottom: 2 }}>SECTION 05 · SDG ALIGNMENT</div>
+                <h2 style={{ fontWeight: 900, fontSize: 22, color: P.gray900, letterSpacing: "-0.02em", margin: 0 }}>Strategic Goals</h2>
               </div>
             </div>
             <div style={{ paddingLeft: 16, display: "flex", flexDirection: "column", gap: 14 }}>
@@ -298,15 +297,15 @@ function AboutPage() {
                         return SdgIcon ? <SdgIcon /> : null;
                       })()}
                     </div>
-                    <div style={{ fontFamily: "'DM Sans', sans-serif", fontWeight: 900, fontSize: 26, color: "rgba(255,255,255,0.15)", lineHeight: 1 }}>{sdg.num}</div>
+                    <div style={{ fontWeight: 900, fontSize: 26, color: "rgba(255,255,255,0.15)", lineHeight: 1 }}>{sdg.num}</div>
                   </div>
                   <div style={{ padding: "22px 26px", background: sdg.bg }}>
                     <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 7 }}>
-                      <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 8, fontWeight: 700, letterSpacing: "0.12em", color: sdg.color }}>SDG {sdg.num}</div>
+                      <div style={{ fontSize: 8, fontWeight: 700, letterSpacing: "0.12em", color: sdg.color }}>SDG {sdg.num}</div>
                       <div style={{ width: 20, height: 2, background: sdg.color, borderRadius: 1, opacity: 0.4 }} />
                     </div>
-                    <div style={{ fontFamily: "'DM Sans', sans-serif", fontWeight: 800, fontSize: 15, color: P.gray900, marginBottom: 10, letterSpacing: "-0.01em" }}>{sdg.title}</div>
-                    <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: P.gray700, lineHeight: 1.8, margin: 0 }}>{sdg.body}</p>
+                    <div style={{ fontWeight: 800, fontSize: 15, color: P.gray900, marginBottom: 10, letterSpacing: "-0.01em" }}>{sdg.title}</div>
+                    <p style={{ fontSize: 13, color: P.gray700, lineHeight: 1.8, margin: 0 }}>{sdg.body}</p>
                   </div>
                 </div>
               ))}
