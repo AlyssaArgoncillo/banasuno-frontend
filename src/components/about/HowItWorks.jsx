@@ -21,10 +21,60 @@ const P = {
   white: "#FFFFFF",
 };
 
+// ─── STEP ICONS (SVG) ────────────────────────────────
+const IconGather = () => (
+  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+    <path d="M12 2v6" />
+    <path d="M8 8l4-4 4 4" />
+    <path d="M5 12H2a2 2 0 0 1 0-4h3" />
+    <path d="M19 12h3a2 2 0 0 0 0-4h-3" />
+    <path d="M12 22v-6" />
+    <path d="M12 16l-4 4 4 4 4-4" />
+    <circle cx="12" cy="12" r="3" />
+  </svg>
+);
+const IconProcess = () => (
+  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+    <circle cx="12" cy="12" r="3" />
+    <path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83" />
+  </svg>
+);
+const IconAssess = () => (
+  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+    <path d="M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z" />
+    <path d="M9 4v2" />
+    <path d="M9 10v2" />
+    <path d="M9 16v2" />
+  </svg>
+);
+const IconCommunity = () => (
+  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+    <circle cx="9" cy="7" r="4" />
+    <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+    <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+  </svg>
+);
+const IconStore = () => (
+  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+    <ellipse cx="12" cy="5" rx="9" ry="3" />
+    <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5" />
+    <path d="M3 12c0 1.66 4 3 9 3s9-1.34 9-3" />
+  </svg>
+);
+const IconShow = () => (
+  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+    <polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6" />
+    <line x1="8" y1="2" x2="8" y2="18" />
+    <line x1="16" y1="6" x2="16" y2="22" />
+  </svg>
+);
+const stepIconComponents = [IconGather, IconProcess, IconAssess, IconCommunity, IconStore, IconShow];
+
 // ─── STEPS DATA ───────────────────────────────────────
 const steps = [
   {
-    num: 1, title: "Gather Inputs", short: "Live data", icon: "📡",
+    num: 1, title: "Gather Inputs", short: "Live data",
     sources: ["Open‑Meteo", "WeatherAPI", "PAGASA", "GeoJSON + PSGC", "Healthsites.io", "PSA", "OpenRouteService"],
     bullets: [
       "Temperature & humidity — live and forecast from Open‑Meteo and WeatherAPI",
@@ -35,7 +85,7 @@ const steps = [
     ],
   },
   {
-    num: 2, title: "Process Data", short: "Clean & structure", icon: "⚙️",
+    num: 2, title: "Process Data", short: "Clean & structure",
     sources: ["Barangay Match", "Facility Filter", "Weather Parse", "Supabase Cache"],
     bullets: [
       "Match population and facility data to barangay boundaries",
@@ -45,7 +95,7 @@ const steps = [
     ],
   },
   {
-    num: 3, title: "Assess Heat Risk", short: "Rothfusz formula", icon: "🌡️",
+    num: 3, title: "Assess Heat Risk", short: "Rothfusz formula",
     sources: ["Rothfusz Regression", "Humidity Adjustments", "PAGASA Risk Bands"],
     bullets: [
       "Apply the Rothfusz regression formula — combines air temperature and humidity into a 'feels‑like' heat index",
@@ -55,7 +105,7 @@ const steps = [
     ],
   },
   {
-    num: 4, title: "Community Data", short: "Population & Facilities", icon: "👥",
+    num: 4, title: "Community Data", short: "Population & Facilities",
     sources: ["Facility Counts", "Population Density", "Travel Distance", "Risk Score"],
     bullets: [
       "Add facility counts and population density for each barangay",
@@ -64,7 +114,7 @@ const steps = [
     ],
   },
   {
-    num: 5, title: "Store Results", short: "Supabase backend", icon: "🗄️",
+    num: 5, title: "Store Results", short: "Supabase backend",
     sources: ["Supabase", "Risk Scores", "Facility Data", "Historical Log"],
     bullets: [
       "Save risk scores, facility details, and historical data in Supabase",
@@ -72,7 +122,7 @@ const steps = [
     ],
   },
   {
-    num: 6, title: "Show Results", short: "Public interface", icon: "🗺️",
+    num: 6, title: "Show Results", short: "Public interface",
     sources: ["Interactive Maps", "Dashboards", "Route Maps", "AI Advisories"],
     bullets: [
       "Interactive maps display barangay polygons, heat zones, and facility markers",
@@ -85,12 +135,12 @@ const steps = [
 
 // ─── SUNRISE ORANGE THEME (smooth transition 3→4→5→6) ──
 const stepColors = [
-  { color: P.orange700, light: P.orange100, bg: P.orange50,  tag: "Deep Orange",   gradient: `linear-gradient(135deg, ${P.orange700} 0%, ${P.orange500} 50%, ${P.orange100} 100%)` },
-  { color: P.orange500, light: "#FFD4B8",   bg: "#FFF8F3",   tag: "Bright Orange", gradient: `linear-gradient(135deg, ${P.orange500} 0%, #FF9559 50%, #FFD4B8 100%)` },
-  { color: P.amber700,  light: P.amber100,  bg: P.amber50,   tag: "Amber Dark",    gradient: `linear-gradient(135deg, ${P.amber700} 0%, ${P.amber500} 50%, ${P.amber100} 100%)` },
-  { color: P.warmAmber700,  light: P.warmAmber100,  bg: P.warmAmber50,  tag: "Warm Amber",   gradient: `linear-gradient(135deg, ${P.warmAmber700} 0%, ${P.warmAmber400} 50%, ${P.warmAmber100} 100%)` },
-  { color: P.softOrange700, light: P.softOrange100, bg: P.softOrange50, tag: "Soft Orange",  gradient: `linear-gradient(135deg, ${P.softOrange700} 0%, ${P.softOrange400} 50%, ${P.softOrange100} 100%)` },
-  { color: P.warmGolden700, light: P.warmGolden100, bg: P.warmGolden50, tag: "Warm Golden",  gradient: `linear-gradient(135deg, ${P.warmGolden700} 0%, ${P.warmGolden400} 50%, ${P.warmGolden100} 100%)` },
+  { color: P.orange700, light: P.orange100, bg: P.orange50,  gradient: `linear-gradient(135deg, ${P.orange700} 0%, ${P.orange500} 50%, ${P.orange100} 100%)` },
+  { color: P.orange500, light: "#FFD4B8",   bg: "#FFF8F3",   gradient: `linear-gradient(135deg, ${P.orange500} 0%, #FF9559 50%, #FFD4B8 100%)` },
+  { color: P.amber700,  light: P.amber100,  bg: P.amber50,   gradient: `linear-gradient(135deg, ${P.amber700} 0%, ${P.amber500} 50%, ${P.amber100} 100%)` },
+  { color: P.warmAmber700,  light: P.warmAmber100,  bg: P.warmAmber50,  gradient: `linear-gradient(135deg, ${P.warmAmber700} 0%, ${P.warmAmber400} 50%, ${P.warmAmber100} 100%)` },
+  { color: P.softOrange700, light: P.softOrange100, bg: P.softOrange50, gradient: `linear-gradient(135deg, ${P.softOrange700} 0%, ${P.softOrange400} 50%, ${P.softOrange100} 100%)` },
+  { color: P.warmGolden700, light: P.warmGolden100, bg: P.warmGolden50, gradient: `linear-gradient(135deg, ${P.warmGolden700} 0%, ${P.warmGolden400} 50%, ${P.warmGolden100} 100%)` },
 ];
 
 // ─── PIPELINE FLOW ────────────────────────────────────
@@ -177,13 +227,16 @@ function HowItWorks() {
                       background: isAct ? sc2.gradient : P.white,
                       border: `2px solid ${isAct ? sc2.color : P.orange100}`,
                       display: "flex", alignItems: "center", justifyContent: "center",
-                      fontSize: 22,
+                      color: isAct ? P.white : P.orange700,
                       boxShadow: isAct
                         ? `0 0 0 5px ${sc2.color}22, 0 6px 20px ${sc2.color}40`
                         : "0 2px 6px rgba(0,0,0,0.06)",
                       transition: "all 0.25s cubic-bezier(.4,0,.2,1)",
                     }}>
-                      {step.icon}
+                      {(() => {
+                        const StepIcon = stepIconComponents[i];
+                        return StepIcon ? <StepIcon /> : null;
+                      })()}
                     </div>
 
                     <div className="how-it-works-node-step-num" style={{
@@ -277,19 +330,12 @@ function HowItWorks() {
                     {s.sources.map((src, si) => (
                       <span key={si} style={{
                         fontFamily: "'DM Mono', monospace", fontSize: 7, fontWeight: 700,
-                        color: sc.color === P.yellow500 || sc.color === P.amber500 ? P.gray700 : P.white,
-                        background: "rgba(255,255,255,0.18)",
-                        border: `1px solid ${sc.color === P.yellow500 || sc.color === P.amber500 ? "rgba(0,0,0,0.12)" : "rgba(255,255,255,0.25)"}`,
+                        color: sc.color === P.yellow500 || sc.color === P.amber500 ? P.gray900 : P.white,
+                        background: sc.color === P.yellow500 || sc.color === P.amber500 ? "rgba(255,255,255,0.92)" : "rgba(122,45,0,0.62)",
+                        border: sc.color === P.yellow500 || sc.color === P.amber500 ? "1px solid rgba(0,0,0,0.1)" : "1px solid rgba(255,255,255,0.2)",
                         borderRadius: 5, padding: "3px 8px",
                       }}>{src}</span>
                     ))}
-                  </div>
-                  <div style={{
-                    fontFamily: "'DM Mono', monospace", fontSize: 7, fontWeight: 700,
-                    color: sc.color === P.yellow500 || sc.color === P.amber500 ? "rgba(0,0,0,0.4)" : "rgba(255,255,255,0.45)",
-                    letterSpacing: "0.06em",
-                  }}>
-                    {sc.tag}
                   </div>
                 </div>
               </div>

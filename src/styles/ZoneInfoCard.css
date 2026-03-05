@@ -1,256 +1,720 @@
-/* Zone Info popup card – shown when a barangay boundary is clicked */
+/* Zone Info popup card – HazardPanel-style layout + FacilityList no-route row */
 
 .zone-info-card {
-  background: var(--surface-primary, #f8fafc);
-  border-radius: 10px;
-  border: 1px solid var(--primary-200, #e2e8f0);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
+  font-family: 'DM Sans', sans-serif;
+  background: #fff;
+  border-radius: 16px;
   overflow: hidden;
-  min-width: 260px;
-  max-width: min(340px, calc(100vw - 24px));
-  font-family: var(--font-body, system-ui, sans-serif);
+  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.09);
+  min-width: 280px;
+  max-width: min(320px, calc(100vw - 24px));
+  max-height: 85vh;
+  display: flex;
+  flex-direction: column;
+  animation: zone-info-card-up 0.35s ease both;
 }
 
-.zone-info-card-tag {
-  padding: 8px 12px 8px 14px;
+@keyframes zone-info-card-up {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes zone-info-card-pulse {
+  0%, 100% { box-shadow: 0 0 5px rgba(168, 255, 216, 0.7); }
+  50%       { box-shadow: 0 0 12px rgba(168, 255, 216, 0.4); }
+}
+
+/* Header (green bar) */
+.zone-info-card-header {
+  padding: 10px 14px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  border-radius: 10px 10px 0 0;
-  font-size: 12px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
+  flex-shrink: 0;
 }
 
-.zone-info-card-tag-label {
-  flex: 1;
+.zone-info-card-status {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 10px;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.zone-info-card-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.9);
+  animation: zone-info-card-pulse 2.2s ease-in-out infinite;
 }
 
 .zone-info-card-close {
-  background: rgba(0, 0, 0, 0.2);
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
   border: none;
-  color: inherit;
-  width: 24px;
-  height: 24px;
-  border-radius: 6px;
-  font-size: 18px;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 14px;
   line-height: 1;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 0;
-  flex-shrink: 0;
+  transition: background 0.15s;
 }
 
 .zone-info-card-close:hover {
-  background: rgba(0, 0, 0, 0.3);
+  background: rgba(255, 255, 255, 0.35);
 }
 
-.zone-info-card-title {
-  margin: 0;
-  padding: 12px 14px 4px;
-  font-size: 16px;
-  font-weight: 700;
-  color: var(--primary-900, #0f172a);
-}
-
-.zone-info-card-subtitle {
-  margin: 0 14px 10px;
-  padding: 0;
-  font-size: 12px;
-  color: var(--primary-600);
-}
-
-.zone-info-card-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  grid-template-rows: auto auto 1fr;
+/* Name row + chips */
+.zone-info-card-name-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 14px 0;
   gap: 10px;
-  padding: 0 14px 14px;
+  flex-shrink: 0;
 }
 
-.zone-info-card-block {
-  background: var(--primary-50, #f1f5f9);
-  border: 1px solid var(--primary-100, #e2e8f0);
-  border-radius: 8px;
-  padding: 8px 10px;
-}
-
-.zone-info-card-block.zone-info-card-facilities-block {
-  grid-column: 1 / -1;
-  display: flex;
-  flex-direction: column;
-  min-height: 120px;
-}
-
-.zone-info-card-label {
-  display: block;
-  font-size: 10px;
+.zone-info-card-name {
+  margin: 0;
+  font-size: 20px;
   font-weight: 700;
-  color: var(--primary-600);
-  text-transform: uppercase;
-  letter-spacing: 0.03em;
-  margin-bottom: 6px;
-}
-
-.zone-info-card-sublabel {
-  display: block;
-  font-size: 11px;
-  color: var(--primary-500);
-}
-
-.zone-info-card-cutoff-note {
-  margin: 6px 0 0 0;
-  font-size: 11px;
-  color: var(--orange-500, #ff6b1a);
-  line-height: 1.35;
-  margin-bottom: 6px;
-}
-
-.zone-info-card-value {
-  font-size: 14px;
-  font-weight: 700;
-  color: var(--primary-800);
-}
-
-.zone-info-card-risk,
-.zone-info-card-temp {
-  min-height: 28px;
-  display: flex;
-  align-items: center;
-}
-
-.zone-info-card-facilities-list {
-  flex: 1;
-  overflow-y: auto;
-  max-height: 180px;
-  margin: 0 -4px 0 0;
-  padding-right: 4px;
-}
-
-.zone-info-card-facilities-list::-webkit-scrollbar {
-  width: 6px;
-}
-
-.zone-info-card-facilities-list::-webkit-scrollbar-track {
-  background: var(--primary-100);
-  border-radius: 3px;
-}
-
-.zone-info-card-facilities-list::-webkit-scrollbar-thumb {
-  background: var(--primary-300);
-  border-radius: 3px;
-}
-
-.zone-info-card-facility-item {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  width: 100%;
-  padding: 8px 8px 8px 0;
-  border: none;
-  background: none;
-  font-size: 13px;
-  color: var(--primary-800);
-  text-align: left;
-  cursor: pointer;
-  font-family: inherit;
-  border-bottom: 1px solid var(--primary-100);
-}
-
-.zone-info-card-facility-item:last-child {
-  border-bottom: none;
-}
-
-.zone-info-card-facility-item:hover {
-  color: var(--primary-600);
-}
-
-.zone-info-card-facility-name {
+  color: #111;
+  letter-spacing: -0.025em;
+  line-height: 1.2;
   flex: 1;
   min-width: 0;
 }
 
-.zone-info-card-facility-distance {
+.zone-info-card-sub {
+  font-size: 10px;
+  color: #aaa;
+  padding: 3px 14px 12px;
+  flex-shrink: 0;
+}
+
+.zone-info-card-chips {
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.zone-info-card-chip {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: #f7f8fa;
+  border: 1px solid #eee;
+  border-radius: 10px;
+  padding: 6px 12px;
+  min-width: 56px;
+}
+
+.zone-info-card-chip-label {
+  font-size: 8px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.09em;
+  color: #aaa;
+  margin-bottom: 2px;
+}
+
+.zone-info-card-chip-val {
+  font-family: 'DM Mono', monospace;
+  font-size: 18px;
+  font-weight: 500;
+  color: #111;
+  line-height: 1.1;
+}
+
+.zone-info-card-chip-val--risk {
+  font-weight: 700;
+}
+
+.zone-info-card-chip-unit {
   font-size: 11px;
-  color: var(--primary-500);
+  color: #aaa;
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 400;
+}
+
+.zone-info-card-divider {
+  height: 1px;
+  background: #eee;
   flex-shrink: 0;
 }
 
-.zone-info-card-facility-arrow {
+/* Body: takes remaining space so list can scroll when long */
+.zone-info-card-body {
+  padding: 12px 12px 14px;
+  flex: 1 1 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.zone-info-card-section-hd {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+  flex-shrink: 0;
+}
+
+.zone-info-card-section-title {
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: #aaa;
+}
+
+.zone-info-card-fcount {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  color: #aaa;
+  background: #f7f8fa;
+  padding: 2px 7px;
+  border-radius: 20px;
+  border: 1px solid #eee;
+}
+
+.zone-info-card-notice {
+  background: #fffbeb;
+  border: 1px solid #f5e09a;
+  border-radius: 8px;
+  padding: 7px 10px;
+  font-size: 10px;
+  color: #997a20;
+  margin-bottom: 8px;
+  line-height: 1.5;
+  flex-shrink: 0;
+}
+
+/* Profile row (dropdown) */
+.zone-info-card-profile-row {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 8px;
+  flex-shrink: 0;
+}
+
+.zone-info-card-profile-label {
+  font-size: 9px;
+  font-weight: 600;
+  color: #aaa;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  flex-shrink: 0;
+}
+
+.zone-info-card-profile-trigger-wrap {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+}
+
+.zone-info-card-profile-trigger {
+  width: 100%;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 11px;
+  font-weight: 500;
+  color: #111;
+  background: #f7f8fa;
+  border: 1px solid #eee;
+  border-radius: 7px;
+  padding: 4px 9px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  text-align: left;
+  transition: border-color 0.15s;
+}
+
+.zone-info-card-profile-trigger:hover,
+.zone-info-card-profile-trigger:focus {
+  border-color: #1a9e5c;
+  outline: none;
+}
+
+.zone-info-card-profile-chevron {
+  font-size: 9px;
+  color: #1a9e5c;
+  flex-shrink: 0;
+}
+
+.zone-info-card-profile-menu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  margin-top: 4px;
+  padding: 4px;
+  background: #fff;
+  border: 1px solid #eee;
+  border-radius: 8px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
+  z-index: 50;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.zone-info-card-profile-menu[hidden] {
+  display: none;
+}
+
+.zone-info-card-profile-option {
+  padding: 8px 10px;
   font-size: 12px;
-  color: var(--primary-500);
+  font-weight: 600;
+  color: #111;
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-family: inherit;
+  text-align: left;
+  transition: background 0.15s, color 0.15s;
+}
+
+.zone-info-card-profile-option:hover {
+  background: rgba(26, 158, 92, 0.12);
+  color: #1a9e5c;
+}
+
+.zone-info-card-profile-option[aria-selected="true"] {
+  background: rgba(26, 158, 92, 0.18);
+  color: #1a9e5c;
+}
+
+/* Route-from label (when route is active) */
+.zone-info-card-route-from {
+  font-size: 11px;
+  font-weight: 600;
+  color: #1a365d;
+  margin-bottom: 6px;
   flex-shrink: 0;
 }
 
-.zone-info-card-facilities-empty,
-.zone-info-card-facilities-loading {
+/* Location status for routing (optional indicator) */
+.zone-info-card-location-status {
+  font-size: 10px;
+  color: #64748b;
+  margin-bottom: 8px;
+  flex-shrink: 0;
+}
+
+.zone-info-card-location-status--on {
+  color: #0d9488;
+}
+
+.zone-info-card-location-status--unavailable {
+  color: #b45309;
+}
+
+.zone-info-card-location-status--using_barangay {
+  color: #64748b;
+}
+
+/* Origin selector: From my location | From [Barangay] */
+.zone-info-card-origin-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+  flex-shrink: 0;
+}
+
+.zone-info-card-origin-label {
+  font-size: 9px;
+  font-weight: 600;
+  color: #aaa;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  flex-shrink: 0;
+}
+
+.zone-info-card-origin-options {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.zone-info-card-origin-btn {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 5px 10px;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+  background: #f8fafc;
+  color: #475569;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+}
+
+.zone-info-card-origin-btn:hover {
+  background: #f1f5f9;
+  border-color: #cbd5e1;
+  color: #334155;
+}
+
+.zone-info-card-origin-btn--active {
+  background: #0f172a;
+  border-color: #0f172a;
+  color: #fff;
+}
+
+/* Facility list: scrolls when content overflows */
+.zone-info-card-flist {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  flex: 1 1 0;
+  min-height: 0;
+  overflow-y: auto;
+  margin-bottom: 0;
+  padding: 2px 10px 2px 0;
+}
+
+.zone-info-card-flist::-webkit-scrollbar {
+  width: 6px;
+}
+
+.zone-info-card-flist::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 3px;
+}
+
+.zone-info-card-flist::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 3px;
+}
+
+.zone-info-card-flist-loading,
+.zone-info-card-flist-empty {
   margin: 0;
   padding: 8px 0;
   font-size: 12px;
-  color: var(--primary-500);
+  color: #64748b;
 }
 
-.zone-info-card-facilities-loading {
+.zone-info-card-flist-loading {
   font-style: italic;
 }
 
-/* Container used by HeatMap to position the card (e.g. Leaflet popup or overlay) */
+/* Normal facility item – text flexes; button has reserved width so never clipped */
+.zone-info-card-fitem {
+  display: flex;
+  align-items: flex-start;
+  padding: 11px 12px;
+  background: #f7f8fa;
+  border: 1px solid #eee;
+  border-radius: 10px;
+  cursor: default;
+  transition: background 0.15s, border-color 0.15s;
+  gap: 12px;
+  overflow: visible;
+  min-width: 0;
+  flex-shrink: 0;
+}
+
+.zone-info-card-fitem:hover {
+  background: #f0fdf6;
+  border-color: #c3f0d8;
+}
+
+.zone-info-card-fitem.zone-info-card-fitem--active {
+  background: #f0fdf6;
+  border-color: #c3f0d8;
+  padding-left: 0;
+}
+
+.zone-info-card-active-bar {
+  display: block;
+  width: 4px;
+  min-width: 4px;
+  align-self: stretch;
+  background: #1a9e5c;
+  border-radius: 4px;
+  margin-left: 6px;
+  margin-right: 6px;
+  flex-shrink: 0;
+}
+
+.zone-info-card-finfo {
+  flex: 1 1 0;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.zone-info-card-fname {
+  font-size: 13px;
+  font-weight: 600;
+  color: #111;
+  line-height: 1.3;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  word-break: break-word;
+}
+
+.zone-info-card-fmeta {
+  font-size: 11px;
+  color: #aaa;
+  margin-top: 3px;
+  line-height: 1.3;
+}
+
+/* Route button (green) – reserved width so “Route →” is always fully visible */
+.zone-info-card-rbtn {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  color: #fff;
+  border-radius: 7px;
+  padding: 6px 10px;
+  flex: 0 0 64px;
+  min-width: 64px;
+  width: 64px;
+  max-width: 64px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.15s;
+  border: 1px solid transparent;
+  box-sizing: border-box;
+  text-align: center;
+  overflow: visible;
+}
+
+.zone-info-card-rbtn:hover:not(:disabled) {
+  filter: brightness(1.05);
+}
+
+.zone-info-card-rbtn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+/* Exit button – reserved width so “✕ Exit” is always fully visible */
+.zone-info-card-xbtn {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  color: #fff;
+  background: #e05252;
+  border: 1px solid #c53030;
+  border-radius: 7px;
+  padding: 6px 10px;
+  flex: 0 0 64px;
+  min-width: 64px;
+  width: 64px;
+  max-width: 64px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.15s;
+  box-sizing: border-box;
+  text-align: center;
+  overflow: visible;
+}
+
+.zone-info-card-xbtn:hover:not(:disabled) {
+  background: #c53030;
+  color: #fff;
+  border-color: #c53030;
+}
+
+.zone-info-card-xbtn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+/* No-route facility row – full FacilityList.jsx format; always fully visible */
+.zone-info-card-fitem-noroute {
+  display: flex;
+  align-items: stretch;
+  border: 1px solid #efd080;
+  border-radius: 10px;
+  overflow: hidden;
+  background: #fffbeb;
+  min-width: 0;
+  flex-shrink: 0;
+}
+
+.zone-info-card-nr-stripe {
+  width: 10px;
+  min-width: 10px;
+  flex-shrink: 0;
+  background: repeating-linear-gradient(
+    -45deg,
+    #e0a030 0px,
+    #e0a030 3px,
+    #fdf0cb 3px,
+    #fdf0cb 9px
+  );
+}
+
+.zone-info-card-nr-content {
+  flex: 1 1 0;
+  min-width: 0;
+  padding: 10px 12px 10px 10px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.zone-info-card-nr-text {
+  flex: 1 1 0;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.zone-info-card-nr-btn-wrap {
+  display: flex;
+  align-items: flex-start;
+  padding-top: 2px;
+  flex: 0 0 64px;
+  min-width: 64px;
+  width: 64px;
+  flex-shrink: 0;
+}
+
+.zone-info-card-nr-warning {
+  display: flex;
+  align-items: flex-start;
+  gap: 4px;
+  margin-top: 10px;
+  font-size: 10px;
+  font-weight: 600;
+  color: #b07b2e;
+  letter-spacing: 0.01em;
+  white-space: normal;
+  line-height: 1.35;
+  word-break: break-word;
+}
+
+.zone-info-card-warn-icon {
+  width: 11px;
+  height: 11px;
+  flex-shrink: 0;
+  margin-top: 0.1em;
+  color: #b07b2e;
+}
+
+.zone-info-card-fitem-noroute .zone-info-card-fname {
+  font-size: 13px;
+  font-weight: 600;
+  color: #111;
+  line-height: 1.3;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  word-break: break-word;
+}
+
+.zone-info-card-fitem-noroute .zone-info-card-fmeta {
+  font-size: 11px;
+  color: #aaa;
+  margin-top: 3px;
+  line-height: 1.3;
+}
+
+.zone-info-card-rbtn-amber {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  color: #fff;
+  background: #b07b2e;
+  border: 1px solid #997a20;
+  border-radius: 7px;
+  padding: 6px 10px;
+  min-width: 64px;
+  width: 100%;
+  max-width: 64px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.15s;
+  box-sizing: border-box;
+  text-align: center;
+  overflow: visible;
+  flex-shrink: 0;
+}
+
+.zone-info-card-rbtn-amber:hover:not(:disabled) {
+  background: #e0a030;
+  color: #fff;
+  border-color: #e0a030;
+}
+
+.zone-info-card-rbtn-amber:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+/* Full Report button */
+.zone-info-card-full-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+  padding: 11px;
+  margin-top: 12px;
+  color: #fff;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  letter-spacing: 0.02em;
+  transition: background 0.15s, transform 0.1s;
+  flex-shrink: 0;
+}
+
+.zone-info-card-full-btn:hover {
+  filter: brightness(0.95);
+}
+
+.zone-info-card-full-btn:active {
+  transform: scale(0.98);
+}
+
+/* Wrapper used by HeatMap to position the card */
 .zone-info-card-wrapper {
   position: absolute;
   z-index: 2000;
   pointer-events: auto;
 }
-.zone-info-card-full-report-btn {
-  width: calc(100% - 28px);
-  padding: 14px 14px;
-  margin-top: 6px;
-  margin-bottom: 14px;
-  margin-left: 14px;
-  margin-right: 14px;
-  border: none;
-  border-radius: 8px;
-  font-family: var(--font-body, system-ui, sans-serif);
-  font-size: 13px;
-  font-weight: 600;
-  color: #fff;
-  cursor: pointer;
-  transition: filter 0.2s ease, box-shadow 0.2s ease;
-}
 
-.zone-info-card-full-report-btn:hover {
-  filter: brightness(0.92);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-}
-
-.zone-info-card-full-report-btn:active {
-  filter: brightness(0.85);
-}
-
-/* 320px – small phones: keep card within viewport */
 @media (max-width: 320px) {
   .zone-info-card {
-    min-width: 240px;
+    min-width: 260px;
     max-width: calc(100vw - 16px);
   }
 
-  .zone-info-card-title {
-    font-size: 14px;
-    padding: 10px 12px 4px;
+  .zone-info-card-name {
+    font-size: 18px;
   }
 
-  .zone-info-card-grid {
-    padding: 0 12px 12px;
-    gap: 8px;
-  }
-
-  .zone-info-card-block {
-    padding: 6px 8px;
-  }
-
-  .zone-info-card-value {
-    font-size: 13px;
+  .zone-info-card-chip-val {
+    font-size: 16px;
   }
 }

@@ -5,6 +5,7 @@ import HeroAbout from '../components/about/HeroAbout.jsx';
 import HowItWorks from '../components/about/HowItWorks.jsx';
 import HeatSafety from '../components/about/HeatSafety.jsx';
 import ContactSection from '../components/about/ContactSection.jsx';
+import '../styles/AboutPage.css';
 
 // ─── PALETTE ─────────────────────────────────────────
 const P = {
@@ -33,19 +34,68 @@ const objectives = [
   "Ensure the interface is responsive and accessible on both desktop and mobile devices.",
 ];
 const disclaimer = `The system calculates neighborhood heat risk using the Rothfusz regression heat index, a widely accepted formula that estimates "feels‑like" temperature from actual temperature and humidity. These computed values are then mapped to PAGASA's official heat risk bands (Caution, Extreme Caution, Danger, Extreme Danger). The AI component (Gemini) does not recalculate heat or claim greater precision. Instead, it uses the backend's PAGASA‑aligned levels to generate informative advisories, ensuring they remain reliable, auditable, and consistent with official standards.`;
+// ─── SECTION ICONS (SVG) ─────────────────────────────
+const IconPurpose = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+    <circle cx="12" cy="12" r="10" />
+    <circle cx="12" cy="12" r="6" />
+    <circle cx="12" cy="12" r="2" />
+  </svg>
+);
+const IconObjectives = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+    <path d="M12 2C9.24 2 7 4.24 7 7c0 4.42 5 11 5 11s5-6.58 5-11c0-2.76-2.24-5-5-5z" />
+    <circle cx="12" cy="7" r="2.5" />
+  </svg>
+);
+const IconDisclaimer = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+    <path d="M12 4v16" />
+    <path d="M5 8h14" />
+    <path d="M6 8v3l6 4 6-4V8" />
+    <circle cx="6" cy="18" r="2.5" />
+    <circle cx="18" cy="18" r="2.5" />
+  </svg>
+);
+
+// Strategic Goals (SDG) icons
+const IconSdgCities = () => (
+  <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+    <path d="M3 21h18" />
+    <path d="M5 21V7l8-4 8 4v14" />
+    <path d="M9 21v-6h6v6" />
+    <path d="M9 9h.01" />
+    <path d="M15 9h.01" />
+    <path d="M9 15h6" />
+  </svg>
+);
+const IconSdgHealth = () => (
+  <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+  </svg>
+);
+const IconSdgClimate = () => (
+  <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+    <circle cx="12" cy="12" r="10" />
+    <line x1="2" y1="12" x2="22" y2="12" />
+    <path d="M12 2a10 10 0 0 1 0 20 10 10 0 0 1 0-20" />
+  </svg>
+);
+const sdgIconComponents = [IconSdgCities, IconSdgHealth, IconSdgClimate];
+
 const sdgs = [
   {
-    num: "11", icon: "🏙️", title: "Sustainable Cities & Communities",
+    num: "11", title: "Sustainable Cities & Communities",
     color: P.orange500, light: P.orange100, bg: P.orange50,
     body: "Supports inclusive and resilient urban awareness. Barangay‑level heat maps and risk scores help communities recognize hotspots and take precautions without implying official hazard measurements.",
   },
   {
-    num: "3", icon: "💚", title: "Good Health & Well‑Being",
+    num: "3", title: "Good Health & Well‑Being",
     color: P.green500, light: P.green100, bg: "#F0FAF0",
     body: "Offers actionable health guidance during high‑heat periods. Residents can identify high‑risk areas and nearby clinics, encouraging preventive behavior — especially for vulnerable groups.",
   },
   {
-    num: "13", icon: "🌍", title: "Climate Action",
+    num: "13", title: "Climate Action",
     color: P.blue700, light: P.blue100, bg: "#EEF4FF",
     body: "Promotes public understanding of urban heat trends. Historical and current data help residents observe patterns, anticipate risks, and adopt adaptive strategies that strengthen resilience.",
   },
@@ -98,30 +148,23 @@ function AboutPage() {
       <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800;900&family=DM+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
       <style>{`
         @keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        .about-detail-sections * { box-sizing: border-box; }
-        .about-detail-sections ::-webkit-scrollbar { width: 4px; }
-        .about-detail-sections ::-webkit-scrollbar-thumb { background: #FF6B1A55; border-radius: 2px; }
-        .about-detail-sections p { margin: 0; }
-        .about-detail-sections button { font-family: inherit; }
-        @media (max-width: 768px) {
-          .about-detail-bento { grid-template-columns: 1fr !important; }
-          .about-detail-objectives { grid-template-columns: 1fr !important; }
-          .about-detail-sdg-row { grid-template-columns: 1fr !important; }
-        }
       `}</style>
       <Header />
       <HeroAbout />
 
       {/* New sections: Purpose, Quote, Objectives, Disclaimer, SDG */}
       <div className="about-detail-sections" style={{ background: "transparent", fontFamily: "'DM Sans', sans-serif" }}>
-        <div style={{ maxWidth: 900, margin: "0 auto", padding: "32px 24px 80px" }}>
+        <div className="about-detail-sections-wrap">
 
           {/* BENTO: PURPOSE + QUOTE */}
-          <div className="about-detail-bento" style={{ display: "grid", gridTemplateColumns: "2fr 1fr", gap: 14, marginBottom: 48 }}>
+          <div className="about-detail-bento">
             <div style={{ background: `linear-gradient(135deg, ${P.orange700} 0%, ${P.orange500} 100%)`, borderRadius: 20, padding: "30px 32px", position: "relative", overflow: "hidden" }}>
               <div style={{ position: "absolute", right: -30, bottom: -30, width: 140, height: 140, borderRadius: "50%", border: "28px solid rgba(255,255,255,0.08)" }} />
               <div style={{ position: "absolute", left: -20, top: -20, width: 90, height: 90, borderRadius: "50%", border: "20px solid rgba(255,255,255,0.05)" }} />
-              <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 9, fontWeight: 700, letterSpacing: "0.14em", color: "rgba(255,255,255,0.5)", marginBottom: 10 }}>🎯 PURPOSE</div>
+              <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 9, fontWeight: 700, letterSpacing: "0.14em", color: "rgba(255,255,255,0.5)", marginBottom: 10, display: "flex", alignItems: "center", gap: 6 }}>
+                <span style={{ display: "inline-flex", color: "rgba(255,255,255,0.85)" }}><IconPurpose /></span>
+                PURPOSE
+              </div>
               <h2 style={{ fontFamily: "'DM Sans', sans-serif", fontWeight: 900, fontSize: 20, color: P.white, letterSpacing: "-0.02em", margin: "0 0 12px" }}>Why We Built This</h2>
               <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: "rgba(255,255,255,0.82)", lineHeight: 1.8, margin: 0 }}>{purpose}</p>
             </div>
@@ -148,13 +191,15 @@ function AboutPage() {
           <div style={{ marginBottom: 48 }}>
             <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 24 }}>
               <div style={{ width: 4, alignSelf: "stretch", background: P.orange500, borderRadius: 2, flexShrink: 0 }} />
-              <div style={{ width: 38, height: 38, borderRadius: 10, background: P.gray900, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18, flexShrink: 0 }}>📌</div>
+              <div style={{ width: 38, height: 38, borderRadius: 10, background: P.gray900, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, color: P.white }}>
+                <IconObjectives />
+              </div>
               <div>
                 <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 8, fontWeight: 700, letterSpacing: "0.12em", color: P.orange500, marginBottom: 2 }}>SECTION 03</div>
                 <h2 style={{ fontFamily: "'DM Sans', sans-serif", fontWeight: 900, fontSize: 22, color: P.gray900, letterSpacing: "-0.02em", margin: 0 }}>Objectives</h2>
               </div>
             </div>
-            <div className="about-detail-objectives" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, paddingLeft: 16 }}>
+            <div className="about-detail-objectives" style={{ paddingLeft: 16 }}>
               {objectives.map((obj, i) => (
                 <div
                   key={i}
@@ -189,7 +234,9 @@ function AboutPage() {
           <div style={{ marginBottom: 48 }}>
             <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}>
               <div style={{ width: 4, alignSelf: "stretch", background: P.orange500, borderRadius: 2, flexShrink: 0 }} />
-              <div style={{ width: 38, height: 38, borderRadius: 10, background: P.yellow500, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18, flexShrink: 0 }}>⚖️</div>
+              <div style={{ width: 38, height: 38, borderRadius: 10, background: P.yellow500, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, color: P.gray900 }}>
+                <IconDisclaimer />
+              </div>
               <div>
                 <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 8, fontWeight: 700, letterSpacing: "0.12em", color: P.orange500, marginBottom: 2 }}>SECTION 04</div>
                 <h2 style={{ fontFamily: "'DM Sans', sans-serif", fontWeight: 900, fontSize: 22, color: P.gray900, letterSpacing: "-0.02em", margin: 0 }}>Disclaimer</h2>
@@ -198,6 +245,7 @@ function AboutPage() {
             <div style={{ paddingLeft: 16, borderRadius: 16, overflow: "hidden", border: `1.5px solid ${P.yellow100}` }}>
               <button
                 type="button"
+                className="about-detail-disclaimer-btn"
                 onClick={() => setOpenDisc(!openDisc)}
                 style={{
                   width: "100%", border: "none", background: P.yellow50,
@@ -232,7 +280,9 @@ function AboutPage() {
           <div>
             <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 24 }}>
               <div style={{ width: 4, alignSelf: "stretch", background: P.orange500, borderRadius: 2, flexShrink: 0 }} />
-              <div style={{ width: 38, height: 38, borderRadius: 10, background: P.blue700, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18, flexShrink: 0 }}>🌍</div>
+              <div style={{ width: 38, height: 38, borderRadius: 10, background: P.blue700, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, color: P.white }}>
+                <IconSdgClimate />
+              </div>
               <div>
                 <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 8, fontWeight: 700, letterSpacing: "0.12em", color: P.orange500, marginBottom: 2 }}>SECTION 05 · SDG ALIGNMENT</div>
                 <h2 style={{ fontFamily: "'DM Sans', sans-serif", fontWeight: 900, fontSize: 22, color: P.gray900, letterSpacing: "-0.02em", margin: 0 }}>Strategic Goals</h2>
@@ -240,9 +290,14 @@ function AboutPage() {
             </div>
             <div style={{ paddingLeft: 16, display: "flex", flexDirection: "column", gap: 14 }}>
               {sdgs.map((sdg, i) => (
-                <div key={i} className="about-detail-sdg-row" style={{ display: "grid", gridTemplateColumns: "88px 1fr", borderRadius: 16, overflow: "hidden", border: `1.5px solid ${sdg.light}` }}>
-                  <div style={{ background: sdg.color, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "24px 0", gap: 8 }}>
-                    <div style={{ fontSize: 26 }}>{sdg.icon}</div>
+                <div key={i} className="about-detail-sdg-row" style={{ borderRadius: 16, overflow: "hidden", border: `1.5px solid ${sdg.light}` }}>
+                  <div className="about-detail-sdg-icon-cell" style={{ background: sdg.color, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "24px 0", gap: 8, color: "rgba(255,255,255,0.95)" }}>
+                    <div style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
+                      {(() => {
+                        const SdgIcon = sdgIconComponents[i];
+                        return SdgIcon ? <SdgIcon /> : null;
+                      })()}
+                    </div>
                     <div style={{ fontFamily: "'DM Sans', sans-serif", fontWeight: 900, fontSize: 26, color: "rgba(255,255,255,0.15)", lineHeight: 1 }}>{sdg.num}</div>
                   </div>
                   <div style={{ padding: "22px 26px", background: sdg.bg }}>

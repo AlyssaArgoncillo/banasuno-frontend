@@ -97,7 +97,8 @@ return {
         max: finalMax,
         averageTemp: avgTemp != null && Number.isFinite(avgTemp) ? avgTemp : undefined,
         updatedAt: typeof data.updatedAt === 'string' ? data.updatedAt : undefined,
-        count: Object.keys(temperatures).length
+        count: Object.keys(temperatures).length,
+        barangays: Array.isArray(data.barangays) ? data.barangays : undefined
       };
       }
     }
@@ -180,8 +181,62 @@ export async function fetchCityAverage(cityId = 'davao') {
 }
 
 /**
+ * GET /api/heat/counts – Heat risk counts for KPI strip.
+ * Response (200): Array<{ risk_level: number, risk_label: string, total: number }>.
+ */
+export async function fetchHeatCounts() {
+  const base = getApiBase();
+  const url = base ? `${base}/api/heat/counts` : '/api/heat/counts';
+  try {
+    const res = await fetch(url, { cache: 'no-store' });
+    if (!res.ok) return null;
+    const data = await res.json();
+    return Array.isArray(data) ? data : null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * GET /api/heat/summary – City summary: risk counts + city avg temp (for KPI strip).
+ * Query: city_id (optional, default davao), format (optional, "rows" for CSV-style).
+ * Response (200): { city_id, city_avg_temp_c, recorded_at, risk_counts: Array<{ risk_level, risk_label, total }>, ... }.
+ */
+export async function fetchHeatSummary(cityId = 'davao') {
+  const base = getApiBase();
+  const url = base ? `${base}/api/heat/summary?city_id=${encodeURIComponent(cityId)}` : `/api/heat/summary?city_id=${encodeURIComponent(cityId)}`;
+  try {
+    const res = await fetch(url, { cache: 'no-store' });
+    if (!res.ok) return null;
+    return await res.json();
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * GET /api/historical-trends – Past data for Historical Trends chart (not forecast).
+ * Query: city_id (default davao), days (7 or 14), limit, sync (optional).
+ * Response (200): { city_id, rows: Array<{ recorded_at, city_avg_temp_c, ... }>, trend_7d_avg_c, trend_14d_avg_c, summary }.
+ * Rows are most recent first.
+ */
+export async function fetchHistoricalTrends(cityId = 'davao', days = 7) {
+  const base = getApiBase();
+  const safeDays = days === 14 ? 14 : 7;
+  const url = base ? `${base}/api/historical-trends?city_id=${encodeURIComponent(cityId)}&days=${safeDays}` : `/api/historical-trends?city_id=${encodeURIComponent(cityId)}&days=${safeDays}`;
+  try {
+    const res = await fetch(url, { cache: 'no-store' });
+    if (!res.ok) return null;
+    return await res.json();
+  } catch {
+    return null;
+  }
+}
+
+/**
  * GET /api/heat/:cityId/forecast – 7- or 14-day forecast. ?days=7 (default) or ?days=14.
  * Response: { forecastDay: [ { date, avgtemp_c, mintemp_c, maxtemp_c } ], ... }.
+ * Note: For Dashboard Historical Trends use fetchHistoricalTrends (past data); forecast is future.
  */
 export async function fetchCityForecast(cityId = 'davao', days = 7) {
   const base = getApiBase();

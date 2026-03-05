@@ -331,16 +331,27 @@
   visibility: visible;
 }
 
-/* 1280px+ – desktop: full sidebar */
-@media (min-width: 1280px) {
+/* Desktop: 1024px and above – full sidebar, balanced margins */
+@media (min-width: 1024px) {
   .main-interface-sidebar {
     width: 260px;
     min-width: 260px;
   }
+
+  .main-interface-content {
+    padding: 0.5rem 1rem;
+    max-width: 100%;
+  }
 }
 
-/* 1024px – larger tablets: sidebar, touch-friendly */
-@media (min-width: 769px) and (max-width: 1024px) {
+@media (min-width: 1280px) {
+  .main-interface-content {
+    padding: 0.5rem 1.5rem;
+  }
+}
+
+/* Tablet: 768px–1023px – narrower sidebar or same, smooth transition */
+@media (min-width: 768px) and (max-width: 1023px) {
   .main-interface-sidebar {
     width: 240px;
     min-width: 240px;
@@ -354,10 +365,14 @@
   .main-interface-map-area {
     min-height: 420px;
   }
+
+  .main-interface-content {
+    padding: 0.75rem 1rem;
+  }
 }
 
-/* 768px – tablets: mobile layout, hamburger */
-@media (max-width: 768px) {
+/* Mobile: up to 767px – hamburger menu, touch-friendly (44px min tap targets) */
+@media (max-width: 767px) {
   .main-interface-sidebar {
     display: none;
   }
@@ -390,9 +405,26 @@
   .main-interface-mobile-backdrop {
     display: block;
   }
+
+  .main-interface-mobile-nav-item {
+    min-height: 44px;
+    min-width: 44px;
+    padding: 0.75rem 1.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .main-interface-burger {
+    min-width: 44px;
+    min-height: 44px;
+    padding: 11px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
 }
 
-/* 412px – large Androids */
 @media (max-width: 412px) {
   .main-interface-content {
     padding: 0.875rem;
@@ -407,7 +439,6 @@
   }
 }
 
-/* 375px – standard iPhones */
 @media (max-width: 375px) {
   .main-interface-content {
     padding: 0.75rem;
@@ -418,7 +449,6 @@
   }
 }
 
-/* 320px – small phones */
 @media (max-width: 320px) {
   .main-interface-mobile-header {
     height: 52px;

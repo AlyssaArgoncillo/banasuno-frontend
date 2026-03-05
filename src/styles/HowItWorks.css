@@ -72,8 +72,8 @@
   margin: 0;
 }
 
-/* 1024px – larger tablets */
-@media (max-width: 1024px) {
+/* Tablet: 768–1023px */
+@media (max-width: 1023px) {
   .how-it-works-section {
     padding: 6rem 2rem 4rem 2rem;
   }
@@ -83,8 +83,8 @@
   }
 }
 
-/* 768px – tablets */
-@media (max-width: 768px) {
+/* Mobile: up to 767px – stack steps, 16px body text */
+@media (max-width: 767px) {
   .how-it-works-section {
     padding: 4rem 1.5rem 3rem 1.5rem;
   }
@@ -157,8 +157,8 @@
   }
 }
 
-/* 375px – standard iPhones: stack and center */
-@media (max-width: 375px) {
+/* Small mobile: stack and center steps, 16px body text */
+@media (max-width: 480px) {
   .step-item {
     flex-direction: column;
     align-items: center;
@@ -197,7 +197,7 @@
   }
 
   .step-description {
-    font-size: 0.9375rem;
+    font-size: 1rem;
   }
 }
 

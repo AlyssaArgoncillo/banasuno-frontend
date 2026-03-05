@@ -66,6 +66,10 @@
   cursor: pointer;
   transition: all 0.2s ease;
   white-space: nowrap;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .cta-button:hover {
@@ -88,17 +92,21 @@
   display: none;
 }
 
-/* Hamburger Menu */
+/* Hamburger Menu – hidden on desktop, 44px min tap target on mobile */
 .hamburger {
   display: none;
   flex-direction: column;
   justify-content: space-between;
+  align-items: center;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 10px;
+  box-sizing: border-box;
   width: 30px;
   height: 24px;
   background: transparent;
   border: none;
   cursor: pointer;
-  padding: 0;
   z-index: 101;
   transition: transform 0.3s ease;
 }
@@ -132,8 +140,15 @@
   background-color: var(--orange-500);
 }
 
-/* 768px – tablets: switch to hamburger menu */
-@media (max-width: 768px) {
+/* Tablet: 768–1023px – switch to hamburger menu */
+@media (max-width: 1023px) {
+  .header-container {
+    padding: 0 2rem;
+  }
+}
+
+/* Mobile: up to 767px – hamburger, touch-friendly (44px min tap targets) */
+@media (max-width: 767px) {
   .header {
     padding: 1.25rem 0;
   }
@@ -154,6 +169,7 @@
     display: block;
     width: 100%;
     margin-top: 1rem;
+    min-height: 44px;
   }
 
   .nav-links {
@@ -164,7 +180,7 @@
     flex-direction: column;
     background-color: var(--surface-primary);
     padding: 2rem 1.5rem;
-    gap: 1.5rem;
+    gap: 0.5rem;
     box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
     transform: translateX(100%);
     opacity: 0;
@@ -181,8 +197,11 @@
   }
 
   .nav-link {
-    font-size: 1.125rem;
-    padding: 0.75rem 0;
+    font-size: 1rem;
+    min-height: 44px;
+    padding: 0.75rem 1rem;
+    display: flex;
+    align-items: center;
     border-bottom: 1px solid var(--primary-100);
     transition: all 0.2s ease;
   }
@@ -193,7 +212,6 @@
 
   .nav-link:active {
     background-color: var(--surface-warning);
-    padding-left: 1rem;
   }
 }
 
@@ -268,15 +286,8 @@
   }
 }
 
-/* 1024px – larger tablets: ensure desktop layout */
-@media (min-width: 769px) and (max-width: 1024px) {
-  .header-container {
-    padding: 0 2rem;
-  }
-}
-
-/* 1280px+ – desktop */
-@media (min-width: 1280px) {
+/* Desktop: 1024px+ – full nav, balanced margins */
+@media (min-width: 1024px) {
   .header-container {
     padding: 0 3rem;
   }

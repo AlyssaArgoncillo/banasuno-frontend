@@ -16,7 +16,7 @@ function distanceKm(lat1, lng1, lat2, lng2) {
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 }
 
-/** Map raw API facility to UI shape and attach distance from center. */
+/** Map raw API facility to UI shape and attach distance from center. Preserves distance_meters from API for straight-line fallback. */
 function mapFacilitiesWithDistance(list, center) {
   return list.map((f) => {
     const lat = f.lat ?? f.latitude;
@@ -24,6 +24,8 @@ function mapFacilitiesWithDistance(list, center) {
     const km = (center.lat != null && center.lng != null && lat != null && lng != null)
       ? distanceKm(center.lat, center.lng, lat, lng)
       : null;
+    const metersFromApi = f.distance_meters != null && Number.isFinite(Number(f.distance_meters)) ? Number(f.distance_meters) : null;
+    const distance_meters = metersFromApi ?? (km != null ? Math.round(km * 1000) : undefined);
     return {
       id: String(f.id ?? ''),
       name: f.name ?? '',
@@ -31,6 +33,7 @@ function mapFacilitiesWithDistance(list, center) {
       facility_type: f.facility_type,
       distance: km != null ? `${km.toFixed(1)} km` : undefined,
       distance_km: km ?? undefined,
+      distance_meters: distance_meters ?? undefined,
       lat: lat ?? undefined,
       lng: lng ?? undefined,
       _distanceKm: km
@@ -76,7 +79,12 @@ export async function getHealthFacilitiesNearBarangay(barangayId, center = {}) {
       let list = Array.isArray(data.facilities) ? data.facilities : [];
       if (list.length > 0) {
         list = mapFacilitiesWithDistance(list, center);
-        return { facilities: sortByDistanceAndClean(list), isNearbyFallback: false };
+        return {
+          facilities: sortByDistanceAndClean(list),
+          isNearbyFallback: data.fallback_nearest ?? false,
+          total_label: data.total_label ?? null,
+          message: data.message ?? null
+        };
       }
       if (center.lat != null && center.lng != null) return fetchNearestInArea(center);
       return empty;

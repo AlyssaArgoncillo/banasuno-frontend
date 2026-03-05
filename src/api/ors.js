@@ -41,3 +41,34 @@ export async function fetchAccessibility(barangayIds, facilities, options = {}) 
   const data = await response.json();
   return data;
 }
+
+/**
+ * Fetch road-based directions (backend proxies OpenRouteService).
+ * POST /api/ors/directions
+ * Body: { start: [lng, lat] | { lng, lat }, end: [lng, lat] | { lng, lat }, profile?: "driving-car" | "foot-walking" | "cycling-regular" }
+ * Response (200): ORS GeoJSON FeatureCollection; features[0].geometry.coordinates (LineString [lng,lat][]), features[0].properties.summary { distance (m), duration (s) }
+ */
+export async function fetchDirections(start, end, profile = 'driving-car') {
+  const base = getApiBase();
+  const url = base ? `${base}/api/ors/directions` : '/api/ors/directions';
+  const norm = (p) => Array.isArray(p) ? { lng: p[0], lat: p[1] } : { lng: p.lng ?? p.lon, lat: p.lat };
+  const body = {
+    start: Array.isArray(start) ? start : [norm(start).lng, norm(start).lat],
+    end: Array.isArray(end) ? end : [norm(end).lng, norm(end).lat],
+    profile: ['foot-walking', 'driving-car', 'cycling-regular'].includes(profile) ? profile : 'driving-car',
+  };
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+    cache: 'no-store',
+  });
+  if (!res.ok) {
+    const errData = await res.json().catch(() => ({}));
+    const e = new Error(errData?.error ?? res.statusText);
+    e.status = res.status;
+    e.body = errData;
+    throw e;
+  }
+  return res.json();
+}
