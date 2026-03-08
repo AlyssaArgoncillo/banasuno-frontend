@@ -750,6 +750,10 @@ export default function Dashboard({ selectedZone, onFocusFacilityOnMap }) {
           .dashboard-kpi { grid-template-columns: 210px 1fr auto; align-items: center; }
         }
         .dashboard-row2 { display: grid; grid-template-columns: 1fr; gap: 16px; margin-bottom: 16px; }
+        .dashboard-clear-filters-mobile { display: none !important; }
+        @media (max-width: 768px) {
+          .dashboard-clear-filters-mobile { display: inline-flex !important; }
+        }
         .dashboard-row3 { display: block; margin-bottom: 16px; }
         .dashboard-row4 { margin-bottom: 16px; }
         @media (max-width: 899px) {
@@ -995,6 +999,30 @@ export default function Dashboard({ selectedZone, onFocusFacilityOnMap }) {
                     </span>
                   )}
                 </button>
+                {hasActiveFilters && (
+                  <button
+                    type="button"
+                    className="dashboard-clear-filters-mobile"
+                    onClick={clearBarangayFilters}
+                    style={{
+                      display: "none",
+                      alignItems: "center",
+                      gap: 6,
+                      padding: "10px 14px",
+                      minHeight: 44,
+                      borderRadius: 10,
+                      border: "none",
+                      background: "none",
+                      color: P.orange500,
+                      fontSize: 12,
+                      fontWeight: 700,
+                      cursor: noSelection ? "not-allowed" : "pointer",
+                      opacity: noSelection ? 0.7 : 1,
+                    }}
+                  >
+                    Clear all filters
+                  </button>
+                )}
               </div>
 
               <div
@@ -1749,13 +1777,26 @@ export default function Dashboard({ selectedZone, onFocusFacilityOnMap }) {
               style={{ border: "none", background: "rgba(255,255,255,0.2)", color: P.white, width: 32, height: 32, borderRadius: 8, cursor: "pointer", fontSize: 18, lineHeight: 1 }}
             >×</button>
           </div>
-          <div style={{ padding: "12px 16px", borderBottom: `1px solid ${P.gray100}` }}>
+          <div style={{ padding: "12px 16px", borderBottom: `1px solid ${P.gray100}`, display: "flex", flexWrap: "wrap", gap: 10, alignItems: "center" }}>
             <input
               value={barangayQuery}
               onChange={(e) => setBarangayQuery(e.target.value)}
               placeholder="Search barangay"
-              style={{ width: "100%", maxWidth: 380, border: `1px solid ${P.gray300}`, borderRadius: 10, padding: "12px 15px", fontSize: 15, color: P.gray900 }}
+              style={{ flex: 1, minWidth: 0, border: `1px solid ${P.gray300}`, borderRadius: 10, padding: "12px 15px", fontSize: 15, color: P.gray900 }}
             />
+            {hasActiveFilters && (
+              <button
+                type="button"
+                className="dashboard-clear-filters-mobile"
+                onClick={clearBarangayFilters}
+                style={{
+                  padding: "10px 14px", minHeight: 44, borderRadius: 10, border: "none", background: "none",
+                  color: P.orange500, fontSize: 13, fontWeight: 700, cursor: "pointer", whiteSpace: "nowrap",
+                }}
+              >
+                Clear all filters
+              </button>
+            )}
           </div>
           <div className="all-barangays-scroll" style={{ flex: 1, minHeight: 0, overflowY: "auto", padding: "0 16px 16px" }}>
             <table style={{ width: "100%", borderCollapse: "collapse", marginTop: 8 }}>

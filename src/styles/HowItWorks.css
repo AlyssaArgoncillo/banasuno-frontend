@@ -243,6 +243,36 @@
   max-width: 100%;
 }
 
+/* Single centered container for all 6 steps – grouped and evenly spaced */
+.how-it-works-steps-container {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+.how-it-works-nodes-wrap {
+  width: 100%;
+  max-width: 960px;
+  margin: 0 auto;
+}
+
+.how-it-works-nodes {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0;
+  min-width: 660px;
+  width: 100%;
+}
+
+.how-it-works-node {
+  display: flex;
+  align-items: center;
+  flex: 1 1 0;
+  min-width: 0;
+}
+
 @media (max-width: 900px) {
   .how-it-works-section {
     padding: 6rem 1.5rem 4rem 1.5rem !important;
@@ -337,10 +367,30 @@
 
   .how-it-works-header {
     padding: 16px 16px !important;
+    justify-content: center !important;
+    text-align: center !important;
+  }
+
+  .how-it-works-header .how-it-works-header-inner {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    text-align: center !important;
+    width: 100% !important;
+  }
+
+  .how-it-works-header .how-it-works-header-inner > div:first-child {
+    justify-content: center !important;
+  }
+
+  .how-it-works-header-label {
+    font-size: 9px !important;
+    text-align: center !important;
   }
 
   .how-it-works-title {
-    font-size: 16px !important;
+    font-size: 18px !important;
+    text-align: center !important;
   }
 
   .how-it-works-nodes-wrap {
@@ -366,25 +416,33 @@
   }
 
   .how-it-works-node-step-num {
-    font-size: 5px !important;
+    font-size: 7px !important;
   }
 
   .how-it-works-node-step-title {
-    font-size: 8px !important;
+    font-size: 10px !important;
   }
 
   .how-it-works-detail-header {
     padding: 12px 14px !important;
   }
 
+  .how-it-works-detail-header .how-it-works-detail-short {
+    font-size: 8px !important;
+  }
+
   .how-it-works-detail-header > div:first-child {
     width: 36px !important;
     height: 36px !important;
-    font-size: 14px !important;
+    font-size: 16px !important;
   }
 
   .how-it-works-detail-header .how-it-works-detail-title {
-    font-size: 14px !important;
+    font-size: 16px !important;
+  }
+
+  .how-it-works-detail-sources span {
+    font-size: 8px !important;
   }
 
   .how-it-works-detail-body {
@@ -396,9 +454,15 @@
   }
 
   .how-it-works-detail-body > div > div:first-child {
-    width: 18px !important;
-    height: 18px !important;
-    font-size: 9px !important;
+    width: 20px !important;
+    height: 20px !important;
+    font-size: 10px !important;
+  }
+
+  .how-it-works-detail-body span {
+    font-size: 13px !important;
+    line-height: 1.55 !important;
+    color: #212121 !important;
   }
 
   .how-it-works-footer {
@@ -406,7 +470,48 @@
   }
 
   .how-it-works-footer p {
-    font-size: 8px !important;
+    font-size: 13px !important;
+    line-height: 1.5 !important;
+  }
+}
+
+@media (max-width: 600px) {
+  /* Small screens: 2x3 grid so all 6 steps visible without horizontal scroll */
+  .how-it-works-nodes-wrap {
+    overflow-x: visible !important;
+    padding-left: 12px !important;
+    padding-right: 12px !important;
+  }
+
+  .how-it-works-nodes {
+    display: grid !important;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px 16px;
+    min-width: unset !important;
+    width: 100%;
+  }
+
+  .how-it-works-node {
+    flex: unset !important;
+    justify-content: center;
+    min-width: unset;
+  }
+
+  .how-it-works-node .how-it-works-node-btn {
+    margin: 0 auto;
+  }
+
+  .how-it-works-node-step-num {
+    font-size: 7px !important;
+  }
+
+  .how-it-works-node-step-title {
+    font-size: 10px !important;
+  }
+
+  /* Hide connector lines in grid layout */
+  .how-it-works-node-connector {
+    display: none !important;
   }
 }
 
@@ -420,15 +525,23 @@
   }
 
   .how-it-works-header-label {
-    font-size: 7px !important;
+    font-size: 9px !important;
   }
 
   .how-it-works-title {
-    font-size: 14px !important;
+    font-size: 16px !important;
+  }
+
+  .how-it-works-node-step-num {
+    font-size: 7px !important;
+  }
+
+  .how-it-works-node-step-title {
+    font-size: 10px !important;
   }
 
   .how-it-works-nodes {
-    min-width: 420px !important;
+    min-width: unset !important;
   }
 
   .how-it-works-node-btn {
@@ -447,31 +560,52 @@
   }
 
   .how-it-works-detail-header .how-it-works-detail-short {
-    font-size: 6px !important;
+    font-size: 8px !important;
   }
 
   .how-it-works-detail-header .how-it-works-detail-title {
-    font-size: 13px !important;
+    font-size: 15px !important;
   }
 
   .how-it-works-detail-sources span {
-    font-size: 6px !important;
-    padding: 2px 6px !important;
+    font-size: 8px !important;
+    padding: 3px 6px !important;
   }
 
-  .how-it-works-detail-body span {
+  .how-it-works-detail-body > div > div:first-child {
+    width: 20px !important;
+    height: 20px !important;
     font-size: 10px !important;
   }
 
+  .how-it-works-detail-body span {
+    font-size: 12px !important;
+    line-height: 1.55 !important;
+    color: #212121 !important;
+  }
+
   .how-it-works-footer p {
-    font-size: 8px !important;
-    line-height: 1.4 !important;
+    font-size: 12px !important;
+    line-height: 1.5 !important;
   }
 }
 
 @media (max-width: 360px) {
+  /* Keep 2x3 grid from 600px; no min-width so grid layout holds */
   .how-it-works-nodes {
-    min-width: 360px !important;
+    min-width: unset !important;
+  }
+
+  .how-it-works-title {
+    font-size: 15px !important;
+  }
+
+  .how-it-works-node-step-num {
+    font-size: 6px !important;
+  }
+
+  .how-it-works-node-step-title {
+    font-size: 9px !important;
   }
 
   .how-it-works-node-btn {
@@ -482,5 +616,18 @@
     width: 36px !important;
     height: 36px !important;
     font-size: 12px !important;
+  }
+
+  .how-it-works-detail-header .how-it-works-detail-title {
+    font-size: 14px !important;
+  }
+
+  .how-it-works-detail-body span {
+    font-size: 11px !important;
+    color: #212121 !important;
+  }
+
+  .how-it-works-footer p {
+    font-size: 11px !important;
   }
 }

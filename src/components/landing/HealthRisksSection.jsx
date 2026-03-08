@@ -1,6 +1,16 @@
+import { useState } from 'react';
 import '../../styles/HealthRisksSection.css';
 
 function HealthRisksSection() {
+  const [expandedCards, setExpandedCards] = useState(new Set());
+  const toggleCard = (index) => {
+    setExpandedCards((prev) => {
+      const next = new Set(prev);
+      if (next.has(index)) next.delete(index);
+      else next.add(index);
+      return next;
+    });
+  };
   const healthRisks = [
     {
       title: 'Heat Exhaustion',
@@ -27,16 +37,34 @@ function HealthRisksSection() {
       <div className="health-risks-container">
         <h2 className="health-risks-heading">Possible Health Risks</h2>
         <div className="health-risks-cards">
-          {healthRisks.map((risk, index) => (
-            <div key={index} className={`card ${risk.colorClass}`}>
-              <div className="overlay"></div>
-              <div className="circle">
-                <img src={risk.icon} alt={risk.title} className="icon" />
+          {healthRisks.map((risk, index) => {
+            const isExpanded = expandedCards.has(index);
+            return (
+              <div
+                key={index}
+                className={`card ${risk.colorClass}${isExpanded ? ' card-expanded' : ''}`}
+                onClick={(e) => { e.stopPropagation(); toggleCard(index); }}
+                onKeyDown={(ev) => {
+                  if (ev.key === 'Enter' || ev.key === ' ') {
+                    ev.preventDefault();
+                    ev.stopPropagation();
+                    toggleCard(index);
+                  }
+                }}
+                role="button"
+                tabIndex={0}
+                aria-expanded={isExpanded}
+                aria-label={isExpanded ? `Collapse ${risk.title}` : `Expand ${risk.title}`}
+              >
+                <div className="overlay" aria-hidden />
+                <div className="circle">
+                  <img src={risk.icon} alt="" className="icon" />
+                </div>
+                <p className="card-title">{risk.title}</p>
+                <p className="card-description">{risk.description}</p>
               </div>
-              <p className="card-title">{risk.title}</p>
-              <p className="card-description">{risk.description}</p>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
     </section>

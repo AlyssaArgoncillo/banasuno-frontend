@@ -61,6 +61,7 @@ const HeatMap = ({ compact = false, selectedZone: propSelectedZone, onZoneSelect
   /** Debounce timer for profile changes while a route is active. */
   const profileChangeTimeoutRef = useRef(null);
   const [heatIndexLegendOpen, setHeatIndexLegendOpen] = useState(false);
+  const [heatIndexMobileOpen, setHeatIndexMobileOpen] = useState(false);
   const [focusFacilityMarkerVisible, setFocusFacilityMarkerVisible] = useState(false);
 
   /** Haversine distance in km for route tooltip. */
@@ -87,6 +88,17 @@ const HeatMap = ({ compact = false, selectedZone: propSelectedZone, onZoneSelect
       if (profileChangeTimeoutRef.current) clearTimeout(profileChangeTimeoutRef.current);
     };
   }, []);
+
+  // Mobile: when a barangay is selected, scroll the info panel into view so it is visible
+  useEffect(() => {
+    if (!selectedZone) return;
+    const isMobile = typeof window !== 'undefined' && window.matchMedia('(max-width: 768px)').matches;
+    if (!isMobile) return;
+    const id = setTimeout(() => {
+      zoneInfoCardRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start', inline: 'nearest' });
+    }, 150);
+    return () => clearTimeout(id);
+  }, [selectedZone]);
 
   // When redirected from Dashboard (e.g. Health Facility Directory "Map" button), fly to facility location and show a location-pin marker
   useEffect(() => {
@@ -690,48 +702,6 @@ const HeatMap = ({ compact = false, selectedZone: propSelectedZone, onZoneSelect
           </div>
         )}
 
-        {!compact && selectedZone && (
-          <div className="zone-info-card-wrapper" ref={zoneInfoCardRef}>
-            <ZoneInfoCard
-              zoneName={selectedZone.name}
-              temperature={selectedZone.temperature}
-              riskLevel={selectedZone.riskLevel}
-              riskScore={selectedZone.riskScore}
-              facilities={selectedZone.facilities}
-              isNearbyFallback={selectedZone.isNearbyFallback}
-              facilitiesLoading={selectedZone.facilitiesLoading}
-              facilitiesTotalLabel={selectedZone.facilitiesTotalLabel}
-              onClose={() => { setSelectedZone(null); setAccessibilityData(null); setRouteToFacility(null); setRouteGeometry(null); setRouteSummary(null); }}
-              highlightedFacilityId={routeToFacility?.id}
-              onGoToDashboard={onGoToDashboard}
-              onShowRoute={(fac, profileOverride) => handleShowRoute(fac, profileOverride, routeOrigin === 'user')}
-              onExitRoute={() => { setRouteToFacility(null); setRouteGeometry(null); setRouteSummary(null); }}
-              routeProfile={routeProfile}
-              onRouteProfileChange={(p) => {
-                setRouteProfile(p);
-                if (!routeToFacility) return;
-                if (profileChangeTimeoutRef.current) clearTimeout(profileChangeTimeoutRef.current);
-                profileChangeTimeoutRef.current = setTimeout(() => {
-                  if (routeToFacility) handleShowRoute(routeToFacility, p, routeOrigin === 'user');
-                }, 300);
-              }}
-              routeSummary={routeSummary}
-              routeLoading={routeLoading}
-              routeSummaryByFacilityId={routeSummaryByFacilityId}
-              routeErrorByFacilityId={routeErrorByFacilityId}
-              routeOrigin={routeOrigin}
-              onRouteOriginChange={(origin) => {
-                setRouteOrigin(origin);
-                setRouteToFacility(null);
-                setRouteGeometry(null);
-                setRouteSummary(null);
-              }}
-              routeFromLabel={routeToFacility ? (routeOrigin === 'user' ? 'Routing from your location' : `Routing from ${selectedZone?.name ?? 'Barangay'}`) : null}
-              locationStatusForRoute={locationStatusForRoute}
-            />
-          </div>
-        )}
-
         {/* Exit facility location button – shown when viewing a facility from the directory */}
         {focusFacilityMarkerVisible && (
           <div className="heatmap-exit-facility-wrap">
@@ -861,17 +831,28 @@ const HeatMap = ({ compact = false, selectedZone: propSelectedZone, onZoneSelect
               )}
             </div>
           </div>
-          <div className="heatmap-bottom-legend">
-            <h3 className="heatmap-bottom-legend-title">Heat Index (PAGASA)</h3>
-            <ul className="heatmap-bottom-legend-list">
-              {HEAT_RISK_LEVELS.map((r) => (
-                <li key={r.level} className="heatmap-bottom-legend-item" style={{ '--risk-color': r.color }}>
-                  <span className="heatmap-index-dot" style={{ background: r.color }} />
-                  <span className="heatmap-index-range">{r.rangeLabel}</span>
-                  <span className="heatmap-index-label">{r.label}</span>
-                </li>
-              ))}
-            </ul>
+          <div className={`heatmap-bottom-legend ${heatIndexMobileOpen ? 'heatmap-bottom-legend--open' : 'heatmap-bottom-legend--closed'}`}>
+            <button
+              type="button"
+              className="heatmap-bottom-legend-trigger"
+              onClick={() => setHeatIndexMobileOpen((o) => !o)}
+              aria-expanded={heatIndexMobileOpen}
+              aria-label={heatIndexMobileOpen ? 'Hide Heat Index (PAGASA)' : 'Show Heat Index (PAGASA)'}
+            >
+              <h3 className="heatmap-bottom-legend-title">Heat Index (PAGASA)</h3>
+              <span className="heatmap-bottom-legend-chevron" aria-hidden>{heatIndexMobileOpen ? '▼' : '▶'}</span>
+            </button>
+            <div className="heatmap-bottom-legend-content">
+              <ul className="heatmap-bottom-legend-list">
+                {HEAT_RISK_LEVELS.map((r) => (
+                  <li key={r.level} className="heatmap-bottom-legend-item" style={{ '--risk-color': r.color }}>
+                    <span className="heatmap-index-dot" style={{ background: r.color }} />
+                    <span className="heatmap-index-range">{r.rangeLabel}</span>
+                    <span className="heatmap-index-label">{r.label}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
           </div>
           <div className="heatmap-zoom-controls heatmap-zoom-controls-mobile">
             <button type="button" className="heatmap-zoom-btn" onClick={() => mapInstanceRef.current?.zoomIn()} aria-label="Zoom in">
@@ -889,6 +870,54 @@ const HeatMap = ({ compact = false, selectedZone: propSelectedZone, onZoneSelect
           </div>
         </div>
       </div>
+
+      {/* Barangay info: always outside map container. Desktop = overlay; mobile = proper card section below map. */}
+      {!compact && selectedZone && (
+        <section
+          id="heatmap-barangay-card"
+          className="heatmap-barangay-card-section zone-info-card-wrapper"
+          ref={zoneInfoCardRef}
+          aria-label="Barangay details"
+        >
+          <ZoneInfoCard
+            zoneName={selectedZone.name}
+            temperature={selectedZone.temperature}
+            riskLevel={selectedZone.riskLevel}
+            riskScore={selectedZone.riskScore}
+            facilities={selectedZone.facilities}
+            isNearbyFallback={selectedZone.isNearbyFallback}
+            facilitiesLoading={selectedZone.facilitiesLoading}
+            facilitiesTotalLabel={selectedZone.facilitiesTotalLabel}
+            onClose={() => { setSelectedZone(null); setAccessibilityData(null); setRouteToFacility(null); setRouteGeometry(null); setRouteSummary(null); }}
+            highlightedFacilityId={routeToFacility?.id}
+            onGoToDashboard={onGoToDashboard}
+            onShowRoute={(fac, profileOverride) => handleShowRoute(fac, profileOverride, routeOrigin === 'user')}
+            onExitRoute={() => { setRouteToFacility(null); setRouteGeometry(null); setRouteSummary(null); }}
+            routeProfile={routeProfile}
+            onRouteProfileChange={(p) => {
+              setRouteProfile(p);
+              if (!routeToFacility) return;
+              if (profileChangeTimeoutRef.current) clearTimeout(profileChangeTimeoutRef.current);
+              profileChangeTimeoutRef.current = setTimeout(() => {
+                if (routeToFacility) handleShowRoute(routeToFacility, p, routeOrigin === 'user');
+              }, 300);
+            }}
+            routeSummary={routeSummary}
+            routeLoading={routeLoading}
+            routeSummaryByFacilityId={routeSummaryByFacilityId}
+            routeErrorByFacilityId={routeErrorByFacilityId}
+            routeOrigin={routeOrigin}
+            onRouteOriginChange={(origin) => {
+              setRouteOrigin(origin);
+              setRouteToFacility(null);
+              setRouteGeometry(null);
+              setRouteSummary(null);
+            }}
+            routeFromLabel={routeToFacility ? (routeOrigin === 'user' ? 'Routing from your location' : `Routing from ${selectedZone?.name ?? 'Barangay'}`) : null}
+            locationStatusForRoute={locationStatusForRoute}
+          />
+        </section>
+      )}
     </div>
   );
 };

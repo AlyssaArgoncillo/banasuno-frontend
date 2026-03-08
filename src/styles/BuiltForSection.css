@@ -326,6 +326,7 @@
     width: 100%;
     max-width: 100%;
     left: 50%;
+    transform: translate(-50%, calc(-50% - 0.5rem));
   }
 
   .need-icon {
@@ -390,6 +391,11 @@
 
   .need-provide-content p {
     font-size: 1rem;
+  }
+
+  /* Pull "NGOs & Community" (second row) up slightly on mobile */
+  .built-for-content > div:nth-child(2) > div:nth-child(2) {
+    margin-top: -1.5rem;
   }
 }
 

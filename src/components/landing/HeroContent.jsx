@@ -12,8 +12,7 @@ function HeroContent() {
       </h1>
 
       <p className="hero-description">
-        Real-time heat risk mapping that shows you where it's hot, why it matters,
-        and where to find help when you need it most.
+        Heat information made simple and local. See which neighborhoods are hotter, understand the risk using official heat levels, and find nearby health facilities — all in one interactive map.
       </p>
 
       <div className="scroll-indicator">
