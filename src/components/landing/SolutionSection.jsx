@@ -94,7 +94,7 @@ function SolutionSection() {
             </p>
           </div>
           <div className="subsection-image">
-            <img src="/historical.png" alt="Data Analytics" />
+            <img src="/historicaltrends.png" alt="Data Analytics" />
           </div>
         </div>
       </div>

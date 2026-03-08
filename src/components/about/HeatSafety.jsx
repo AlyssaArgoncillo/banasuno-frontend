@@ -1,6 +1,19 @@
+import { useState } from 'react';
 import '../../styles/HeatSafety.css';
 
 function HeatSafety() {
+  const [expandedCard, setExpandedCard] = useState(null);
+
+  const handleCardClick = (index) => {
+    setExpandedCard((prev) => {
+      const next = prev === index ? null : index;
+      if (next === null && document.activeElement?.closest?.('.heat-safety-section .card')) {
+        document.activeElement?.blur?.();
+      }
+      return next;
+    });
+  };
+
   const cards = [
     {
       title: 'Hydrate',
@@ -41,8 +54,22 @@ function HeatSafety() {
       <h1 className="heat-safety-title">STAY SAFE IN THIS HEAT</h1>
       <div className="cards-container">
         {cards.map((card, index) => (
-          <div key={index} className="card">
-            <img src={card.image} alt={card.title} />
+          <div
+            key={index}
+            className={`card${expandedCard === index ? ' expanded' : ''}`}
+            onClick={() => handleCardClick(index)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                handleCardClick(index);
+              }
+            }}
+            role="button"
+            tabIndex={0}
+            aria-expanded={expandedCard === index}
+            aria-label={`${card.title}, click to ${expandedCard === index ? 'collapse' : 'expand'} tips`}
+          >
+            <img src={card.image} alt="" />
             <section>
               <h2>{card.title}</h2>
               {Array.isArray(card.description) ? (

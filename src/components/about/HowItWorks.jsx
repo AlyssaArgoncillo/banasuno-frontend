@@ -157,7 +157,7 @@ function HowItWorks() {
   const sc = active !== null ? stepColors[active] : null;
 
   return (
-    <section className="how-it-works-section" style={{  }}>
+    <section id="how-it-works" className="how-it-works-section" style={{  }}>
             <style>{`
         @keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes pulse  { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.5;transform:scale(1.4)} }
@@ -202,14 +202,15 @@ function HowItWorks() {
           </div>
         </div>
 
-        {/* ── PIPELINE NODES ── */}
-        <div className="how-it-works-nodes-wrap" style={{ padding: "28px 24px 16px", overflowX: "auto" }}>
-          <div className="how-it-works-nodes" style={{ display: "flex", alignItems: "flex-start", gap: 0, minWidth: 660 }}>
-            {steps.map((step, i) => {
-              const isAct = active === i;
-              const sc2   = stepColors[i];
-              return (
-                <div key={i} className="how-it-works-node" style={{ display: "flex", alignItems: "center", flex: 1, minWidth: 0 }}>
+        {/* ── PIPELINE NODES (single centered container, evenly spaced) ── */}
+        <div className="how-it-works-steps-container">
+          <div className="how-it-works-nodes-wrap" style={{ padding: "28px 24px 16px", overflowX: "auto" }}>
+            <div className="how-it-works-nodes">
+              {steps.map((step, i) => {
+                const isAct = active === i;
+                const sc2   = stepColors[i];
+                return (
+                  <div key={i} className="how-it-works-node">
 
                   <button
                     type="button"
@@ -241,7 +242,7 @@ function HowItWorks() {
                     <div className="how-it-works-node-step-num" style={{
                       fontSize: 7, fontWeight: 700,
                       letterSpacing: "0.1em",
-                      color: isAct ? sc2.color : P.orange100,
+                      color: isAct ? sc2.color : P.orange700,
                       textAlign: "center", transition: "color 0.2s",
                     }}>
                       STEP {step.num}
@@ -258,11 +259,14 @@ function HowItWorks() {
                   </button>
 
                   {i < steps.length - 1 && (
-                    <div style={{
-                      flex: 1, height: 2, background: P.orange100,
-                      position: "relative", overflow: "hidden",
-                      margin: "0 2px", marginBottom: 42, borderRadius: 1,
-                    }}>
+                    <div
+                      className="how-it-works-node-connector"
+                      style={{
+                        flex: 1, height: 2, background: P.orange100,
+                        position: "relative", overflow: "hidden",
+                        margin: "0 2px", marginBottom: 42, borderRadius: 1,
+                      }}
+                    >
                       <div style={{
                         position: "absolute", top: 0, left: 0, height: "100%", width: "35%",
                         background: `linear-gradient(90deg, transparent, ${sc2.color}, ${sc2.light}, transparent)`,
@@ -273,6 +277,7 @@ function HowItWorks() {
                 </div>
               );
             })}
+            </div>
           </div>
         </div>
 
@@ -324,8 +329,8 @@ function HowItWorks() {
                   </div>
                 </div>
 
-                <div className="how-it-works-detail-sources" style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 6, flexShrink: 0 }}>
-                  <div style={{ display: "flex", gap: 5, flexWrap: "wrap", justifyContent: "flex-end", maxWidth: 280 }}>
+                <div className="how-it-works-detail-sources" style={{ display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 6, flexShrink: 0 }}>
+                  <div style={{ display: "flex", gap: 5, flexWrap: "wrap", justifyContent: "flex-start", maxWidth: 280 }}>
                     {s.sources.map((src, si) => (
                       <span key={si} style={{
                         fontSize: 7, fontWeight: 700,

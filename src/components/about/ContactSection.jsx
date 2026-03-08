@@ -11,16 +11,16 @@ const team = [
   {
     id: 1,
     name: "Alyssa Nicole A. Argoncillo",
-    role: "Project Lead & System Developer",
-    bio: "Leads system architecture and end-to-end development of the BanasUno platform.",
+    role: "Backend & Frontend Designer",
+    bio: "Leads backend development (APIs, data sourcing, and core logic), frontend styling and branding, plus repository management, framework decisions, and integration oversight.",
     image: "/Ar.jpg",
     github: "https://github.com/AlyssaArgoncillo",
   },
   {
     id: 2,
     name: "Kisha Ann Joy M. Sanchez",
-    role: "Data Analyst & UI Documentation Lead",
-    bio: "Drives data analysis pipelines and maintains comprehensive UI documentation standards.",
+    role: "UI/UX & Integration Developer",
+    bio: "Drives frontend and UI/UX implementation, AI integration and backend refinement, and documentation of sources, citations, and design choices for traceability.",
     image: "/KS2.jpg",
     github: "https://github.com/KishaSanchez",
   },
@@ -133,30 +133,51 @@ export default function ContactSection() {
         }
         @media (max-width: 768px) {
           .contact-section-wrapper { padding: 4rem 1.5rem 6rem 1.5rem !important; }
+          .contact-main { display: flex !important; flex-direction: column !important; align-items: center !important; }
           .contact-container {
             grid-template-columns: 1fr !important;
             min-height: auto !important;
+            width: 100% !important;
           }
           .contact-left, .contact-right {
             border-right: none !important;
             border-bottom: 1px solid rgba(255,107,26,0.15) !important;
             padding: 2rem 1.5rem !important;
+            display: flex !important;
+            flex-direction: column !important;
+            align-items: center !important;
+            text-align: center !important;
           }
           .contact-right {
             border-bottom: none !important;
             padding-top: 2rem !important;
           }
+          .contact-left > div:first-child,
+          .contact-right > div:first-child { align-self: center !important; }
           .contact-heading {
             font-size: 28px !important;
+            text-align: center !important;
           }
           .contact-desc {
             font-size: 13px !important;
+            text-align: center !important;
+          }
+          .contact-left > div:last-child {
+            display: flex !important;
+            flex-direction: column !important;
+            align-items: center !important;
+            width: 100% !important;
           }
           .contact-card-item {
             flex-direction: row !important;
             padding: 1rem 1.25rem !important;
             gap: 1rem !important;
+            align-items: center !important;
+            text-align: center !important;
+            width: 100% !important;
+            max-width: 100% !important;
           }
+          .contact-card-item .contact-card-text { text-align: center !important; }
           .contact-card-item .contact-icon-wrap {
             width: 48px !important;
             height: 48px !important;
@@ -172,11 +193,19 @@ export default function ContactSection() {
             width: 22px !important;
             height: 22px !important;
           }
+          .contact-right > div:last-child {
+            display: flex !important;
+            flex-direction: column !important;
+            align-items: center !important;
+            width: 100% !important;
+          }
           .contact-team-card {
             flex-direction: column !important;
-            align-items: flex-start !important;
+            align-items: center !important;
             padding: 1.25rem !important;
             gap: 1rem !important;
+            width: 100% !important;
+            max-width: 100% !important;
           }
           .contact-team-card .team-avatar-wrap {
             width: 72px !important;
@@ -189,31 +218,47 @@ export default function ContactSection() {
             max-width: 72px !important;
             max-height: 72px !important;
           }
+          .contact-team-card .contact-team-content {
+            display: flex !important;
+            flex-direction: column !important;
+            align-items: center !important;
+            text-align: center !important;
+            width: 100% !important;
+          }
           .contact-team-card .contact-team-content .contact-team-name { font-size: 14px !important; }
           .contact-team-card .contact-team-content .contact-team-role { font-size: 12px !important; }
           .contact-team-card .contact-team-content .contact-team-bio { font-size: 12px !important; padding: 8px 10px !important; }
         }
         @media (max-width: 480px) {
           .contact-section-wrapper { padding: 3rem 1rem 5rem 1rem !important; }
+          .contact-main { display: flex !important; flex-direction: column !important; align-items: center !important; }
           .contact-container {
             border-radius: 16px !important;
           }
           .contact-left, .contact-right {
             padding: 1.5rem 1rem !important;
+            align-items: center !important;
+            text-align: center !important;
           }
+          .contact-left > div:first-child,
+          .contact-right > div:first-child { align-self: center !important; }
           .contact-heading {
             font-size: 22px !important;
             line-height: 1.2 !important;
+            text-align: center !important;
           }
           .contact-desc {
             font-size: 12px !important;
+            text-align: center !important;
           }
+          .contact-left > div:last-child { align-items: center !important; }
           .contact-card-item {
             flex-direction: column !important;
-            align-items: flex-start !important;
-            text-align: left !important;
+            align-items: center !important;
+            text-align: center !important;
             padding: 1rem !important;
           }
+          .contact-card-item .contact-card-text { text-align: center !important; }
           .contact-card-item .contact-icon-wrap {
             width: 44px !important;
             height: 44px !important;
@@ -231,6 +276,11 @@ export default function ContactSection() {
           .contact-team-card .team-avatar-wrap > div {
             max-width: 64px !important;
             max-height: 64px !important;
+          }
+          .contact-team-card .contact-team-content {
+            align-items: center !important;
+            text-align: center !important;
+            width: 100% !important;
           }
           .contact-team-card .contact-team-content .contact-team-name { font-size: 13px !important; }
           .contact-team-card .contact-team-content .contact-team-role { font-size: 11px !important; }

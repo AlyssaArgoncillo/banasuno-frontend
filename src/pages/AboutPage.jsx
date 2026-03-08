@@ -156,7 +156,7 @@ function AboutPage() {
         <div className="about-detail-sections-wrap">
 
           {/* BENTO: PURPOSE + QUOTE */}
-          <div className="about-detail-bento">
+          <div id="purpose" className="about-detail-bento">
             <div style={{ background: `linear-gradient(135deg, ${P.orange700} 0%, ${P.orange500} 100%)`, borderRadius: 20, padding: "30px 32px", position: "relative", overflow: "hidden" }}>
               <div style={{ position: "absolute", right: -30, bottom: -30, width: 140, height: 140, borderRadius: "50%", border: "28px solid rgba(255,255,255,0.08)" }} />
               <div style={{ position: "absolute", left: -20, top: -20, width: 90, height: 90, borderRadius: "50%", border: "20px solid rgba(255,255,255,0.05)" }} />
@@ -168,7 +168,7 @@ function AboutPage() {
               <p style={{ fontSize: 13, color: "rgba(255,255,255,0.82)", lineHeight: 1.8, margin: 0 }}>{purpose}</p>
             </div>
             <div style={{ background: P.yellow50, border: `1.5px solid ${P.yellow100}`, borderRadius: 20, padding: "28px 26px", display: "flex", flexDirection: "column", justifyContent: "center" }}>
-              <div style={{ fontSize: 40, lineHeight: 1, marginBottom: 12, fontFamily: "Georgia, serif", color: P.orange700, opacity: 0.25 }}>"</div>
+              <div className="about-quote-mark" style={{ fontSize: 40, lineHeight: 1, marginBottom: 12, fontFamily: "Georgia, serif", color: P.orange700, opacity: 0.25 }}>"</div>
               <p style={{ fontStyle: "italic", fontSize: 13.5, color: P.gray700, lineHeight: 1.75, margin: 0 }}>
                 {overview.p2}
               </p>
@@ -187,7 +187,7 @@ function AboutPage() {
           </div>
 
           {/* OBJECTIVES */}
-          <div style={{ marginBottom: 48 }}>
+          <div id="objectives" style={{ marginBottom: 48 }}>
             <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 24 }}>
               <div style={{ width: 4, alignSelf: "stretch", background: P.orange500, borderRadius: 2, flexShrink: 0 }} />
               <div style={{ width: 38, height: 38, borderRadius: 10, background: P.gray900, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, color: P.white }}>
@@ -207,7 +207,7 @@ function AboutPage() {
                   style={{
                     display: "flex", gap: 14, alignItems: "flex-start",
                     padding: "14px 18px",
-                    background: hovObj === i ? P.white : (i % 2 === 0 ? P.cream : P.white),
+                    background: P.white,
                     border: `1.5px solid ${hovObj === i ? P.orange100 : P.creamBorder}`,
                     borderRadius: 12,
                     boxShadow: hovObj === i ? "0 4px 16px rgba(255,107,26,0.08)" : "none",
@@ -269,14 +269,14 @@ function AboutPage() {
               </button>
               {openDisc && (
                 <div style={{ padding: "20px 24px", background: P.white, animation: "fadeUp 0.25s both", borderTop: `1px solid ${P.yellow100}` }}>
-                  <p style={{ fontSize: 13, color: P.gray700, lineHeight: 1.85, margin: 0 }}>{disclaimer}</p>
+                  <p style={{ fontSize: 15, color: P.gray700, lineHeight: 1.9, margin: 0 }}>{disclaimer}</p>
                 </div>
               )}
             </div>
           </div>
 
           {/* STRATEGIC GOALS / SDG */}
-          <div>
+          <div id="sdgs">
             <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 24 }}>
               <div style={{ width: 4, alignSelf: "stretch", background: P.orange500, borderRadius: 2, flexShrink: 0 }} />
               <div style={{ width: 38, height: 38, borderRadius: 10, background: P.blue700, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, color: P.white }}>

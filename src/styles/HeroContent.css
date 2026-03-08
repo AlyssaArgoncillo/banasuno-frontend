@@ -98,6 +98,8 @@
 @media (max-width: 768px) {
   .hero-content {
     gap: 2rem;
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
   }
 
   .hero-heading {

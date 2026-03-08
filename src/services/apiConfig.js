@@ -9,12 +9,29 @@
 const LIVE_BACKEND_URL = 'https://banasuno-backend.vercel.app';
 
 export function getApiBase() {
+  // Debug: log env values (production and dev)
+  const env = typeof import.meta !== 'undefined' ? import.meta.env : {};
+  console.log('[apiConfig] import.meta.env:', {
+    VITE_USE_PROXY: env.VITE_USE_PROXY,
+    VITE_API_URL: env.VITE_API_URL,
+    MODE: env.MODE,
+    DEV: env.DEV,
+    PROD: env.PROD,
+  });
+
   const useProxy = typeof import.meta !== 'undefined' && (import.meta.env?.VITE_USE_PROXY === 'true' || import.meta.env?.VITE_USE_PROXY === '1');
-  if (useProxy) return '';
+  if (useProxy) {
+    console.log('[apiConfig] getApiBase: using proxy (returning "")');
+    return '';
+  }
   const raw = typeof import.meta !== 'undefined' && import.meta.env?.VITE_API_URL;
   const url = typeof raw === 'string' ? raw.trim().replace(/\/+$/, '') : '';
   const invalid = !url || url === 'undefined' || url === 'null';
-  if (!invalid && (url.startsWith('http://') || url.startsWith('https://'))) return url;
+  if (!invalid && (url.startsWith('http://') || url.startsWith('https://'))) {
+    console.log('[apiConfig] getApiBase: resolved to VITE_API_URL:', url);
+    return url;
+  }
+  console.log('[apiConfig] getApiBase: falling back to LIVE_BACKEND_URL:', LIVE_BACKEND_URL);
   return LIVE_BACKEND_URL;
 }
 

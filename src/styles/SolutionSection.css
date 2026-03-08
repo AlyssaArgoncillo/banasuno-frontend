@@ -112,6 +112,10 @@
   align-items: stretch;
 }
 
+.das-subsection .subsection-image {
+  padding-bottom: 3.5rem;
+}
+
 .subsection {
   display: flex;
   gap: 0;

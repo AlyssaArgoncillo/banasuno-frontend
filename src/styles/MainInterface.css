@@ -409,21 +409,27 @@
 
   .main-interface-body {
     padding-top: 56px;
-    height: 100vh;
     min-height: 100vh;
+    height: auto;
     box-sizing: border-box;
-    overflow: hidden;
+    overflow-y: auto;
+    overflow-x: hidden;
   }
 
   .main-interface-content {
     padding: 1rem;
     min-height: 0;
-    height: 100%;
+    flex: 1 1 auto;
   }
 
   .main-interface-map-area {
-    min-height: min(calc(100vh - 56px - 2rem), 520px);
     flex: 1 1 auto;
+    min-height: min(calc(100vh - 56px - 2rem), 520px);
+  }
+
+  .main-interface-content-card {
+    flex: 1 1 auto;
+    min-height: 0;
   }
 
   .main-interface-mobile-header {
@@ -450,6 +456,15 @@
   .main-interface-burger {
     min-width: 44px;
     min-height: 44px;
+  }
+}
+
+/* At 768px: heat map shows card below map; allow page scroll so full card is visible */
+@media (max-width: 768px) {
+  .main-interface-body {
+    overflow-y: auto;
+    overflow-x: hidden;
+    height: auto;
   }
 }
 

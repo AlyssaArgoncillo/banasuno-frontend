@@ -112,6 +112,15 @@
   .about-detail-sections p {
     font-size: 1rem;
   }
+
+  .about-quote-mark {
+    margin-bottom: 0 !important;
+    line-height: 0.85 !important;
+  }
+
+  .about-detail-bento > div:last-child .about-quote-mark + p {
+    margin-top: -2px !important;
+  }
 }
 
 @media (max-width: 375px) {

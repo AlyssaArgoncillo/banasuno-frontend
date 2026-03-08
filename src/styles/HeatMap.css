@@ -5,6 +5,7 @@
 }
 
 .heatmap-wrapper {
+  position: relative;
   width: 100%;
   height: 100%;
   min-height: 0;
@@ -88,8 +89,8 @@
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
 }
 
-/* Zone info panel: always stays inside map; list scrolls when long */
-.heatmap-container .zone-info-card-wrapper {
+/* Zone info panel: lives OUTSIDE map container (sibling). Desktop = overlay via CSS; mobile = below map. */
+.heatmap-wrapper > .zone-info-card-wrapper {
   position: absolute;
   right: 16px;
   top: 16px;
@@ -102,7 +103,7 @@
   min-height: 0;
 }
 
-.heatmap-container .zone-info-card-wrapper .zone-info-card {
+.heatmap-wrapper > .zone-info-card-wrapper .zone-info-card {
   flex: 1 1 0;
   min-height: 0;
   max-height: 100%;
@@ -898,7 +899,7 @@
   height: 14px;
 }
 
-/* Mobile only: heat index legend at bottom – compact panel (not full width) */
+/* Mobile only: heat index legend at bottom – compact panel (not full width); collapsible */
 .heatmap-mobile-ui .heatmap-bottom-legend {
   position: absolute;
   bottom: 8px;
@@ -906,12 +907,31 @@
   right: auto;
   width: auto;
   max-width: min(320px, 80%);
-  padding: 8px 12px 10px;
+  padding: 0;
   background: rgba(255, 255, 255, 0.96);
   backdrop-filter: blur(8px);
   border: 1px solid var(--primary-100);
   z-index: 1000;
   border-radius: 10px;
+  overflow: hidden;
+}
+
+.heatmap-mobile-ui .heatmap-bottom-legend-trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 5px 8px 6px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font: inherit;
+  text-align: left;
+  gap: 6px;
+}
+
+.heatmap-mobile-ui .heatmap-bottom-legend-trigger:hover {
+  background: rgba(0, 0, 0, 0.03);
 }
 
 .heatmap-mobile-ui .heatmap-bottom-legend-title {
@@ -921,7 +941,28 @@
   color: var(--primary-800);
   text-transform: uppercase;
   letter-spacing: 0.04em;
-  margin: 0 0 6px 0;
+  margin: 0;
+}
+
+.heatmap-mobile-ui .heatmap-bottom-legend-chevron {
+  font-size: 10px;
+  color: var(--primary-600);
+  flex-shrink: 0;
+}
+
+.heatmap-mobile-ui .heatmap-bottom-legend-content {
+  overflow: hidden;
+  max-height: 0;
+  transition: max-height 0.3s ease;
+}
+
+.heatmap-mobile-ui .heatmap-bottom-legend--open .heatmap-bottom-legend-content {
+  max-height: 220px;
+}
+
+.heatmap-mobile-ui .heatmap-bottom-legend-content .heatmap-bottom-legend-list {
+  padding: 0 8px 6px;
+  margin: 0;
 }
 
 .heatmap-mobile-ui .heatmap-bottom-legend-list {
@@ -1031,11 +1072,140 @@
   }
 }
 
-/* Mobile: map overlays and controls (mobile UI); allow map to fill and page to scroll */
+/* Mobile: map full size (original dimensions); barangay info as separate section BELOW map – no overlay */
 @media (max-width: 768px) {
+  /* Wrapper grows with content so map + card stack; no fixed height so card sits in flow below map */
   .heatmap-wrapper {
     padding: 6px;
-    min-height: min(400px, calc(100vh - 56px - 2rem - 12px));
+    height: auto;
+    min-height: 0;
+  }
+
+  /* Map occupies its own space at top – larger height so users see more map area */
+  .heatmap-wrapper > .heatmap-container {
+    flex: 0 0 auto;
+    min-height: min(65vh, 520px);
+    height: min(65vh, 520px);
+  }
+
+  /* Barangay card section: strictly BELOW map, zero overlap. Override any absolute positioning from other CSS. */
+  .heatmap-wrapper > .heatmap-barangay-card-section.zone-info-card-wrapper {
+    position: static !important;
+    top: auto !important;
+    right: auto !important;
+    bottom: auto !important;
+    left: auto !important;
+    z-index: auto;
+    width: 100%;
+    max-width: none;
+    flex: 0 0 auto;
+    margin-top: 16px;
+    margin-bottom: 24px;
+    padding: 0;
+    border-radius: 16px;
+    border: 1px solid var(--primary-100);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    background: #fff;
+    min-height: 0;
+    display: block;
+    pointer-events: auto;
+    overflow: visible;
+  }
+
+  /* Card: same layout as panel, just moved below map – no max-height so page scroll reveals all. */
+  .heatmap-wrapper > .heatmap-barangay-card-section.zone-info-card-wrapper .zone-info-card {
+    max-height: none !important;
+    min-height: 0;
+    flex: none;
+    height: auto;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    max-width: none;
+    border-radius: 16px;
+    box-shadow: none;
+    overflow: visible;
+  }
+
+  /* Preserve exact panel layout: body and list size to content, no inner scroll – page scroll only. */
+  .heatmap-wrapper > .heatmap-barangay-card-section.zone-info-card-wrapper .zone-info-card-body {
+    flex: 0 0 auto;
+    min-height: 0;
+    overflow: visible;
+    max-height: none;
+    padding: 12px 14px 16px;
+  }
+
+  .heatmap-wrapper > .heatmap-barangay-card-section.zone-info-card-wrapper .zone-info-card-flist {
+    flex: 0 0 auto;
+    overflow: visible;
+    max-height: none;
+    margin-top: 4px;
+  }
+
+  /* Prevent overlaps: consistent spacing and no shrink so layout matches original panel. */
+  .heatmap-wrapper > .heatmap-barangay-card-section.zone-info-card-wrapper .zone-info-card-header {
+    flex-shrink: 0;
+    padding: 10px 14px;
+  }
+
+  .heatmap-wrapper > .heatmap-barangay-card-section.zone-info-card-wrapper .zone-info-card-name-row {
+    flex-shrink: 0;
+    padding: 14px 14px 0;
+    gap: 10px;
+    margin: 0;
+  }
+
+  .heatmap-wrapper > .heatmap-barangay-card-section.zone-info-card-wrapper .zone-info-card-sub {
+    flex-shrink: 0;
+    padding: 3px 14px 12px;
+    margin: 0;
+  }
+
+  .heatmap-wrapper > .heatmap-barangay-card-section.zone-info-card-wrapper .zone-info-card-divider {
+    flex-shrink: 0;
+    margin: 0;
+  }
+
+  .heatmap-wrapper > .heatmap-barangay-card-section.zone-info-card-wrapper .zone-info-card-section-hd {
+    flex-shrink: 0;
+    margin-bottom: 8px;
+  }
+
+  .heatmap-wrapper > .heatmap-barangay-card-section.zone-info-card-wrapper .zone-info-card-notice,
+  .heatmap-wrapper > .heatmap-barangay-card-section.zone-info-card-wrapper .zone-info-card-route-from,
+  .heatmap-wrapper > .heatmap-barangay-card-section.zone-info-card-wrapper .zone-info-card-location-status {
+    flex-shrink: 0;
+    margin-bottom: 8px;
+  }
+
+  .heatmap-wrapper > .heatmap-barangay-card-section.zone-info-card-wrapper .zone-info-card-profile-row {
+    flex-shrink: 0;
+    margin-bottom: 8px;
+  }
+
+  .heatmap-wrapper > .heatmap-barangay-card-section.zone-info-card-wrapper .zone-info-card-origin-row {
+    flex-shrink: 0;
+    margin-bottom: 12px;
+  }
+
+  /* Ensure "My location" / origin selected state is visible on mobile (contrast + no override) */
+  .heatmap-wrapper > .heatmap-barangay-card-section.zone-info-card-wrapper .zone-info-card-origin-btn--active {
+    background: #0f172a !important;
+    border-color: #0f172a !important;
+    color: #fff !important;
+  }
+  .heatmap-wrapper > .heatmap-barangay-card-section.zone-info-card-wrapper .zone-info-card-origin-btn--active:hover,
+  .heatmap-wrapper > .heatmap-barangay-card-section.zone-info-card-wrapper .zone-info-card-origin-btn--active:focus,
+  .heatmap-wrapper > .heatmap-barangay-card-section.zone-info-card-wrapper .zone-info-card-origin-btn--active:active {
+    background: #0f172a !important;
+    border-color: #0f172a !important;
+    color: #fff !important;
+  }
+
+  .heatmap-wrapper > .heatmap-barangay-card-section.zone-info-card-wrapper .zone-info-card-fitem,
+  .heatmap-wrapper > .heatmap-barangay-card-section.zone-info-card-wrapper .zone-info-card-fitem-noroute {
+    flex-shrink: 0;
   }
 
   .heatmap-mobile-ui .heatmap-overlay-bar-mobile {
@@ -1093,7 +1263,7 @@
   .heatmap-mobile-ui .heatmap-bottom-legend {
     left: 8px;
     max-width: 58%;
-    padding: 6px 10px 8px;
+    padding: 4px 6px 5px;
   }
 
   .heatmap-mobile-ui .heatmap-bottom-legend-list {
@@ -1162,7 +1332,7 @@
   .heatmap-mobile-ui .heatmap-bottom-legend {
     left: 6px;
     max-width: 60%;
-    padding: 5px 8px 6px;
+    padding: 3px 6px 4px;
   }
 
   .heatmap-mobile-ui .heatmap-bottom-legend-list {
@@ -1210,7 +1380,7 @@
 
   .heatmap-mobile-ui .heatmap-bottom-legend {
     left: 4px;
-    padding: 4px 6px 5px;
+    padding: 3px 5px 4px;
   }
 
   .heatmap-mobile-ui .heatmap-bottom-legend-list {

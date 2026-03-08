@@ -373,6 +373,15 @@
   color: #fff;
 }
 
+/* Ensure active state is visible on touch devices and in heatmap card (mobile) */
+.zone-info-card-origin-btn--active:hover,
+.zone-info-card-origin-btn--active:focus,
+.zone-info-card-origin-btn--active:active {
+  background: #0f172a;
+  border-color: #0f172a;
+  color: #fff;
+}
+
 /* Facility list: scrolls when content overflows */
 .zone-info-card-flist {
   display: flex;
@@ -687,11 +696,19 @@
   transform: scale(0.98);
 }
 
-/* Wrapper used by HeatMap to position the card */
+/* Wrapper used by HeatMap to position the card (desktop overlay) */
 .zone-info-card-wrapper {
   position: absolute;
   z-index: 2000;
   pointer-events: auto;
+}
+
+/* Mobile: HeatMap places card below map – no overlay; positioning is in HeatMap.css */
+@media (max-width: 768px) {
+  .heatmap-wrapper > .heatmap-barangay-card-section.zone-info-card-wrapper {
+    position: static !important;
+    z-index: auto;
+  }
 }
 
 @media (max-width: 320px) {

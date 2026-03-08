@@ -45,7 +45,7 @@
   margin: 0;
 }
 
-/* Tablet: 768–1023px */
+/* Tablet: 768–1023px – center left-side illustration in banner */
 @media (max-width: 1023px) {
   .hero-about-section {
     padding: 4rem 1.5rem 3rem;
@@ -57,6 +57,7 @@
     max-width: 100%;
     height: 280px;
     margin: 0 1rem;
+    object-position: 0% center;
   }
 
   .hero-about-title {
@@ -64,7 +65,7 @@
   }
 }
 
-/* Mobile: up to 767px – readable body text (16px), no horizontal scroll */
+/* Mobile: up to 767px – center left-side illustration in banner */
 @media (max-width: 767px) {
   .hero-about-section {
     padding: 2rem 1rem 2.5rem;
@@ -76,7 +77,7 @@
     max-width: 100%;
     height: 250px;
     margin: 0 1rem;
-    object-position: center center;
+    object-position: 0% center;
   }
 
   .hero-about-content {
@@ -97,6 +98,7 @@
 @media (max-width: 412px) {
   .hero-about-visual {
     height: 220px;
+    object-position: 0% center;
   }
 
   .hero-about-title {
@@ -107,6 +109,7 @@
 @media (max-width: 375px) {
   .hero-about-visual {
     height: 200px;
+    object-position: 0% center;
   }
 
   .hero-about-title {
@@ -129,6 +132,7 @@
     width: calc(100% - 1.5rem);
     max-width: 100%;
     margin: 0 0.75rem;
+    object-position: 0% center;
   }
 
   .hero-about-title {

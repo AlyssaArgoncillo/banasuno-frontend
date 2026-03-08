@@ -1,11 +1,13 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { useNavigationLoader } from '../../contexts/NavigationContext';
 import '../../styles/Header.css';
 
 function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { navigateWithLoader } = useNavigationLoader();
+  const location = useLocation();
+  const isAboutPage = location.pathname === '/about';
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
@@ -17,7 +19,15 @@ function Header() {
 
   const handleAccessBanasUno = (e) => {
     closeMenu();
-    navigateWithLoader('/home')(e);
+    navigateWithLoader('/home?view=heatmap')(e);
+  };
+
+  const handleAboutSectionClick = (e, hash) => {
+    e.preventDefault();
+    closeMenu();
+    const el = document.querySelector(hash);
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    else window.location.href = `/about${hash}`;
   };
 
   return (
@@ -28,15 +38,28 @@ function Header() {
         </Link>
 
         <nav className={`nav-links ${isMenuOpen ? 'active' : ''}`}>
-          <Link to="/about" className="nav-link" onClick={closeMenu}>About Us</Link>
-          <a href="/#solution" className="nav-link" onClick={closeMenu}>Features</a>
-          <a href="/#data-sources" className="nav-link" onClick={closeMenu}>Data</a>
-          <a href="/home" className="cta-button mobile-cta" onClick={handleAccessBanasUno}>
-            Access BanasUno→
-          </a>
+          {isAboutPage ? (
+            <>
+              <a href="#sdgs" className="nav-link" onClick={(e) => handleAboutSectionClick(e, '#sdgs')}>SDGs</a>
+              <a href="#objectives" className="nav-link" onClick={(e) => handleAboutSectionClick(e, '#objectives')}>Objectives</a>
+              <a href="#how-it-works" className="nav-link" onClick={(e) => handleAboutSectionClick(e, '#how-it-works')}>How it Works</a>
+              <a href="/home?view=heatmap" className="cta-button mobile-cta" onClick={handleAccessBanasUno}>
+                Access BanasUno→
+              </a>
+            </>
+          ) : (
+            <>
+              <Link to="/about" className="nav-link" onClick={closeMenu}>About Us</Link>
+              <a href="/#solution" className="nav-link" onClick={closeMenu}>Features</a>
+              <a href="/#data-sources" className="nav-link" onClick={closeMenu}>Data</a>
+              <a href="/home?view=heatmap" className="cta-button mobile-cta" onClick={handleAccessBanasUno}>
+                Access BanasUno→
+              </a>
+            </>
+          )}
         </nav>
 
-        <a href="/home" className="cta-button desktop-cta" onClick={navigateWithLoader('/home')}>
+        <a href="/home?view=heatmap" className="cta-button desktop-cta" onClick={navigateWithLoader('/home?view=heatmap')}>
           Access BanasUno→
         </a>
 
