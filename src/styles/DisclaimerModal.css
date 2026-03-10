@@ -1,0 +1,335 @@
+/* DisclaimerModal – first-time Heat Map disclaimer with animation */
+@import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800;900&family=DM+Mono:wght@400;500;700&display=swap");
+
+.disclaimer-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  box-sizing: border-box;
+  transition: background 0.95s ease, backdrop-filter 0.95s ease;
+}
+
+.disclaimer-modal-inner {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Radiating rings behind card */
+.disclaimer-modal-ring {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+  transition:
+    width 1.35s cubic-bezier(0.22, 1, 0.36, 1),
+    height 1.35s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.disclaimer-modal-ring--0 {
+  transition-delay: 0.12s;
+}
+
+.disclaimer-modal-ring--1 {
+  transition-delay: 0.34s;
+}
+
+.disclaimer-modal-ring--2 {
+  transition-delay: 0.56s;
+}
+
+/* Icon glow pulse */
+@keyframes disclaimerIconPulse {
+  0%,
+  100% {
+    box-shadow: 0 4px 16px rgba(255, 107, 26, 0.38);
+    transform: scale(1);
+  }
+  50% {
+    box-shadow: 0 6px 30px rgba(255, 107, 26, 0.65);
+    transform: scale(1.07);
+  }
+}
+
+/* Rings breathe when fully expanded */
+@keyframes disclaimerRingPulse0 {
+  0%,
+  100% {
+    opacity: 0.28;
+  }
+  50% {
+    opacity: 0.06;
+  }
+}
+
+@keyframes disclaimerRingPulse1 {
+  0%,
+  100% {
+    opacity: 0.18;
+  }
+  50% {
+    opacity: 0.03;
+  }
+}
+
+@keyframes disclaimerRingPulse2 {
+  0%,
+  100% {
+    opacity: 0.1;
+  }
+  50% {
+    opacity: 0.01;
+  }
+}
+
+.disclaimer-modal-card-wrapper {
+  position: relative;
+  transition:
+    background 1s 0.2s ease,
+    box-shadow 1s ease,
+    transform 1.05s cubic-bezier(0.34, 1.56, 0.64, 1),
+    opacity 0.75s ease;
+}
+
+.disclaimer-modal-card {
+  background: rgba(255, 251, 246, 0.86);
+  backdrop-filter: blur(24px) saturate(1.2);
+  -webkit-backdrop-filter: blur(24px) saturate(1.2);
+  border-radius: 24px;
+  width: 400px;
+  max-width: 100%;
+  border: 1px solid rgba(255, 255, 255, 0.65);
+  overflow: hidden;
+  position: relative;
+}
+
+/* Curtain */
+.disclaimer-modal-curtain {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 10;
+  border-radius: 24px;
+  overflow: hidden;
+  pointer-events: none;
+  transition: height 1.15s cubic-bezier(0.76, 0, 0.24, 1);
+}
+
+.disclaimer-modal-curtain-fill {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(180deg, #c44f00 0%, #ff8c3a 60%, #ffb800 100%);
+  position: relative;
+  overflow: hidden;
+}
+
+.disclaimer-modal-curtain-dots {
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(rgba(255, 255, 255, 0.1) 1px, transparent 1px);
+  background-size: 18px 18px;
+}
+
+.disclaimer-modal-curtain-wordmark {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-family: "DM Sans", sans-serif;
+  font-weight: 900;
+  font-size: 32px;
+  color: rgba(255, 255, 255, 0.22);
+  letter-spacing: -0.02em;
+  white-space: nowrap;
+  user-select: none;
+}
+
+/* Content */
+.disclaimer-modal-content {
+  padding: 34px 32px 28px;
+}
+
+.disclaimer-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 18px;
+}
+
+.disclaimer-modal-header-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.disclaimer-modal-icon-wrap {
+  width: 80px;
+  height: 80px;
+  border-radius: 20px;
+  background: linear-gradient(135deg, #ff8c3a, #c44f00);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 76px;
+  flex-shrink: 0;
+  box-shadow: 0 4px 16px rgba(255, 107, 26, 0.38);
+}
+
+.disclaimer-modal-label {
+  font-family: "DM Mono", monospace;
+  font-size: 13px;
+  font-weight: 700;
+  color: #ff6b1a;
+  letter-spacing: 0.12em;
+  transition: opacity 0.6s;
+}
+
+.disclaimer-modal-close {
+  width: 30px;
+  height: 30px;
+  min-width: 30px;
+  min-height: 30px;
+  border-radius: 50%;
+  background: rgba(255, 107, 26, 0.1);
+  border: none;
+  cursor: pointer;
+  color: #c44f00;
+  font-size: 13px;
+  font-weight: 700;
+  transition: background 0.18s, transform 0.18s;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.disclaimer-modal-close:hover {
+  background: rgba(255, 107, 26, 0.22);
+  transform: scale(1.1);
+}
+
+.disclaimer-modal-close:focus {
+  outline: none;
+}
+
+.disclaimer-modal-title {
+  font-family: "DM Sans", sans-serif;
+  font-weight: 900;
+  font-size: 19px;
+  color: #1a1a1a;
+  margin: 0 0 6px;
+  letter-spacing: -0.02em;
+  line-height: 1.25;
+  transition: opacity 0.7s 0.1s, transform 0.7s 0.1s ease;
+}
+
+.disclaimer-modal-rule {
+  height: 2px;
+  border-radius: 1px;
+  background: linear-gradient(90deg, #ff6b1a, #ffb800 60%, transparent);
+  margin-bottom: 16px;
+  transition: width 1s 0.2s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.disclaimer-modal-body {
+  font-family: "DM Sans", sans-serif;
+  font-size: 13.5px;
+  line-height: 1.78;
+  color: #3a2818;
+  margin: 0 0 26px;
+}
+
+.disclaimer-modal-accent {
+  height: 3px;
+  border-radius: 2px;
+  background: linear-gradient(90deg, #ff6b1a, #ffb800);
+  margin-bottom: 20px;
+  transform-origin: left;
+  transition: transform 0.95s 0.15s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.disclaimer-modal-btn {
+  width: 100%;
+  padding: 14px 0;
+  min-height: 44px;
+  border-radius: 14px;
+  cursor: pointer;
+  font-family: "DM Sans", sans-serif;
+  font-weight: 700;
+  font-size: 15px;
+  letter-spacing: 0.01em;
+  color: #fff;
+  transition:
+    background 0.4s ease,
+    border-color 0.4s ease,
+    transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1),
+    box-shadow 0.35s,
+    opacity 0.55s;
+}
+
+.disclaimer-modal-btn:focus {
+  outline: none;
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+  .disclaimer-modal-overlay {
+    padding: 12px;
+    align-items: center;
+  }
+
+  .disclaimer-modal-ring--1,
+  .disclaimer-modal-ring--2 {
+    display: none !important; /* Hide extra rings on small screens */
+  }
+
+  .disclaimer-modal-card {
+    width: 100%;
+    max-width: none;
+  }
+
+  .disclaimer-modal-content {
+    padding: 24px 20px 22px;
+  }
+
+  .disclaimer-modal-title {
+    font-size: 18px;
+  }
+
+  .disclaimer-modal-body {
+    font-size: 16px;
+    line-height: 1.7;
+    margin-bottom: 22px;
+  }
+
+  .disclaimer-modal-btn {
+    min-height: 44px;
+    padding: 14px 0;
+    font-size: 16px;
+  }
+
+  .disclaimer-modal-close {
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+    min-height: 44px;
+    font-size: 16px;
+  }
+
+  .disclaimer-modal-curtain-wordmark {
+    font-size: 24px;
+  }
+}
+
+@media (max-width: 480px) {
+  .disclaimer-modal-ring--0,
+  .disclaimer-modal-ring--1,
+  .disclaimer-modal-ring--2 {
+    display: none !important; /* Hide all rings on very small screens */
+  }
+}

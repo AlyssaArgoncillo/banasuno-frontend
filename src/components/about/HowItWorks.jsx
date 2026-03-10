@@ -329,15 +329,16 @@ function HowItWorks() {
                   </div>
                 </div>
 
-                <div className="how-it-works-detail-sources" style={{ display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 6, flexShrink: 0 }}>
-                  <div style={{ display: "flex", gap: 5, flexWrap: "wrap", justifyContent: "flex-start", maxWidth: 280 }}>
+                <div className="how-it-works-detail-sources" style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 8, flexShrink: 0 }}>
+                  <div style={{ display: "flex", gap: 6, flexWrap: "wrap", justifyContent: "flex-end", maxWidth: 320 }}>
                     {s.sources.map((src, si) => (
                       <span key={si} style={{
-                        fontSize: 7, fontWeight: 700,
+                        fontSize: 10, fontWeight: 700,
                         color: sc.color === P.yellow500 || sc.color === P.amber500 ? P.gray900 : P.white,
                         background: sc.color === P.yellow500 || sc.color === P.amber500 ? "rgba(255,255,255,0.92)" : "rgba(122,45,0,0.62)",
                         border: sc.color === P.yellow500 || sc.color === P.amber500 ? "1px solid rgba(0,0,0,0.1)" : "1px solid rgba(255,255,255,0.2)",
-                        borderRadius: 5, padding: "3px 8px",
+                        borderRadius: 999, padding: "4px 10px",
+                        textAlign: "right", display: "inline-flex", justifyContent: "flex-end",
                       }}>{src}</span>
                     ))}
                   </div>
@@ -394,7 +395,7 @@ function HowItWorks() {
           borderTop: `1px solid ${P.orange100}`,
         }}>
           <div style={{ width: 16, height: 16, borderRadius: "50%", background: P.green500, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 8, color: P.white, fontWeight: 700, flexShrink: 0 }}>✓</div>
-          <p style={{ fontSize: 12, color: P.gray500, margin: 0, lineHeight: 1.6 }}>
+          <p style={{ fontSize: 14, color: P.gray500, margin: 0, lineHeight: 1.6 }}>
             BanasUno integrates open-source weather APIs, official PAGASA classifications, and community health data to generate real-time risk intelligence for Davao City.
           </p>
         </div>

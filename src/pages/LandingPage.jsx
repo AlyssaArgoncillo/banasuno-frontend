@@ -5,13 +5,11 @@ import HeroSection from '../components/landing/HeroSection.jsx';
 import ProblemSection from '../components/landing/ProblemSection.jsx';
 import HealthRisksSection from '../components/landing/HealthRisksSection.jsx';
 import LocalSection from '../components/landing/LocalSection.jsx';
-import CreativeSeparator from '../components/landing/CreativeSeparator.jsx';
 import SolutionSection from '../components/landing/SolutionSection.jsx';
 import TryItNowSection from '../components/landing/TryItNowSection.jsx';
 import BuiltForSubsection from '../components/landing/BuiltForSubsection.jsx';
 import DataSourcesSection from '../components/landing/DataSourcesSection.jsx';
 import FinalCTA from '../components/landing/FinalCTA.jsx';
-import Footer from '../components/landing/Footer.jsx';
 
 function LandingPage() {
   const location = useLocation();
@@ -41,13 +39,11 @@ function LandingPage() {
       <ProblemSection />
       <HealthRisksSection />
       <LocalSection />
-      <CreativeSeparator />
       <SolutionSection />
       <TryItNowSection />
       <BuiltForSubsection />
       <DataSourcesSection />
       <FinalCTA />
-      <Footer />
     </div>
   );
 }

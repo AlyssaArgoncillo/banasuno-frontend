@@ -4,6 +4,7 @@ import { NavigationProvider } from './contexts/NavigationContext';
 import LandingPage from './pages/LandingPage';
 import HomePage from './pages/HomePage';
 import AboutPage from './pages/AboutPage';
+import Footer from './components/landing/Footer';
 import './styles/App.css';
 
 function App() {
@@ -12,11 +13,14 @@ function App() {
       <ErrorBoundary>
         <BrowserRouter>
           <NavigationProvider>
-            <Routes>
-              <Route path="/" element={<LandingPage />} />
-              <Route path="/home" element={<HomePage />} />
-              <Route path="/about" element={<AboutPage />} />
-            </Routes>
+            <div className="app-main">
+              <Routes>
+                <Route path="/" element={<LandingPage />} />
+                <Route path="/home" element={<HomePage />} />
+                <Route path="/about" element={<AboutPage />} />
+              </Routes>
+            </div>
+            <Footer />
           </NavigationProvider>
         </BrowserRouter>
       </ErrorBoundary>

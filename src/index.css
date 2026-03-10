@@ -111,6 +111,13 @@ body {
 .landing-page {
   background-image: var(--page-gradient);
   background-color: transparent;
+  padding-top: 80px;
+}
+
+@media (max-width: 768px) {
+  .landing-page {
+    padding-top: 72px;
+  }
 }
 
 section {
@@ -183,4 +190,25 @@ button {
   .container {
     padding: 0 3rem;
   }
+}
+
+/* IoT / Heat Map pin and modal animations */
+@keyframes pinPulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(74, 156, 77, 0.55); }
+  50%      { box-shadow: 0 0 0 5px rgba(74, 156, 77, 0.15); }
+}
+@keyframes pinAlert {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(229, 57, 53, 0.65); }
+  50%      { box-shadow: 0 0 0 6px rgba(229, 57, 53, 0.18); }
+}
+@keyframes fadeIn {
+  from { opacity: 0; } to { opacity: 1; }
+}
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(24px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes slideUpFade {
+  from { opacity: 0; transform: translate(-50%, 10px); }
+  to   { opacity: 1; transform: translate(-50%, 0); }
 }

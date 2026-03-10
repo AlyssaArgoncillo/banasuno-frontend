@@ -2,4 +2,16 @@
   width: 100%;
   min-height: 100vh;
   background-color: transparent;
+  display: flex;
+  flex-direction: column;
+}
+
+.app-main {
+  flex: 1 0 auto;
+}
+
+/* Footer sits flush with content above – no gap (avoids white line between Contact and Footer) */
+.app .footer {
+  margin-top: 0;
+  flex-shrink: 0;
 }

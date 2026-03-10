@@ -23,7 +23,8 @@
   min-height: 0;
   width: 100%;
   border-radius: 12px;
-  overflow: visible;
+  /* Clip map-only overlays (like IoT pins) to the map area so they never bleed into the side panel */
+  overflow: hidden;
   border: 3px dashed var(--primary-200, var(--primary-100));
   box-shadow: none;
   background: var(--surface-primary);
@@ -90,7 +91,9 @@
 }
 
 /* Zone info panel: lives OUTSIDE map container (sibling). Desktop = overlay via CSS; mobile = below map. */
-.heatmap-wrapper > .zone-info-card-wrapper {
+/* Zone card: overlay in map column (desktop) or static below map (mobile) */
+.heatmap-wrapper > .zone-info-card-wrapper,
+.heatmap-iot-map-col > .zone-info-card-wrapper {
   position: absolute;
   right: 16px;
   top: 16px;
@@ -103,7 +106,8 @@
   min-height: 0;
 }
 
-.heatmap-wrapper > .zone-info-card-wrapper .zone-info-card {
+.heatmap-wrapper > .zone-info-card-wrapper .zone-info-card,
+.heatmap-iot-map-col > .zone-info-card-wrapper .zone-info-card {
   flex: 1 1 0;
   min-height: 0;
   max-height: 100%;
@@ -194,6 +198,56 @@
   font-size: 14px;
   line-height: 1;
   opacity: 0.95;
+}
+
+/* Exit pinning location button – when user has searched and pinned a location */
+.heatmap-exit-pinning-wrap {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  z-index: 1000;
+  pointer-events: auto;
+}
+
+.heatmap-container:has(.heatmap-exit-facility-wrap) .heatmap-exit-pinning-wrap {
+  top: 54px;
+}
+
+.heatmap-exit-pinning-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  min-height: 44px;
+  min-width: 44px;
+  border: none;
+  border-radius: 10px;
+  background: var(--orange-500, #f97316);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 2px 10px rgba(249, 115, 22, 0.4);
+  transition: background 0.2s, transform 0.15s;
+}
+
+.heatmap-exit-pinning-btn:hover {
+  background: var(--orange-700, #c2410c);
+  transform: translateY(-1px);
+}
+
+.heatmap-exit-pinning-btn:active {
+  transform: translateY(0);
+}
+
+.heatmap-exit-pinning-icon {
+  font-size: 14px;
+  line-height: 1;
+  opacity: 0.95;
+}
+
+.heatmap-exit-pinning-text {
+  white-space: nowrap;
 }
 
 .heatmap-error {
@@ -554,7 +608,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 34px;
+  width: 28px;
   flex-shrink: 0;
   background: transparent;
   border: none;
@@ -578,7 +632,7 @@
   flex: 1;
   min-width: 140px;
   max-width: 200px;
-  padding: 6px 10px;
+  padding: 6px 10px 6px 6px;
   border: none;
   background: transparent;
   font-family: var(--font-body);
@@ -899,6 +953,18 @@
   height: 14px;
 }
 
+/* Exit pinned location control, stacked with zoom buttons */
+.heatmap-zoom-btn-exit-pin {
+  background: var(--orange-500, #f97316);
+  border-color: var(--orange-500, #f97316);
+  color: #fff;
+}
+
+.heatmap-zoom-btn-exit-pin:hover {
+  background: var(--orange-700, #c2410c);
+  border-color: var(--orange-700, #c2410c);
+}
+
 /* Mobile only: heat index legend at bottom – compact panel (not full width); collapsible */
 .heatmap-mobile-ui .heatmap-bottom-legend {
   position: absolute;
@@ -1072,8 +1138,72 @@
   }
 }
 
+/* Community Sensors mobile: fixed panel (same pattern as Zone Info Panel), hidden on desktop/tablet */
+.heatmap-iot-mobile-panel {
+  display: none;
+}
+
 /* Mobile: map full size (original dimensions); barangay info as separate section BELOW map – no overlay */
 @media (max-width: 768px) {
+  /* Community Sensors: fixed panel below map, same layout as Zone Info Panel – no draggable sheet; low z-index so sidebar/modal stay on top */
+  .heatmap-iot-mobile-panel {
+    display: block;
+    position: static;
+    z-index: 0;
+    width: 100%;
+    max-width: none;
+    flex: 0 0 auto;
+    margin-top: 16px;
+    margin-bottom: 24px;
+    padding: 0;
+    border-radius: 16px;
+    border: 1px solid var(--primary-100);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    background: #fff;
+    overflow: visible;
+  }
+
+  .heatmap-iot-mobile-panel-inner {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    max-height: 45vh;
+    border-radius: 16px;
+    overflow: hidden;
+  }
+
+  .heatmap-iot-mobile-panel-header {
+    flex-shrink: 0;
+    padding: 12px 14px 8px;
+    border-bottom: 1px solid var(--primary-100);
+  }
+
+  .heatmap-iot-mobile-panel-title {
+    margin: 0;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 1rem;
+    font-weight: 800;
+    color: var(--primary-900, #1A1A1A);
+  }
+
+  .heatmap-iot-mobile-panel-sub {
+    margin-top: 4px;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    color: var(--primary-300, #8A8A8A);
+  }
+
+  .heatmap-iot-mobile-panel-body {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 12px 14px 20px;
+    -webkit-overflow-scrolling: touch;
+  }
+
   /* Wrapper grows with content so map + card stack; no fixed height so card sits in flow below map */
   .heatmap-wrapper {
     padding: 6px;
@@ -1082,14 +1212,17 @@
   }
 
   /* Map occupies its own space at top – larger height so users see more map area */
-  .heatmap-wrapper > .heatmap-container {
+  .heatmap-wrapper .heatmap-container,
+  .main-interface-map-area .heatmap-container,
+  .heatmap-iot-map-col .heatmap-container {
     flex: 0 0 auto;
-    min-height: min(65vh, 520px);
-    height: min(65vh, 520px);
+    min-height: 68vh;
+    height: 68vh;
   }
 
   /* Barangay card section: strictly BELOW map, zero overlap. Override any absolute positioning from other CSS. */
-  .heatmap-wrapper > .heatmap-barangay-card-section.zone-info-card-wrapper {
+  .heatmap-wrapper > .heatmap-barangay-card-section.zone-info-card-wrapper,
+  .heatmap-iot-map-col > .heatmap-barangay-card-section.zone-info-card-wrapper {
     position: static !important;
     top: auto !important;
     right: auto !important;
@@ -1113,7 +1246,8 @@
   }
 
   /* Card: same layout as panel, just moved below map – no max-height so page scroll reveals all. */
-  .heatmap-wrapper > .heatmap-barangay-card-section.zone-info-card-wrapper .zone-info-card {
+  .heatmap-wrapper > .heatmap-barangay-card-section.zone-info-card-wrapper .zone-info-card,
+  .heatmap-iot-map-col > .heatmap-barangay-card-section.zone-info-card-wrapper .zone-info-card {
     max-height: none !important;
     min-height: 0;
     flex: none;
@@ -1128,6 +1262,7 @@
   }
 
   /* Preserve exact panel layout: body and list size to content, no inner scroll – page scroll only. */
+  .heatmap-iot-map-col > .heatmap-barangay-card-section.zone-info-card-wrapper .zone-info-card-body,
   .heatmap-wrapper > .heatmap-barangay-card-section.zone-info-card-wrapper .zone-info-card-body {
     flex: 0 0 auto;
     min-height: 0;
@@ -1136,6 +1271,7 @@
     padding: 12px 14px 16px;
   }
 
+  .heatmap-iot-map-col > .heatmap-barangay-card-section.zone-info-card-wrapper .zone-info-card-flist,
   .heatmap-wrapper > .heatmap-barangay-card-section.zone-info-card-wrapper .zone-info-card-flist {
     flex: 0 0 auto;
     overflow: visible;
@@ -1392,5 +1528,41 @@
     height: 26px;
     min-width: 26px;
     min-height: 26px;
+  }
+}
+
+/* Empty-state skeleton below map when no barangay is selected */
+.heatmap-empty-state {
+  display: none;
+  margin-top: 16px;
+  padding: 0 4px 4px;
+}
+
+.heatmap-empty-state-card {
+  background: #fafafa;
+  border-radius: 12px;
+  padding: 20px 16px;
+  border: 1px dashed rgba(255, 107, 26, 0.2);
+  text-align: center;
+}
+
+.heatmap-empty-state-title {
+  font-family: var(--font-header);
+  font-size: 16px;
+  font-weight: 700;
+  margin: 0 0 6px;
+  color: var(--primary-900, #111827);
+}
+
+.heatmap-empty-state-sub {
+  font-family: var(--font-body);
+  font-size: 14px;
+  margin: 0;
+  color: var(--primary-500, #6b7280);
+}
+
+@media (max-width: 768px) {
+  .heatmap-empty-state {
+    display: block;
   }
 }

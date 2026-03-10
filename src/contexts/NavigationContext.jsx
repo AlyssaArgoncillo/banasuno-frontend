@@ -33,7 +33,15 @@ export function NavigationProvider({ children }) {
       e?.preventDefault?.();
       setIsLoading(true);
       setTimeout(() => {
-        navigate(to);
+        if (typeof to === 'string' && to.includes('#')) {
+          const [pathname, hashPart] = to.split('#');
+          navigate(
+            { pathname: pathname || '/', hash: hashPart ? `#${hashPart}` : undefined },
+            { preventScrollReset: true }
+          );
+        } else {
+          navigate(to);
+        }
         setIsLoading(false);
       }, LOADER_DURATION_MS);
     };

@@ -1,0 +1,121 @@
+/* Tutorial – bottom sheet and trigger */
+* {
+  box-sizing: border-box;
+}
+
+.tutorial-sheet {
+  touch-action: pan-y;
+}
+
+@keyframes tutorial-iconPulse {
+  0%,
+  100% {
+    box-shadow: 0 3px 12px rgba(0, 0, 0, 0.12);
+  }
+  50% {
+    box-shadow: 0 5px 20px rgba(255, 107, 26, 0.5);
+  }
+}
+
+@keyframes tutorial-spinBounce {
+  0% {
+    transform: scale(0) rotate(-180deg);
+  }
+  100% {
+    transform: scale(1) rotate(0deg);
+  }
+}
+
+.tutorial-btn {
+  height: 44px;
+  min-height: 44px;
+  padding: 0 16px;
+  border: none;
+  border-radius: 12px;
+  font-family: "DM Sans", sans-serif;
+  font-weight: 700;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 0.18s, transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s, border-color 0.18s, color 0.18s;
+}
+
+.tutorial-btn:focus {
+  outline: none;
+}
+
+.tutorial-btn-prev {
+  background: #f0eae0;
+  color: #5a4030;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  flex-shrink: 0;
+}
+
+.tutorial-btn-prev:hover {
+  background: #e0d4c4;
+  transform: scale(1.04);
+}
+
+.tutorial-btn-skip {
+  background: none;
+  border: 1.5px solid #ddd6cc;
+  color: #bdbdbd;
+  flex-shrink: 0;
+}
+
+.tutorial-btn-skip:hover {
+  border-color: #ff6b1a;
+  background: #ff6b1a;
+  color: #fff;
+}
+
+.tutorial-btn-next {
+  flex: 1;
+  min-width: 0;
+  color: #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  letter-spacing: 0.01em;
+}
+
+.tutorial-btn-next:hover {
+  transform: translateY(-2px);
+}
+
+.tutorial-trigger {
+  flex-shrink: 0;
+}
+
+/* Mobile: full-width buttons and larger tap targets */
+@media (max-width: 480px) {
+  .tutorial-sheet {
+    max-height: 92vh;
+    border-radius: 20px 20px 0 0;
+  }
+
+  .tutorial-btn {
+    height: 48px;
+    min-height: 48px;
+    font-size: 15px;
+  }
+
+  .tutorial-btn-next {
+    flex: 1 1 100%;
+  }
+
+  .tutorial-btn-prev,
+  .tutorial-btn-skip {
+    flex: 1;
+    min-width: 0;
+  }
+}
+
+@media (max-width: 360px) {
+  .tutorial-trigger {
+    width: 40px;
+    height: 40px;
+  }
+}

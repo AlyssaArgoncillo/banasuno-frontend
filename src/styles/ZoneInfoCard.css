@@ -408,6 +408,37 @@
   border-radius: 3px;
 }
 
+/* Override: BanasUno-themed scrollbar, hidden until user interacts */
+.zone-info-card-flist {
+  scrollbar-width: none;
+}
+
+.zone-info-card-flist:hover {
+  scrollbar-width: thin;
+}
+
+.zone-info-card-flist::-webkit-scrollbar {
+  width: 0;
+}
+
+.zone-info-card-flist:hover::-webkit-scrollbar {
+  width: 4px;
+}
+
+.zone-info-card-flist:hover::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.zone-info-card-flist:hover::-webkit-scrollbar-thumb {
+  background-color: #ff6b1a66;
+  border-radius: 2px;
+  transition: background-color 0.2s ease, opacity 0.2s ease;
+}
+
+.zone-info-card-flist:hover::-webkit-scrollbar-thumb:hover {
+  background-color: #ff6b1a;
+}
+
 .zone-info-card-flist-loading,
 .zone-info-card-flist-empty {
   margin: 0;

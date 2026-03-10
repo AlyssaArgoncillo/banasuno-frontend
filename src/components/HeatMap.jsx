@@ -1,6 +1,7 @@
 import React, { startTransition, useEffect, useRef, useState } from 'react';
 import '../styles/HeatMap.css';
 import '../styles/NavigationLoader.css';
+import '../styles/IotPanel.css';
 import { fetchDavaoBoundaries } from '../services/boundariesService.js';
 import { getBarangayHeatData } from '../services/heatService.js';
 import { getHealthFacilitiesNearBarangay } from '../services/healthFacilitiesService.js';
@@ -10,10 +11,19 @@ import { getBarangayId, getColorForTemp, tempToHeatRiskLevel, HEAT_RISK_LEVELS }
 import { getUserLocationWithFallback, setManualLocation } from '../api/location.js';
 import { fetchAccessibility, fetchDirections } from '../api/ors.js';
 import ZoneInfoCard from './ZoneInfoCard.jsx';
+import DisclaimerModal from './DisclaimerModal.jsx';
+import { Tutorial } from './tutorial/index.js';
+import { SENSORS, SENSOR_LATLNG } from './iot/data/mockSensors.js';
+import IotRightPanel from './iot/IotRightPanel.jsx';
+import SensorPin from './iot/SensorPin.jsx';
+import SensorHistoryModal from './iot/SensorHistoryModal.jsx';
+import AddSensorModal from './iot/AddSensorModal.jsx';
+import Toast from './iot/Toast.jsx';
+import useScrollFade from './iot/useScrollFade.js';
 
 /* global L */
 
-const HeatMap = ({ compact = false, selectedZone: propSelectedZone, onZoneSelected, onGoToDashboard, facilityToFocusOnMap, onClearFocusFacility }) => {
+const HeatMap = ({ compact = false, selectedZone: propSelectedZone, onZoneSelected, onGoToDashboard, facilityToFocusOnMap, onClearFocusFacility, showTutorial: propShowTutorial, setShowTutorial: propSetShowTutorial, externalIotLayer, externalIotLayerKey }) => {
   const mapRef = useRef(null);
   const mapInstanceRef = useRef(null);
   const barangayLayerRef = useRef(null);
@@ -60,9 +70,27 @@ const HeatMap = ({ compact = false, selectedZone: propSelectedZone, onZoneSelect
   const routeRequestSeqRef = useRef(0);
   /** Debounce timer for profile changes while a route is active. */
   const profileChangeTimeoutRef = useRef(null);
-  const [heatIndexLegendOpen, setHeatIndexLegendOpen] = useState(false);
-  const [heatIndexMobileOpen, setHeatIndexMobileOpen] = useState(false);
+  const [heatIndexLegendOpen, setHeatIndexLegendOpen] = useState(true);
+  const [heatIndexMobileOpen, setHeatIndexMobileOpen] = useState(true);
+  const [hasPinnedLocation, setHasPinnedLocation] = useState(false);
   const [focusFacilityMarkerVisible, setFocusFacilityMarkerVisible] = useState(false);
+  const [disclaimerVisible, setDisclaimerVisible] = useState(false);
+  const [internalShowTutorial, setInternalShowTutorial] = useState(false);
+  const showTutorial = propShowTutorial !== undefined ? propShowTutorial : internalShowTutorial;
+  const setShowTutorial = propSetShowTutorial !== undefined ? propSetShowTutorial : setInternalShowTutorial;
+  /* IoT integration */
+  const iotLayer = externalIotLayer === 'Community only' ? 'Community only' : 'Official only';
+  const iotLayerRef = useRef('Official only');
+  const [selectedPin, setSelectedPin] = useState(null);
+  const [historySensor, setHistorySensor] = useState(null);
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [toastMessage, setToastMessage] = useState(null);
+  const [sheetExpand, setSheetExpand] = useState('collapsed');
+  const [sheetY, setSheetY] = useState(null);
+  const sheetDragRef = useRef({ dragging: false, startY: 0, startSheetY: 0 });
+  const [sensorPosById, setSensorPosById] = useState({});
+  const sheetScrollRef = useScrollFade();
+  const mobilePanelScrollRef = useScrollFade();
 
   /** Haversine distance in km for route tooltip. */
   const haversineKm = (lat1, lng1, lat2, lng2) => {
@@ -88,6 +116,43 @@ const HeatMap = ({ compact = false, selectedZone: propSelectedZone, onZoneSelect
       if (profileChangeTimeoutRef.current) clearTimeout(profileChangeTimeoutRef.current);
     };
   }, []);
+
+  useEffect(() => {
+    iotLayerRef.current = iotLayer;
+    if (iotLayer === 'Official only') {
+      setSelectedPin(null);
+      setSheetExpand('collapsed');
+    } else {
+      setSheetExpand('half');
+    }
+  }, [iotLayer, externalIotLayerKey]);
+
+  // First-time disclaimer: show only when the full Heat Map is open, after loading finishes, with a short delay for a smooth transition.
+  useEffect(() => {
+    if (compact || mapLoading) return;
+    try {
+      if (localStorage.getItem('banasuno_heatmap_disclaimer_seen') === '1') return;
+    } catch (_) {
+      return;
+    }
+    const delayMs = 500;
+    const t = setTimeout(() => setDisclaimerVisible(true), delayMs);
+    return () => clearTimeout(t);
+  }, [compact, mapLoading]);
+
+  // First-visit: auto-open tutorial once when full Heat Map has loaded (unless user already saw it or chose "don't show again").
+  useEffect(() => {
+    if (compact || mapLoading) return;
+    try {
+      if (localStorage.getItem('banasuno_heatmap_tutorial_seen') === '1') return;
+      if (localStorage.getItem('banasuno_heatmap_tutorial_dont_show') === '1') return;
+    } catch (_) {
+      return;
+    }
+    const delayMs = 1100;
+    const t = setTimeout(() => setShowTutorial(true), delayMs);
+    return () => clearTimeout(t);
+  }, [compact, mapLoading]);
 
   // Mobile: when a barangay is selected, scroll the info panel into view so it is visible
   useEffect(() => {
@@ -171,6 +236,7 @@ const HeatMap = ({ compact = false, selectedZone: propSelectedZone, onZoneSelect
       if (ring && ring.length >= 3) {
         const [lng, lat] = ringCentroid(ring);
         setLocationIndicator(lat, lng);
+        setHasPinnedLocation(true);
         map.flyTo([lat, lng], 14, { duration: 0.6 });
         setError(null);
         return;
@@ -183,8 +249,19 @@ const HeatMap = ({ compact = false, selectedZone: propSelectedZone, onZoneSelect
         return;
       }
       setLocationIndicator(result.lat, result.lng);
+      setHasPinnedLocation(true);
       mapInstanceRef.current.flyTo([result.lat, result.lng], 15, { duration: 0.6 });
     });
+  };
+
+  const handleExitPinnedLocation = () => {
+    const map = mapInstanceRef.current;
+    if (locationMarkerRef.current && map && map.hasLayer(locationMarkerRef.current)) {
+      map.removeLayer(locationMarkerRef.current);
+      locationMarkerRef.current = null;
+    }
+    setSearchQuery('');
+    setHasPinnedLocation(false);
   };
 
   /** Device location: high-accuracy first, then IP fallback. Used only to center the map and show a pin. Not stored or sent to any server. */
@@ -208,6 +285,7 @@ const HeatMap = ({ compact = false, selectedZone: propSelectedZone, onZoneSelect
       const map = mapInstanceRef.current;
       if (map) {
         setLocationIndicator(lat, lng);
+        setHasPinnedLocation(true);
         map.flyTo([lat, lng], 17, { duration: 0.5 });
         if (loc.source === 'ip') {
           setLocationError('Using approximate location (from IP). For better accuracy, allow browser location or search for your barangay.');
@@ -265,6 +343,11 @@ const HeatMap = ({ compact = false, selectedZone: propSelectedZone, onZoneSelect
         refreshTiles();
         setTimeout(refreshTiles, 150);
       });
+
+      // Community mode: clicking empty map clears selected pin
+      map.on('click', () => {
+        if (iotLayerRef.current === 'Community only') setSelectedPin(null);
+      });
       window.addEventListener('resize', refreshTiles);
       resizeCleanupRef.current = () => {
         window.removeEventListener('resize', refreshTiles);
@@ -309,6 +392,7 @@ const HeatMap = ({ compact = false, selectedZone: propSelectedZone, onZoneSelect
           },
           onEachFeature: (feature, layer) => {
             layer.on('click', () => {
+              if (iotLayerRef.current === 'Community only') return;
               const now = Date.now();
               if (now - lastPolygonClickTimeRef.current < 120) return;
               lastPolygonClickTimeRef.current = now;
@@ -453,6 +537,137 @@ const HeatMap = ({ compact = false, selectedZone: propSelectedZone, onZoneSelect
       }
     };
   }, []);
+
+  // Dim heat overlay in community mode (keep streets/terrain visible)
+  useEffect(() => {
+    const layer = barangayLayerRef.current;
+    if (!layer) return;
+    const { tempByBarangayId } = heatDataRef.current || {};
+    const isCommunity = iotLayer === 'Community only';
+    layer.setStyle((feature) => {
+      const id = getBarangayId(feature);
+      const temp = tempByBarangayId != null && id != null ? tempByBarangayId[id] : null;
+      if (temp == null || !Number.isFinite(temp)) {
+        return {
+          color: 'rgba(26, 54, 93, 0.25)',
+          weight: 1,
+          fillColor: '#e2e8f0',
+          fillOpacity: isCommunity ? 0.06 : 0.3
+        };
+      }
+      const fillColor = getColorForTemp(temp);
+      return {
+        fillColor,
+        fillOpacity: isCommunity ? 0.12 : 0.38,
+        color: isCommunity ? 'rgba(26, 54, 93, 0.25)' : 'rgba(26, 54, 93, 0.4)',
+        weight: 1
+      };
+    });
+  }, [iotLayer]);
+
+  // Position sensor pins at geographic coordinates; update screen position on pan/zoom.
+  // Re-run when map becomes ready (mapLoading false) so pins appear after navigating from Dashboard/Heat Advisory.
+  useEffect(() => {
+    if (compact) return;
+    if (iotLayer !== 'Community only') return;
+    const map = mapInstanceRef.current;
+    if (!map) return;
+
+    const computeScreenPositions = () => {
+      const out = {};
+      SENSORS.forEach((s) => {
+        const latLng = SENSOR_LATLNG[s.id];
+        if (!latLng) return;
+        const pt = map.latLngToContainerPoint(latLng);
+        out[s.id] = { left: pt.x, top: pt.y };
+      });
+      setSensorPosById(out);
+    };
+
+    computeScreenPositions();
+
+    let raf = null;
+    const onMove = () => {
+      if (raf) cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(computeScreenPositions);
+    };
+
+    map.on('move', onMove);
+    map.on('zoom', onMove);
+    map.on('resize', onMove);
+
+    return () => {
+      if (raf) cancelAnimationFrame(raf);
+      map.off('move', onMove);
+      map.off('zoom', onMove);
+      map.off('resize', onMove);
+    };
+  }, [compact, iotLayer, mapLoading]);
+
+  // On mobile / when switching to Community mode or when map just loaded, invalidate map size so pin positions recompute
+  useEffect(() => {
+    if (compact || iotLayer !== 'Community only') return;
+    const map = mapInstanceRef.current;
+    if (!map) return;
+    const t = setTimeout(() => {
+      map.invalidateSize();
+    }, mapLoading ? 200 : 100);
+    return () => clearTimeout(t);
+  }, [compact, iotLayer, mapLoading]);
+
+  // Bottom sheet snap points + drag (mobile/tablet).
+  // We keep three states: collapsed (~70% hidden), half, and full (0% hidden).
+  useEffect(() => {
+    if (compact) return;
+    if (iotLayer !== 'Community only') {
+      setSheetY(null);
+      return;
+    }
+    const collapsed = 70;
+    const half = 40;
+    const full = 0;
+    const target = sheetExpand === 'full' ? full : sheetExpand === 'half' ? half : collapsed;
+    setSheetY(target);
+  }, [compact, iotLayer, sheetExpand]);
+
+  const snapSheetToNearest = (y) => {
+    const collapsed = 70;
+    const half = 40;
+    const full = 0;
+    const opts = [
+      { key: 'collapsed', y: collapsed },
+      { key: 'half', y: half },
+      { key: 'full', y: full }
+    ];
+    const nearest = opts.reduce((best, cur) => (Math.abs(cur.y - y) < Math.abs(best.y - y) ? cur : best), opts[0]);
+    setSheetExpand(nearest.key);
+    setSheetY(nearest.y);
+  };
+
+  const handleSheetPointerDown = (e) => {
+    if (iotLayer !== 'Community only') return;
+    sheetDragRef.current.dragging = true;
+    sheetDragRef.current.startY = e.clientY;
+    sheetDragRef.current.startSheetY = sheetY ?? 0;
+    e.currentTarget.setPointerCapture?.(e.pointerId);
+  };
+
+  const handleSheetPointerMove = (e) => {
+    if (!sheetDragRef.current.dragging) return;
+    const dy = e.clientY - sheetDragRef.current.startY;
+    const vh = window.innerHeight || 800;
+    const deltaPercent = (dy / vh) * 100;
+    const minY = 0;
+    const maxY = 80;
+    const next = Math.max(minY, Math.min(maxY, sheetDragRef.current.startSheetY + deltaPercent));
+    setSheetY(next);
+  };
+
+  const handleSheetPointerUp = () => {
+    if (!sheetDragRef.current.dragging) return;
+    sheetDragRef.current.dragging = false;
+    snapSheetToNearest(sheetY ?? 0);
+  };
 
   useEffect(() => {
     setRouteToFacility(null);
@@ -681,10 +896,79 @@ const HeatMap = ({ compact = false, selectedZone: propSelectedZone, onZoneSelect
     };
   }, [selectedZone, routeToFacility, routeGeometry, routeSummary, routeOrigin, userPositionForRoute]);
 
+  const handleDisclaimerClose = () => {
+    try {
+      localStorage.setItem('banasuno_heatmap_disclaimer_seen', '1');
+    } catch (_) {}
+    setDisclaimerVisible(false);
+  };
+
+  const handleTutorialClose = () => {
+    setShowTutorial(false);
+    try {
+      localStorage.setItem('banasuno_heatmap_tutorial_seen', '1');
+    } catch (_) {}
+  };
+
+  const handleTutorialDontShowAgain = () => {
+    try {
+      localStorage.setItem('banasuno_heatmap_tutorial_dont_show', '1');
+    } catch (_) {}
+  };
+
+  const handleIotCopy = (sensor) => {
+    setToastMessage(`Location copied: Brgy. ${sensor.barangay}`);
+  };
+
   return (
     <div className="heatmap-wrapper">
+      {/* First-time Heat Map disclaimer – show once, animation then never again */}
+      {!compact && disclaimerVisible && (
+        <DisclaimerModal onClose={handleDisclaimerClose} />
+      )}
+
+      {!compact && showTutorial && (
+        <Tutorial
+          onClose={handleTutorialClose}
+          onDontShowAgain={handleTutorialDontShowAgain}
+        />
+      )}
+
+      {/* IoT modals and toast */}
+      {historySensor && (
+        <SensorHistoryModal sensor={historySensor} onClose={() => setHistorySensor(null)} />
+      )}
+      {showAddModal && <AddSensorModal onClose={() => setShowAddModal(false)} />}
+      {toastMessage && <Toast message={toastMessage} onDone={() => setToastMessage(null)} />}
+
+      <div className={`heatmap-with-iot ${compact ? 'heatmap-with-iot--compact' : ''}`}>
+        {/* Left column: map + zone card overlay */}
+        <div className="heatmap-iot-map-col">
       <div className={`heatmap-container ${compact ? 'heatmap-compact heatmap-compact-hide-mobile-legend' : ''}`}>
         <div id="heatmap" ref={mapRef} />
+        {/* IoT sensor pins overlay (percentage-based on map container) */}
+        {!compact && iotLayer === 'Community only' && (
+          <div className="iot-pins-overlay" aria-hidden="true">
+            {SENSORS.map((s) => {
+              const p = sensorPosById[s.id];
+              if (!p) return null;
+              return (
+                <div
+                  key={s.id}
+                  style={{
+                    position: 'absolute',
+                    left: `${p.left}px`,
+                    top: `${p.top}px`,
+                    transform: 'translate(-50%, -50%)',
+                    zIndex: selectedPin === s.id ? 20 : 15
+                  }}
+                >
+                  <SensorPin sensor={s} selected={selectedPin === s.id} onClick={(id) => setSelectedPin(selectedPin === id ? null : id)} />
+                </div>
+              );
+            })}
+          </div>
+        )}
         {mapLoading && (
           <div className="heatmap-loading" aria-live="polite" aria-busy="true">
             <div className="navigation-loader-content">
@@ -780,6 +1064,7 @@ const HeatMap = ({ compact = false, selectedZone: propSelectedZone, onZoneSelect
             </div>
             <span className="heatmap-legend-area">Average index per barangay · PSGC boundaries</span>
           </div>
+          {/* IoT layer toggle removed; mode is controlled from the sidebar */}
           <div className="zoom-indicator">{zoomPercentage}%</div>
           <div className="heatmap-zoom-controls heatmap-zoom-controls-desktop">
             <button type="button" className="heatmap-zoom-btn" onClick={() => mapInstanceRef.current?.zoomIn()} aria-label="Zoom in">
@@ -794,6 +1079,17 @@ const HeatMap = ({ compact = false, selectedZone: propSelectedZone, onZoneSelect
             <button type="button" className="heatmap-zoom-btn" onClick={() => { const el = mapRef.current?.closest('.heatmap-container'); if (el && !document.fullscreenElement) el.requestFullscreen?.(); else if (document.fullscreenElement) document.exitFullscreen?.(); }} aria-label="Fullscreen">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3" /></svg>
             </button>
+            {hasPinnedLocation && (
+              <button
+                type="button"
+                className="heatmap-zoom-btn heatmap-zoom-btn-exit-pin"
+                onClick={handleExitPinnedLocation}
+                aria-label="Exit pinned location"
+                title="Exit pinned location"
+              >
+                ✕
+              </button>
+            )}
           </div>
         </div>
 
@@ -867,12 +1163,23 @@ const HeatMap = ({ compact = false, selectedZone: propSelectedZone, onZoneSelect
             <button type="button" className="heatmap-zoom-btn" onClick={() => { const el = mapRef.current?.closest('.heatmap-container'); if (el && !document.fullscreenElement) el.requestFullscreen?.(); else if (document.fullscreenElement) document.exitFullscreen?.(); }} aria-label="Fullscreen">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3" /></svg>
             </button>
+            {hasPinnedLocation && (
+              <button
+                type="button"
+                className="heatmap-zoom-btn heatmap-zoom-btn-exit-pin"
+                onClick={handleExitPinnedLocation}
+                aria-label="Exit pinned location"
+                title="Exit pinned location"
+              >
+                ✕
+              </button>
+            )}
           </div>
         </div>
       </div>
 
-      {/* Barangay info: always outside map container. Desktop = overlay; mobile = proper card section below map. */}
-      {!compact && selectedZone && (
+      {/* Barangay info: only in Official mode (community mode is sensor-focused) */}
+      {!compact && iotLayer === 'Official only' && selectedZone && (
         <section
           id="heatmap-barangay-card"
           className="heatmap-barangay-card-section zone-info-card-wrapper"
@@ -888,7 +1195,14 @@ const HeatMap = ({ compact = false, selectedZone: propSelectedZone, onZoneSelect
             isNearbyFallback={selectedZone.isNearbyFallback}
             facilitiesLoading={selectedZone.facilitiesLoading}
             facilitiesTotalLabel={selectedZone.facilitiesTotalLabel}
-            onClose={() => { setSelectedZone(null); setAccessibilityData(null); setRouteToFacility(null); setRouteGeometry(null); setRouteSummary(null); }}
+            onClose={() => {
+              setSelectedZone(null);
+              setAccessibilityData(null);
+              setRouteToFacility(null);
+              setRouteGeometry(null);
+              setRouteSummary(null);
+              onZoneSelected?.(null);
+            }}
             highlightedFacilityId={routeToFacility?.id}
             onGoToDashboard={onGoToDashboard}
             onShowRoute={(fac, profileOverride) => handleShowRoute(fac, profileOverride, routeOrigin === 'user')}
@@ -917,6 +1231,124 @@ const HeatMap = ({ compact = false, selectedZone: propSelectedZone, onZoneSelect
             locationStatusForRoute={locationStatusForRoute}
           />
         </section>
+      )}
+      {!compact && iotLayer === 'Official only' && !selectedZone && (
+        <section className="heatmap-empty-state">
+          <div className="heatmap-empty-state-card">
+            <h3 className="heatmap-empty-state-title">Select barangay/zone</h3>
+            <p className="heatmap-empty-state-sub">
+              Tap any area on the map to see detailed information.
+            </p>
+          </div>
+        </section>
+      )}
+
+      {/* Mobile: Community Sensors as fixed panel (same layout as Zone Info Panel); no zone-info-card-wrapper so it doesn't overlay sidebar/modal */}
+      {!compact && iotLayer === 'Community only' && (
+        <section
+          className="heatmap-iot-mobile-panel"
+          aria-label="Community Sensors"
+        >
+          <div className="heatmap-iot-mobile-panel-inner">
+            <div className="heatmap-iot-mobile-panel-header">
+              <h2 className="heatmap-iot-mobile-panel-title">Community Sensors</h2>
+              <div className="heatmap-iot-mobile-panel-sub">CONCEPT PREVIEW · Mock data for demonstration</div>
+            </div>
+            <div ref={mobilePanelScrollRef} className="heatmap-iot-mobile-panel-body scroll-fade">
+              <IotRightPanel
+                sensors={SENSORS}
+                selectedPin={selectedPin}
+                onSelectPin={setSelectedPin}
+                onAddSensor={() => setShowAddModal(true)}
+                onHistory={(sensor) => setHistorySensor(sensor)}
+                onCopy={handleIotCopy}
+                variant="full"
+              />
+            </div>
+          </div>
+        </section>
+      )}
+        </div>
+
+        {/* Right column: IoT panel (desktop only, community mode) */}
+        {!compact && iotLayer === 'Community only' && (
+          <div className="heatmap-iot-panel-col">
+            <IotRightPanel
+              sensors={SENSORS}
+              selectedPin={selectedPin}
+              onSelectPin={setSelectedPin}
+              onAddSensor={() => setShowAddModal(true)}
+              onHistory={(sensor) => setHistorySensor(sensor)}
+              onCopy={handleIotCopy}
+              variant="full"
+            />
+          </div>
+        )}
+      </div>
+
+      {/* Tablet only: draggable bottom sheet (hidden on mobile ≤768px where we use fixed panel) */}
+      {!compact && iotLayer === 'Community only' && (
+        <>
+          <div
+            className={`iot-bottom-sheet-backdrop ${sheetExpand !== 'collapsed' ? 'iot-bottom-sheet-backdrop--visible' : ''}`}
+            onClick={() => setSheetExpand('collapsed')}
+            aria-hidden="true"
+          />
+          <div
+            className="iot-bottom-sheet"
+            role="region"
+            aria-label="IoT sensors"
+            style={{ transform: sheetY != null ? `translateY(${sheetY}%)` : undefined }}
+          >
+            <div
+              className="iot-bottom-sheet-drag"
+              onPointerDown={handleSheetPointerDown}
+              onPointerMove={handleSheetPointerMove}
+              onPointerUp={handleSheetPointerUp}
+              onPointerCancel={handleSheetPointerUp}
+              aria-label="Drag sensor panel"
+            >
+              <div className="iot-bottom-sheet-drag-handle" />
+            </div>
+            <div ref={sheetScrollRef} className="iot-bottom-sheet-inner scroll-fade">
+              <div className="iot-layer-toggle-wrap" style={{ marginBottom: 10 }}>
+                <div
+                  style={{
+                    fontFamily: "'DM Sans', sans-serif",
+                    fontSize: 13,
+                    fontWeight: 800,
+                    color: 'var(--primary-900, #1A1A1A)'
+                  }}
+                >
+                  Community Sensors
+                </div>
+                <div
+                  style={{
+                    marginTop: 4,
+                    fontFamily: "'DM Mono', monospace",
+                    fontSize: 9,
+                    fontWeight: 700,
+                    letterSpacing: '0.10em',
+                    color: 'var(--primary-300, #8A8A8A)'
+                  }}
+                >
+                  CONCEPT PREVIEW · Mock data for demonstration · Future implementation
+                </div>
+              </div>
+              {sheetExpand === 'collapsed' ? null : (
+                <IotRightPanel
+                  sensors={SENSORS}
+                  selectedPin={selectedPin}
+                  onSelectPin={setSelectedPin}
+                  onAddSensor={() => setShowAddModal(true)}
+                  onHistory={(sensor) => setHistorySensor(sensor)}
+                  onCopy={handleIotCopy}
+                  variant={sheetExpand === 'half' ? 'summary' : 'full'}
+                />
+              )}
+            </div>
+          </div>
+        </>
       )}
     </div>
   );

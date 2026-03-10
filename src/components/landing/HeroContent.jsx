@@ -15,12 +15,17 @@ function HeroContent() {
         Heat information made simple and local. See which neighborhoods are hotter, understand the risk using official heat levels, and find nearby health facilities — all in one interactive map.
       </p>
 
-      <div className="scroll-indicator">
+      <button
+        type="button"
+        className="scroll-indicator"
+        onClick={() => document.querySelector('#problem')?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
+        aria-label="Scroll to What is BanasUno aiming to solve?"
+      >
         <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
           <path d="M7 13L12 18L17 13" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
           <path d="M7 6L12 11L17 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
         </svg>
-      </div>
+      </button>
     </div>
   );
 }

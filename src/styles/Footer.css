@@ -106,10 +106,21 @@
   text-decoration: none;
   font-size: 0.9rem;
   transition: color 0.3s ease;
+  display: inline-block;
 }
 
 .footer-links a:hover {
   color: #FD6F00;
+}
+
+/* Touch-friendly link tap targets on mobile */
+@media (max-width: 768px) {
+  .footer-links a {
+    padding: 0.35rem 0;
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+  }
 }
 
 /* 1024px – larger tablets */

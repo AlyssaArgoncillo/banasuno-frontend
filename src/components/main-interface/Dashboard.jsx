@@ -328,7 +328,7 @@ function ExportToast({ msg, onClose }) {
 }
 
 // ─── DASHBOARD ────────────────────────────────────────
-export default function Dashboard({ selectedZone, onFocusFacilityOnMap }) {
+export default function Dashboard({ selectedZone, onFocusFacilityOnMap, onGoToHeatMap }) {
   const [trendDays, setTrendDays] = useState(7);
   const [isDesktop, setIsDesktop] = useState(() => typeof window !== "undefined" && window.matchMedia("(min-width: 1024px)").matches);
   const [allBarangaysPanelOpen, setAllBarangaysPanelOpen] = useState(false);
@@ -671,7 +671,7 @@ export default function Dashboard({ selectedZone, onFocusFacilityOnMap }) {
 
     return true;
   });
-  const displayed = filteredBarangays.slice(0, 15);
+  const displayed = filteredBarangays.slice(0, 3);
 
   // Derive risk counts from the same barangay data shown in the list/map so the count always matches what the user sees.
   const riskCounts = useMemo(() => {
@@ -883,6 +883,47 @@ export default function Dashboard({ selectedZone, onFocusFacilityOnMap }) {
       </div>
 
       <div style={{ padding: "clamp(16px, 4vw, 28px) clamp(12px, 4vw, 28px) 48px", maxWidth: 1280, margin: "0 auto" }}>
+
+        {/* Empty state when no barangay selected */}
+        {noSelection && (
+          <div style={{
+            marginBottom: 16,
+            padding: "16px 20px",
+            background: P.orange50,
+            border: `1px solid ${P.orange100}`,
+            borderRadius: 12,
+            display: "flex",
+            flexWrap: "wrap",
+            alignItems: "center",
+            justifyContent: "space-between",
+            gap: 12,
+          }}>
+            <div>
+              <div style={{ fontWeight: 700, fontSize: 15, color: P.gray900, marginBottom: 4 }}>No barangay selected</div>
+              <p style={{ margin: 0, fontSize: 13, color: P.gray700 }}>Select a barangay on the map to view detailed data, heat risk counts, and recommendations.</p>
+            </div>
+            <button
+              type="button"
+              onClick={onGoToHeatMap}
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                justifyContent: "center",
+                minHeight: 44,
+                padding: "10px 20px",
+                background: P.orange500,
+                color: "#fff",
+                fontWeight: 700,
+                fontSize: 14,
+                borderRadius: 10,
+                textDecoration: "none",
+                boxShadow: "0 2px 10px rgba(255,107,26,0.3)",
+              }}
+            >
+              Go to Heat Map
+            </button>
+          </div>
+        )}
 
         {/* ══ ROW 1: KPI STRIP — Surface-Warning + orange grad ══ */}
         <div className="dashboard-kpi" style={{
@@ -1149,18 +1190,7 @@ export default function Dashboard({ selectedZone, onFocusFacilityOnMap }) {
                   </tr>
                 </thead>
                 <tbody>
-                  {noSelection ? (
-                    <tr>
-                      <td colSpan={5} style={{ padding: 32, textAlign: "center", verticalAlign: "middle" }}>
-                        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8 }}>
-                          <span style={{ fontWeight: 700, fontSize: 14, color: P.gray700 }}>Select a barangay to begin</span>
-                          <p style={{ margin: 0, fontSize: 12, color: P.gray500, maxWidth: 320 }}>
-                            Click any area on the map or use search above to view heat risk and facilities.
-                          </p>
-                        </div>
-                      </td>
-                    </tr>
-                  ) : barangaysLoading ? (
+                  {barangaysLoading ? (
                     <tr><td colSpan={5} style={{ padding: 24, textAlign: "center", fontSize: 12, color: P.gray500 }}>Loading barangays…</td></tr>
                   ) : barangaysError ? (
                     <tr><td colSpan={5} style={{ padding: 24, textAlign: "center", fontSize: 12, color: P.red500 }}>{barangaysError}</td></tr>
@@ -1203,18 +1233,16 @@ export default function Dashboard({ selectedZone, onFocusFacilityOnMap }) {
               background: P.gray50,
             }}>
               <span style={{ fontSize: 11, color: P.gray500 }}>
-                {noSelection ? "Select a barangay on the map to see the list" : `Showing ${displayed.length} of ${filteredBarangays.length} barangays${barangayQuery ? " (filtered)" : ""}`}
+                {`Showing ${displayed.length} of ${filteredBarangays.length} barangays${barangayQuery ? " (filtered)" : ""}`}
               </span>
               <button
                 type="button"
-                disabled={noSelection}
-                onClick={() => !noSelection && setAllBarangaysPanelOpen(true)}
+                onClick={() => setAllBarangaysPanelOpen(true)}
                 style={{
-                  border: `1px solid ${noSelection ? P.gray300 : P.orange100}`, borderRadius: 8,
-                  background: noSelection ? P.gray100 : P.orange50, color: noSelection ? P.gray500 : P.orange500,
+                  border: `1px solid ${P.orange100}`, borderRadius: 8,
+                  background: P.orange50, color: P.orange500,
                   fontWeight: 700, fontSize: 11,
-                  padding: "5px 14px", cursor: noSelection ? "not-allowed" : "pointer",
-                  opacity: noSelection ? 0.8 : 1,
+                  padding: "5px 14px", cursor: "pointer", opacity: 1,
                 }}>
                 View All {filteredBarangays.length} →
               </button>
@@ -1695,7 +1723,11 @@ export default function Dashboard({ selectedZone, onFocusFacilityOnMap }) {
         </div>
 
         {/* Export section — two cards (ExportPair layout) */}
-        <div className="dashboard-export-section" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(264px, 1fr))", gap: 20, marginBottom: 24 }}>
+        <div
+          id="dashboard-export"
+          className="dashboard-export-section"
+          style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(264px, 1fr))", gap: 20, marginBottom: 24 }}
+        >
           {/* KPI Heat Risk card */}
           <div style={{ borderRadius: 20, boxShadow: "0 8px 36px rgba(0,0,0,0.12)", overflow: "hidden", display: "flex", flexDirection: "column" }}>
             <div style={{ background: `linear-gradient(135deg, ${P.orange500} 0%, ${P.orange700} 100%)`, padding: "20px 18px 18px", display: "flex", flexDirection: "column", gap: 4 }}>
@@ -1777,26 +1809,140 @@ export default function Dashboard({ selectedZone, onFocusFacilityOnMap }) {
               style={{ border: "none", background: "rgba(255,255,255,0.2)", color: P.white, width: 32, height: 32, borderRadius: 8, cursor: "pointer", fontSize: 18, lineHeight: 1 }}
             >×</button>
           </div>
-          <div style={{ padding: "12px 16px", borderBottom: `1px solid ${P.gray100}`, display: "flex", flexWrap: "wrap", gap: 10, alignItems: "center" }}>
-            <input
-              value={barangayQuery}
-              onChange={(e) => setBarangayQuery(e.target.value)}
-              placeholder="Search barangay"
-              style={{ flex: 1, minWidth: 0, border: `1px solid ${P.gray300}`, borderRadius: 10, padding: "12px 15px", fontSize: 15, color: P.gray900 }}
-            />
-            {hasActiveFilters && (
+          <div style={{ padding: "12px 16px", borderBottom: `1px solid ${P.gray100}`, background: P.white }}>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 10, alignItems: "center" }}>
+              <input
+                value={barangayQuery}
+                onChange={(e) => setBarangayQuery(e.target.value)}
+                placeholder="Search barangay"
+                style={{ flex: 1, minWidth: 0, border: `1px solid ${P.gray300}`, borderRadius: 10, padding: "12px 15px", fontSize: 15, color: P.gray900 }}
+              />
               <button
                 type="button"
-                className="dashboard-clear-filters-mobile"
-                onClick={clearBarangayFilters}
+                onClick={() => setFiltersOpen((o) => !o)}
                 style={{
-                  padding: "10px 14px", minHeight: 44, borderRadius: 10, border: "none", background: "none",
-                  color: P.orange500, fontSize: 13, fontWeight: 700, cursor: "pointer", whiteSpace: "nowrap",
+                  display: "inline-flex", alignItems: "center", gap: 6,
+                  padding: "10px 14px", borderRadius: 10,
+                  border: `1.5px solid ${(filtersOpen || hasActiveFilters) ? P.orange500 : P.gray200}`,
+                  background: filtersOpen ? P.orange50 : P.white,
+                  color: hasActiveFilters ? P.orange500 : P.gray700,
+                  fontWeight: 700, fontSize: 13,
+                  cursor: "pointer",
                 }}
               >
-                Clear all filters
+                Filters
+                {activeFilterCount > 0 && (
+                  <span style={{ background: P.orange500, color: P.white, borderRadius: 99, fontSize: 11, fontWeight: 800, padding: "2px 7px" }}>
+                    {activeFilterCount}
+                  </span>
+                )}
               </button>
-            )}
+              {hasActiveFilters && (
+                <button
+                  type="button"
+                  onClick={clearBarangayFilters}
+                  style={{
+                    padding: "10px 14px", minHeight: 44, borderRadius: 10, border: "none", background: "none",
+                    color: P.orange500, fontSize: 13, fontWeight: 700, cursor: "pointer", whiteSpace: "nowrap",
+                  }}
+                >
+                  Clear all filters
+                </button>
+              )}
+            </div>
+            <div
+              style={{
+                overflow: "hidden",
+                maxHeight: filtersOpen ? 360 : 0,
+                transition: "max-height 0.25s ease",
+              }}
+            >
+              <div style={{ marginTop: 10, background: P.white, border: `1px solid ${P.gray100}`, borderRadius: 12, padding: 12 }}>
+                <div style={{ fontSize: 10, fontWeight: 700, color: P.gray500, textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 8 }}>Risk Level</div>
+                <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 12 }}>
+                  {RISK_FILTER_OPTIONS.map((risk) => {
+                    const on = riskFilters.has(risk);
+                    const m = riskMeta[risk];
+                    return (
+                      <button
+                        key={risk}
+                        type="button"
+                        onClick={() => toggleRiskFilter(risk)}
+                        style={{
+                          padding: "6px 12px", borderRadius: 99,
+                          border: `1.5px solid ${on ? m.color : P.gray100}`,
+                          background: on ? m.bg : P.gray50,
+                          color: on ? m.color : P.gray700,
+                          fontWeight: on ? 700 : 600,
+                          fontSize: 12,
+                          display: "inline-flex", alignItems: "center", gap: 5,
+                          cursor: "pointer",
+                        }}
+                      >
+                        <span style={{ width: 6, height: 6, borderRadius: "50%", background: m.color }} />
+                        {risk}
+                      </button>
+                    );
+                  })}
+                </div>
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: 14 }}>
+                  <div>
+                    <div style={{ fontSize: 10, fontWeight: 700, color: P.gray500, textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 8 }}>Temperature</div>
+                    <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                      {TEMP_FILTER_OPTIONS.map(([val, label]) => {
+                        const on = tempFilter === val;
+                        return (
+                          <button
+                            key={val}
+                            type="button"
+                            onClick={() => setTempFilter(val)}
+                            style={{
+                              width: "100%", textAlign: "left",
+                              padding: "8px 10px", borderRadius: 9,
+                              border: `1.5px solid ${on ? P.orange500 : P.gray100}`,
+                              background: on ? P.orange50 : P.gray50,
+                              color: on ? P.orange500 : P.gray700,
+                              fontWeight: on ? 700 : 600,
+                              fontSize: 12,
+                              cursor: "pointer",
+                            }}
+                          >
+                            {label}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                  <div>
+                    <div style={{ fontSize: 10, fontWeight: 700, color: P.gray500, textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 8 }}>Nearby Facilities</div>
+                    <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                      {FACILITY_FILTER_OPTIONS.map(([val, label]) => {
+                        const on = facilityFilter === val;
+                        return (
+                          <button
+                            key={val}
+                            type="button"
+                            onClick={() => setFacilityFilter(val)}
+                            style={{
+                              width: "100%", textAlign: "left",
+                              padding: "8px 10px", borderRadius: 9,
+                              border: `1.5px solid ${on ? P.orange500 : P.gray100}`,
+                              background: on ? P.orange50 : P.gray50,
+                              color: on ? P.orange500 : P.gray700,
+                              fontWeight: on ? 700 : 600,
+                              fontSize: 12,
+                              cursor: "pointer",
+                            }}
+                          >
+                            {label}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
           <div className="all-barangays-scroll" style={{ flex: 1, minHeight: 0, overflowY: "auto", padding: "0 16px 16px" }}>
             <table style={{ width: "100%", borderCollapse: "collapse", marginTop: 8 }}>

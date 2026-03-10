@@ -269,41 +269,46 @@ export async function fetchCityForecast(cityId = 'davao', days = 7) {
  * @param {import('geojson').Feature[]} barangayFeatures
  * @returns {Promise<{ intensityPoints, points, tempMin, tempMax, tempByBarangayId, averageTemp?, updatedAt?, apiTempCount? }>}
  */
+const isDev = typeof import.meta !== 'undefined' && import.meta.env?.DEV;
+
 export async function getBarangayHeatData(barangayFeatures) {
-  console.log('[getBarangayHeatData] Starting with', barangayFeatures?.length, 'barangay features');
-  
+  if (isDev) console.log('[getBarangayHeatData] Starting with', barangayFeatures?.length, 'barangay features');
+
   const backend = await fetchBarangayTemperatures('davao');
-  console.log('[getBarangayHeatData] Backend response:', backend ? 
-    `${backend.count} temps, min=${backend.min}, max=${backend.max}` : 
-    'null (using simulation)');
-  
+  if (isDev) {
+    console.log('[getBarangayHeatData] Backend response:', backend ?
+      `${backend.count} temps, min=${backend.min}, max=${backend.max}` :
+      'null (using simulation)');
+  }
+
   const tempRange = {
     min: backend?.min ?? DEFAULT_TEMP_MIN,
     max: backend?.max ?? DEFAULT_TEMP_MAX
   };
-  
+
   let tempByBarangayId = backend?.temperatures ?? null;
   if (tempByBarangayId == null) {
-    console.log('[getBarangayHeatData] No backend temps, using simulation');
+    if (isDev) console.log('[getBarangayHeatData] No backend temps, using simulation');
     tempByBarangayId = simulateBarangayTemperatures(barangayFeatures, {
       centerLng: 125.4553,
       centerLat: 7.1907,
       ...tempRange
     });
-    console.log('[getBarangayHeatData] Simulated', Object.keys(tempByBarangayId).length, 'temperatures');
+    if (isDev) console.log('[getBarangayHeatData] Simulated', Object.keys(tempByBarangayId).length, 'temperatures');
   } else {
-    console.log('[getBarangayHeatData] Using backend temps:', Object.keys(tempByBarangayId).length, 'barangays');
-    console.log('[getBarangayHeatData] Sample backend IDs:', Object.keys(tempByBarangayId).slice(0, 5));
-    console.log('[getBarangayHeatData] Sample backend temps:', Object.keys(tempByBarangayId).slice(0, 5).map(id => `${id}: ${tempByBarangayId[id]}°C`));
-    
+    if (isDev) {
+      console.log('[getBarangayHeatData] Using backend temps:', Object.keys(tempByBarangayId).length, 'barangays');
+      console.log('[getBarangayHeatData] Sample backend IDs:', Object.keys(tempByBarangayId).slice(0, 5));
+      console.log('[getBarangayHeatData] Sample backend temps:', Object.keys(tempByBarangayId).slice(0, 5).map(id => `${id}: ${tempByBarangayId[id]}°C`));
+    }
     // Check if GeoJSON IDs match backend IDs
-    if (barangayFeatures?.length > 0) {
+    if (isDev && barangayFeatures?.length > 0) {
       const sampleFeature = barangayFeatures[0];
       const sampleId = sampleFeature.id ?? sampleFeature.properties?.adm4_psgc ?? sampleFeature.properties?.ADM4_PSGC;
       console.log('[getBarangayHeatData] Sample GeoJSON feature ID:', sampleId, 'Type:', typeof sampleId);
       console.log('[getBarangayHeatData] Backend has this ID?', String(sampleId) in tempByBarangayId);
     }
-    
+
     const averageTemp = backend.averageTemp != null && Number.isFinite(backend.averageTemp) ? backend.averageTemp : null;
     if (averageTemp != null && barangayFeatures?.length) {
       const filled = { ...tempByBarangayId };
@@ -316,7 +321,7 @@ export async function getBarangayHeatData(barangayFeatures) {
   }
   
   const { points, intensityPoints } = buildHeatPointsFromBarangays(barangayFeatures, tempByBarangayId, tempRange);
-  console.log('[getBarangayHeatData] Generated', intensityPoints.length, 'intensity points');
+  if (isDev) console.log('[getBarangayHeatData] Generated', intensityPoints.length, 'intensity points');
   
   return {
     intensityPoints,
