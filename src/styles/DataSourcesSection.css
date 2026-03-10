@@ -199,6 +199,44 @@
   background: rgba(253, 111, 0, 0.5);
 }
 
+/* Override: BanasUno-themed scrollbar, hidden until user interacts */
+.data-sources-tabs,
+.data-source-detail {
+  scrollbar-width: none;
+}
+
+.data-sources-tabs:hover,
+.data-source-detail:hover {
+  scrollbar-width: thin;
+}
+
+.data-sources-tabs::-webkit-scrollbar,
+.data-source-detail::-webkit-scrollbar {
+  width: 0;
+}
+
+.data-sources-tabs:hover::-webkit-scrollbar,
+.data-source-detail:hover::-webkit-scrollbar {
+  width: 4px;
+}
+
+.data-sources-tabs:hover::-webkit-scrollbar-track,
+.data-source-detail:hover::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.data-sources-tabs:hover::-webkit-scrollbar-thumb,
+.data-source-detail:hover::-webkit-scrollbar-thumb {
+  background-color: #ff6b1a66;
+  border-radius: 2px;
+  transition: background-color 0.2s ease, opacity 0.2s ease;
+}
+
+.data-sources-tabs:hover::-webkit-scrollbar-thumb:hover,
+.data-source-detail:hover::-webkit-scrollbar-thumb:hover {
+  background-color: #ff6b1a;
+}
+
 .data-source-tab {
   border: 1px solid rgba(253, 111, 0, 0.25);
   border-radius: 14px;

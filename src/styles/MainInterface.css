@@ -46,8 +46,53 @@
   overflow: visible;
 }
 
+/* Heat Advisory page – themed, subtle scrollbar that appears only when interacting */
+.heat-advisory-page {
+  scrollbar-width: none; /* Firefox: hide by default */
+}
+
+.heat-advisory-page:hover {
+  scrollbar-width: thin; /* Firefox: show thin scrollbar on hover/scroll */
+}
+
 .heat-advisory-page::-webkit-scrollbar {
-  display: none;
+  width: 0;
+  height: 0;
+}
+
+.heat-advisory-page:hover::-webkit-scrollbar {
+  width: 4px;
+}
+
+.heat-advisory-page:hover::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.heat-advisory-page:hover::-webkit-scrollbar-thumb {
+  background-color: #ff6b1a66;
+  border-radius: 2px;
+  transition: background-color 0.2s ease, opacity 0.2s ease;
+}
+
+.heat-advisory-page:hover::-webkit-scrollbar-thumb:hover {
+  background-color: #ff6b1a;
+}
+
+/* Heat Advisory – "Choose location" CTA (min 44px for touch) */
+.heat-advisory-choose-location-btn:hover {
+  background: #C44F00;
+  transform: translateY(-1px);
+}
+
+.heat-advisory-choose-location-btn:active {
+  transform: translateY(0);
+}
+
+@media (max-width: 768px) {
+  .heat-advisory-choose-location-btn {
+    min-height: 44px;
+    padding: 14px 24px;
+  }
 }
 
 .main-interface-dashboard-placeholder {
@@ -76,6 +121,45 @@
   max-height: 100vh;
   overflow-y: auto;
   box-shadow: 2px 0 8px rgba(0, 0, 0, 0.04);
+}
+
+/* Sidebar + mobile nav overlay: BanasUno-themed scrollbars (hidden until hover/scroll) */
+.main-interface-sidebar,
+.main-interface-mobile-overlay {
+  scrollbar-width: none;
+}
+
+.main-interface-sidebar:hover,
+.main-interface-mobile-overlay:hover {
+  scrollbar-width: thin;
+}
+
+.main-interface-sidebar::-webkit-scrollbar,
+.main-interface-mobile-overlay::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+}
+
+.main-interface-sidebar:hover::-webkit-scrollbar,
+.main-interface-mobile-overlay:hover::-webkit-scrollbar {
+  width: 4px;
+}
+
+.main-interface-sidebar:hover::-webkit-scrollbar-track,
+.main-interface-mobile-overlay:hover::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.main-interface-sidebar:hover::-webkit-scrollbar-thumb,
+.main-interface-mobile-overlay:hover::-webkit-scrollbar-thumb {
+  background-color: #ff6b1a66;
+  border-radius: 2px;
+  transition: background-color 0.2s ease, opacity 0.2s ease;
+}
+
+.main-interface-sidebar:hover::-webkit-scrollbar-thumb:hover,
+.main-interface-mobile-overlay:hover::-webkit-scrollbar-thumb:hover {
+  background-color: #ff6b1a;
 }
 
 .main-interface-logo {
@@ -172,6 +256,27 @@
   color: inherit;
 }
 
+.main-interface-nav-item--iot {
+  color: var(--primary-700);
+}
+
+.main-interface-nav-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px 8px;
+  border-radius: 999px;
+  border: 1px solid var(--orange-200, #fed7aa);
+  background: var(--orange-50, #fff4ed);
+  color: var(--orange-700, #C44F00);
+  font-family: var(--font-header);
+  font-size: 0.65rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  line-height: 1;
+}
+
 .main-interface-nav-link {
   text-decoration: none;
   color: inherit;
@@ -181,6 +286,42 @@
   height: 1px;
   background-color: var(--primary-100);
   margin: 0.5rem 0.25rem;
+}
+
+/* HELP section – Open Tutorial button: subtle outlined so it doesn't compete with nav */
+.main-interface-tutorial-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.6rem 0.75rem;
+  margin-top: 0.25rem;
+  background-color: var(--orange-50, #fff5ed);
+  color: var(--orange-700, #c2410c);
+  border: 1.5px solid var(--orange-200, #fed7aa);
+  border-radius: 10px;
+  font-family: var(--font-body);
+  font-size: 0.9375rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.main-interface-tutorial-btn:hover {
+  background-color: var(--orange-100, #ffedd5);
+  border-color: var(--orange-400, #fb923c);
+  color: var(--orange-800, #9a3412);
+  box-shadow: 0 2px 8px rgba(251, 146, 60, 0.2);
+}
+
+.main-interface-tutorial-btn:active {
+  background-color: var(--orange-200, #fed7aa);
+}
+
+.main-interface-tutorial-btn-icon {
+  flex-shrink: 0;
+  color: inherit;
 }
 
 /* Mobile header - hidden on desktop */
@@ -321,6 +462,18 @@
   background-color: var(--orange-50);
   color: var(--orange-700);
   font-weight: 600;
+}
+
+.main-interface-mobile-tutorial-btn {
+  margin-top: 0.5rem;
+  background-color: var(--orange-50, #fff5ed);
+  color: var(--orange-700, #c2410c);
+  border: 1.5px solid var(--orange-200, #fed7aa);
+}
+
+.main-interface-mobile-tutorial-btn:hover {
+  background-color: var(--orange-100, #ffedd5);
+  color: var(--orange-800, #9a3412);
 }
 
 .main-interface-mobile-backdrop {

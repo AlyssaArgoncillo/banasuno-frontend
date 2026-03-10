@@ -118,7 +118,7 @@ export default function ContactSection() {
   const [hovC, setHovC] = useState(null);
 
   return (
-    <div className="contact-section-wrapper" style={{ background: "#111", minHeight: "100vh", padding: "8rem 3rem 10rem 3rem",  }}>
+    <div id="contact" className="contact-section-wrapper" style={{ background: "#111", minHeight: "100vh", padding: "8rem 3rem 10rem 3rem",  }}>
       <style>{`
         .contact-section-wrapper { box-sizing: border-box; }
         .contact-section-wrapper * { box-sizing: border-box; }

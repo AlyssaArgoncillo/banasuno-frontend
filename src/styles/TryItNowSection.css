@@ -53,7 +53,8 @@
   border: none;
   border-radius: 6px;
   box-shadow: 0 2px 4px rgba(0,0,0,0.2) inset;
-  cursor: pointer;
+  cursor: default;
+  pointer-events: none;
 }
 
 /* Map bar below the smp frame, intentionally wider than the frame */
@@ -100,6 +101,12 @@
   cursor: pointer;
   transform: skew(-20deg);
   box-shadow: 0 6px 18px rgba(0,0,0,0.15);
+  transition: background-color 0.25s ease, box-shadow 0.25s ease;
+}
+
+.launch-btn:hover {
+  background: #FD6F00;
+  box-shadow: 0 6px 18px rgba(253, 111, 0, 0.35);
 }
 
 .launch-btn span {

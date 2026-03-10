@@ -268,13 +268,15 @@ export function UrgencyTicker({ barangay, riskKey, selectedZone }) {
       const requested = requestedParamsRef.current;
       if (!requested) return;
       if (!data) return;
-      if (requested.risk_level != null && (data.risk_level == null || data.risk_level !== requested.risk_level)) {
+      // Reject only when backend explicitly returns a *different* risk_level (safety: don't show "Not Hazardous" for Danger).
+      // Per contract, risk_level/risk_label are optional – if missing, accept and show Gemini content.
+      if (data.risk_level != null && requested.risk_level != null && data.risk_level !== requested.risk_level) {
         if (process.env.NODE_ENV === 'development') {
-          console.warn('[UrgencyTicker] Response risk_level missing or mismatch: got', data.risk_level, 'expected', requested.risk_level, '- not showing (avoids Not Hazardous for higher-risk selection)');
+          console.warn('[UrgencyTicker] Response risk_level mismatch: got', data.risk_level, 'expected', requested.risk_level, '- not showing');
         }
         return;
       }
-      if (requested.risk_label != null && data.risk_label != null && normalizeLabel(data.risk_label) !== normalizeLabel(requested.risk_label)) {
+      if (data.risk_label != null && requested.risk_label != null && normalizeLabel(data.risk_label) !== normalizeLabel(requested.risk_label)) {
         if (process.env.NODE_ENV === 'development') {
           console.warn('[UrgencyTicker] Response risk_label mismatch: got', data.risk_label, 'expected', requested.risk_label, '- not showing');
         }
@@ -300,9 +302,7 @@ export function UrgencyTicker({ barangay, riskKey, selectedZone }) {
   const fallbackForLevel = getFallbackAdvisoryForFrontend(displayLabel, displayLevel);
   const apiMatchesSelection = apiAdvisory && (apiAdvisory.risk_level == null || apiAdvisory.risk_level === displayLevel);
   const hasApiContent = apiMatchesSelection && typeof apiAdvisory.tagline === "string" && Array.isArray(apiAdvisory.advices) && apiAdvisory.advices.length > 0;
-  if (apiAdvisory && !apiMatchesSelection && process.env.NODE_ENV === 'development') {
-    console.warn('[UrgencyTicker] Ignoring stale apiAdvisory (level', apiAdvisory.risk_level, ') – current selection is level', displayLevel, '; using fallback');
-  }
+  // When the user changes the gauge before the API responds, we ignore the old response and show fallback for the current level until the new request completes.
   const effectiveTagline = hasApiContent ? apiAdvisory.tagline : fallbackForLevel.tagline;
   const effectiveAdvices = hasApiContent
     ? apiAdvisory.advices.map((a, i) => ({ ...a, iconKey: (r.advices[i]?.iconKey) ?? r.advices[0]?.iconKey ?? "droplet" }))

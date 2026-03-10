@@ -18,6 +18,9 @@
   object-fit: cover;
   object-position: center center;
   display: block;
+  opacity: 0;
+  transform: translateY(-20px);
+  transition: opacity 0.6s ease, transform 0.6s ease;
 }
 
 .hero-about-content {
@@ -32,6 +35,9 @@
   color: #333;
   margin: 0 0 2rem 0;
   letter-spacing: 0.05em;
+  opacity: 0;
+  transform: translateY(12px);
+  transition: opacity 0.55s 0.5s ease, transform 0.55s 0.5s ease;
 }
 
 .hero-about-title-accent {
@@ -43,6 +49,20 @@
   color: #666;
   line-height: 1.8;
   margin: 0;
+  opacity: 0;
+  transform: translateY(12px);
+  transition: opacity 0.55s 0.65s ease, transform 0.55s 0.65s ease;
+}
+
+.hero-about-section.hero-about-visible .hero-about-visual {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.hero-about-section.hero-about-visible .hero-about-title,
+.hero-about-section.hero-about-visible .hero-about-description {
+  opacity: 1;
+  transform: translateY(0);
 }
 
 /* Tablet: 768–1023px – center left-side illustration in banner */

@@ -41,9 +41,9 @@ function TryItNowSection() {
             </div>
           </div>
           <div className="monitor-controls">
-            <button className="control-btn" aria-label="control-1"></button>
-            <button className="control-btn" aria-label="control-2"></button>
-            <button className="control-btn" aria-label="control-3"></button>
+            <span className="control-btn" aria-hidden></span>
+            <span className="control-btn" aria-hidden></span>
+            <span className="control-btn" aria-hidden></span>
           </div>
         </div>
       </div>

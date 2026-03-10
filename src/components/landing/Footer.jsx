@@ -12,7 +12,13 @@ function Footer() {
             Making climate data accessible and actionable.
           </p>
           <div className="footer-social">
-            <a href="https://github.com" className="social-icon" aria-label="GitHub" target="_blank" rel="noopener noreferrer">
+            <a
+              href="https://github.com/BanasUno-Repo"
+              className="social-icon"
+              aria-label="GitHub"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
               <img src="/github.png" alt="GitHub" />
             </a>
             <a href="mailto:contact@banasuno.example" className="social-icon" aria-label="Email">
@@ -26,7 +32,7 @@ function Footer() {
             <h5 className="footer-heading">Quick Links</h5>
             <ul className="footer-links">
               <li><Link to="/home?view=heatmap">Heat Map</Link></li>
-              <li><Link to="/home?view=dashboard">Data Export</Link></li>
+              <li><Link to="/home?view=dashboard#dashboard-export">Data Export</Link></li>
             </ul>
           </div>
           

@@ -1,6 +1,6 @@
 .how-it-works-section {
   width: 100%;
-  padding: 8rem 2rem 6rem 2rem;
+  padding: 6rem 2.5rem 5rem 2.5rem;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -240,7 +240,8 @@
 
 .how-it-works-card {
   width: 100%;
-  max-width: 100%;
+  max-width: 56.25rem;
+  margin: 0 auto;
 }
 
 /* Single centered container for all 6 steps – grouped and evenly spaced */
@@ -264,6 +265,7 @@
   gap: 0;
   min-width: 660px;
   width: 100%;
+  margin: 0 auto;
 }
 
 .how-it-works-node {
@@ -442,7 +444,7 @@
   }
 
   .how-it-works-detail-sources span {
-    font-size: 8px !important;
+    font-size: 10px !important;
   }
 
   .how-it-works-detail-body {
@@ -568,8 +570,8 @@
   }
 
   .how-it-works-detail-sources span {
-    font-size: 8px !important;
-    padding: 3px 6px !important;
+    font-size: 9px !important;
+    padding: 4px 8px !important;
   }
 
   .how-it-works-detail-body > div > div:first-child {

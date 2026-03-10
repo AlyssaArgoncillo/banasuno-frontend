@@ -49,6 +49,10 @@
   animation: bounce 2.5s ease-in-out infinite;
   cursor: pointer;
   transition: color 0.2s ease;
+  border: none;
+  background: none;
+  padding: 0;
+  font: inherit;
 }
 
 .scroll-indicator:hover {

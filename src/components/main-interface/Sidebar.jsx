@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { Ico } from '../ui/Icons.jsx';
 import '../../styles/MainInterface.css';
 
 const ChevronDown = ({ open }) => (
@@ -38,9 +39,10 @@ const AlertIcon = () => (
   </svg>
 );
 
-function Sidebar({ activeView, onSelectView }) {
+function Sidebar({ activeView, onSelectView, onSelectCommunitySensors, onOpenTutorial }) {
   const [homeOpen, setHomeOpen] = useState(true);
   const [infoOpen, setInfoOpen] = useState(true);
+  const [helpOpen, setHelpOpen] = useState(true);
 
   return (
     <aside className="main-interface-sidebar">
@@ -67,6 +69,21 @@ function Sidebar({ activeView, onSelectView }) {
             >
               <GearIcon />
               <span>Heat Map</span>
+            </button>
+            <button
+              type="button"
+              className={`main-interface-nav-item main-interface-nav-item--iot ${activeView === 'community-sensors' ? 'active' : ''}`}
+              onClick={() => (typeof onSelectCommunitySensors === 'function' ? onSelectCommunitySensors() : onSelectView('heatmap'))}
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                <circle cx="12" cy="12" r="2" />
+                <path d="M16.24 7.76a6 6 0 0 1 0 8.49M7.76 16.24a6 6 0 0 1 0-8.49" />
+                <path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 19.07a10 10 0 0 1 0-14.14" />
+              </svg>
+              <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, width: '100%' }}>
+                <span>Community Sensors</span>
+                <span className="main-interface-nav-pill">Preview</span>
+              </span>
             </button>
             <button
               type="button"
@@ -104,6 +121,31 @@ function Sidebar({ activeView, onSelectView }) {
               <InfoIcon />
               <span>About Us</span>
             </Link>
+          </div>
+        )}
+
+        <div className="main-interface-nav-separator" />
+
+        <button
+          type="button"
+          className="main-interface-nav-section"
+          onClick={() => setHelpOpen(!helpOpen)}
+          aria-expanded={helpOpen}
+        >
+          <span>Help</span>
+          <ChevronDown open={helpOpen} />
+        </button>
+        {helpOpen && (
+          <div className="main-interface-nav-group">
+            <button
+              type="button"
+              className="main-interface-tutorial-btn"
+              onClick={onOpenTutorial}
+              aria-label="Open tutorial"
+            >
+              <Ico name="HelpCircle" size={20} className="main-interface-tutorial-btn-icon" />
+              <span>Open Tutorial</span>
+            </button>
           </div>
         )}
       </nav>

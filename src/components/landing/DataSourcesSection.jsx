@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import {
   animated,
   config,
@@ -59,6 +59,7 @@ function DataSourcesSection() {
   const [open, setOpen] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(0);
+  const triggerRef = useRef(null);
 
   const springApi = useSpringRef();
   const { size, ...rest } = useSpring({
@@ -86,6 +87,9 @@ function DataSourcesSection() {
 
         <div className="data-sources-visual-wrapper">
           <animated.div
+            ref={triggerRef}
+            role="button"
+            tabIndex={0}
             className="data-sources-visual"
             data-open={open ? 'true' : 'false'}
             data-hovered={isHovered ? 'true' : 'false'}
@@ -93,6 +97,8 @@ function DataSourcesSection() {
             onClick={handleToggle}
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
+            onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleToggle(); } }}
+            aria-label="Reveal data sources"
           >
             <img src="/folder.png" alt="" className="data-sources-folder" aria-hidden />
           </animated.div>
@@ -111,7 +117,10 @@ function DataSourcesSection() {
             <button
               type="button"
               className="data-sources-close"
-              onClick={() => setOpen(false)}
+              onClick={() => {
+                triggerRef.current?.focus?.();
+                setOpen(false);
+              }}
               aria-label="Close data sources"
             >
               ×

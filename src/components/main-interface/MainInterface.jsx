@@ -8,7 +8,7 @@ function MainInterface() {
   const [activeView, setActiveView] = useState(() => {
     try {
       const saved = localStorage.getItem('activeView');
-      if (saved && ['dashboard', 'heatmap', 'heat-advisory'].includes(saved)) {
+      if (saved && ['dashboard', 'heatmap', 'heat-advisory', 'community-sensors'].includes(saved)) {
         return saved;
       }
     } catch (err) {
@@ -17,8 +17,11 @@ function MainInterface() {
     return 'heatmap';
   });
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [showTutorial, setShowTutorial] = useState(false);
   const [selectedZone, setSelectedZone] = useState(null);
   const [facilityToFocusOnMap, setFacilityToFocusOnMap] = useState(null);
+  const [heatmapIotLayer, setHeatmapIotLayer] = useState('Official only');
+  const [heatmapIotLayerKey, setHeatmapIotLayerKey] = useState(0);
   const location = useLocation();
 
   const onFocusFacilityOnMap = (facility) => {
@@ -32,20 +35,23 @@ function MainInterface() {
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     const view = params.get('view');
-    if (view === 'dashboard' || view === 'heatmap' || view === 'heat-advisory') {
+    if (view === 'dashboard' || view === 'heatmap' || view === 'heat-advisory' || view === 'community-sensors') {
       setActiveView(view);
     }
-    
-    // Restore selected barangay from localStorage
-    try {
-      const savedZone = localStorage.getItem('selectedZone');
-      if (savedZone) {
-        setSelectedZone(JSON.parse(savedZone));
-      }
-    } catch (err) {
-      console.error('Failed to restore selected zone from localStorage:', err);
-    }
+    // Do not restore selectedZone from localStorage — no location is selected until the user selects one on the Heat Map.
   }, [location.search]);
+
+  // When landing on /home?view=dashboard#dashboard-export, scroll to the CSV export cards.
+  useEffect(() => {
+    if (activeView !== 'dashboard') return;
+    if (location.hash !== '#dashboard-export') return;
+    const el = document.querySelector('#dashboard-export');
+    if (el) {
+      setTimeout(() => {
+        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 150);
+    }
+  }, [activeView, location.hash]);
 
   // Persist activeView to localStorage whenever it changes
   useEffect(() => {
@@ -59,6 +65,14 @@ function MainInterface() {
   const closeMobileMenu = () => setIsMobileMenuOpen(false);
   const setViewAndClose = (view) => {
     setActiveView(view);
+    if (view === 'heatmap') {
+      setHeatmapIotLayer('Official only');
+      setHeatmapIotLayerKey((k) => k + 1);
+    }
+    if (view === 'community-sensors') {
+      setHeatmapIotLayer('Community only');
+      setHeatmapIotLayerKey((k) => k + 1);
+    }
     closeMobileMenu();
   };
   
@@ -78,12 +92,34 @@ function MainInterface() {
   };
   const onGoToDashboard = () => {
     setActiveView('dashboard');
+    setHeatmapIotLayer('Official only');
+    setHeatmapIotLayerKey((k) => k + 1);
     closeMobileMenu();
   };
 
   return (
     <div className="main-interface">
-      <Sidebar activeView={activeView} onSelectView={setActiveView} />
+      <Sidebar
+        activeView={activeView}
+        onSelectView={(view) => {
+          setActiveView(view);
+          if (view === 'heatmap') {
+            setHeatmapIotLayer('Official only');
+            setHeatmapIotLayerKey((k) => k + 1);
+          }
+          if (view === 'community-sensors') {
+            setHeatmapIotLayer('Community only');
+            setHeatmapIotLayerKey((k) => k + 1);
+          }
+        }}
+        onSelectCommunitySensors={() => {
+          setActiveView('community-sensors');
+          setHeatmapIotLayer('Community only');
+          setHeatmapIotLayerKey((k) => k + 1);
+          closeMobileMenu();
+        }}
+        onOpenTutorial={() => { setActiveView('heatmap'); setHeatmapIotLayer('Official only'); setShowTutorial(true); }}
+      />
 
       <div className="main-interface-body">
         <main className="main-interface-content main-interface-content-card">
@@ -95,6 +131,11 @@ function MainInterface() {
             onFocusFacilityOnMap={onFocusFacilityOnMap}
             facilityToFocusOnMap={facilityToFocusOnMap}
             onClearFocusFacility={() => setFacilityToFocusOnMap(null)}
+            onGoToHeatMap={() => setViewAndClose('heatmap')}
+            showTutorial={showTutorial}
+            setShowTutorial={setShowTutorial}
+            heatmapIotLayer={heatmapIotLayer}
+            heatmapIotLayerKey={heatmapIotLayerKey}
           />
         </main>
       </div>
@@ -134,6 +175,13 @@ function MainInterface() {
           </button>
           <button
             type="button"
+            className="main-interface-mobile-nav-item"
+            onClick={() => setViewAndClose('community-sensors')}
+          >
+            Community Sensors
+          </button>
+          <button
+            type="button"
             className={`main-interface-mobile-nav-item ${activeView === 'dashboard' ? 'active' : ''}`}
             onClick={() => setViewAndClose('dashboard')}
           >
@@ -149,6 +197,13 @@ function MainInterface() {
           <Link to="/about" className="main-interface-mobile-nav-item main-interface-mobile-nav-link" onClick={closeMobileMenu}>
             About Us
           </Link>
+          <button
+            type="button"
+            className="main-interface-mobile-nav-item main-interface-mobile-tutorial-btn"
+            onClick={() => { setActiveView('heatmap'); setShowTutorial(true); closeMobileMenu(); }}
+          >
+            Open Tutorial
+          </button>
         </nav>
       </div>
       <div
