@@ -451,6 +451,57 @@
   font-style: italic;
 }
 
+/* Mobile only: "Show more" / "Show less" for facilities list */
+.zone-info-card-show-more-wrap {
+  display: none;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 8px;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+@media (max-width: 768px) {
+  .zone-info-card-show-more-wrap {
+    display: flex;
+  }
+}
+
+.zone-info-card-facilities-count {
+  font-size: 11px;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.zone-info-card-show-more-btn {
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--primary-700, #c2410c);
+  background: var(--primary-50, #fff7ed);
+  border: 1px solid var(--primary-200, #fed7aa);
+  border-radius: 10px;
+  padding: 10px 14px;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s, color 0.2s;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.zone-info-card-show-more-btn:hover {
+  background: var(--primary-100, #ffedd5);
+  border-color: var(--primary-300, #fdba74);
+  color: var(--primary-800, #9a3412);
+}
+
+.zone-info-card-show-more-btn:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(255, 107, 26, 0.35);
+}
+
 /* Normal facility item – text flexes; button has reserved width so never clipped */
 .zone-info-card-fitem {
   display: flex;

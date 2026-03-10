@@ -980,7 +980,7 @@ const HeatMap = ({ compact = false, selectedZone: propSelectedZone, onZoneSelect
             })}
           </div>
         )}
-        {mapLoading && (
+        {mapLoading && !showTutorial && (
           <div className="heatmap-loading" aria-live="polite" aria-busy="true">
             <div className="navigation-loader-content">
               <div className="radar-loader" aria-hidden>
@@ -994,21 +994,6 @@ const HeatMap = ({ compact = false, selectedZone: propSelectedZone, onZoneSelect
         {error && (
           <div className="heatmap-error">
             {error?.message ?? String(error)}
-          </div>
-        )}
-
-        {/* Exit facility location button – shown when viewing a facility from the directory */}
-        {focusFacilityMarkerVisible && (
-          <div className="heatmap-exit-facility-wrap">
-            <button
-              type="button"
-              className="heatmap-exit-facility-btn"
-              onClick={handleExitFacilityFocus}
-              aria-label="Exit facility location view"
-            >
-              <span className="heatmap-exit-facility-icon" aria-hidden>✕</span>
-              <span>Exit location</span>
-            </button>
           </div>
         )}
 
@@ -1101,6 +1086,17 @@ const HeatMap = ({ compact = false, selectedZone: propSelectedZone, onZoneSelect
                 ✕
               </button>
             )}
+            {focusFacilityMarkerVisible && (
+              <button
+                type="button"
+                className="heatmap-zoom-btn heatmap-zoom-btn-exit-pin"
+                onClick={handleExitFacilityFocus}
+                aria-label="Exit facility location view"
+                title="Exit location"
+              >
+                ✕
+              </button>
+            )}
           </div>
         </div>
 
@@ -1181,6 +1177,17 @@ const HeatMap = ({ compact = false, selectedZone: propSelectedZone, onZoneSelect
                 onClick={handleExitPinnedLocation}
                 aria-label="Exit pinned location"
                 title="Exit pinned location"
+              >
+                ✕
+              </button>
+            )}
+            {focusFacilityMarkerVisible && (
+              <button
+                type="button"
+                className="heatmap-zoom-btn heatmap-zoom-btn-exit-pin"
+                onClick={handleExitFacilityFocus}
+                aria-label="Exit facility location view"
+                title="Exit location"
               >
                 ✕
               </button>

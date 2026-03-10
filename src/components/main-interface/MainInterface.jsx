@@ -41,6 +41,11 @@ function MainInterface() {
     // Do not restore selectedZone from localStorage — no location is selected until the user selects one on the Heat Map.
   }, [location.search]);
 
+  // Reset scroll to top when switching between Dashboard, Heat Map, Community Sensors, Heat Advisory
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [activeView]);
+
   // When landing on /home?view=dashboard#dashboard-export, scroll to the CSV export cards.
   useEffect(() => {
     if (activeView !== 'dashboard') return;

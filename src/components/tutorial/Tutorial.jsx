@@ -36,10 +36,11 @@ export function Tutorial({ onClose, onDontShowAgain }) {
     <>
       <div
         onClick={close}
+        className="tutorial-backdrop"
         style={{
           position: "fixed",
           inset: 0,
-          zIndex: 500,
+          zIndex: 1300,
           background: mounted && !closing ? "rgba(10,4,0,0.62)" : "rgba(10,4,0,0)",
           backdropFilter: mounted && !closing ? "blur(8px)" : "blur(0px)",
           WebkitBackdropFilter: mounted && !closing ? "blur(8px)" : "blur(0px)",
@@ -48,12 +49,13 @@ export function Tutorial({ onClose, onDontShowAgain }) {
       />
 
       <div
+        className="tutorial-sheet-wrapper"
         style={{
           position: "fixed",
           bottom: 0,
           left: 0,
           right: 0,
-          zIndex: 501,
+          zIndex: 1301,
           display: "flex",
           justifyContent: "center",
         }}
