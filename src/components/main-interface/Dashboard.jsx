@@ -312,17 +312,26 @@ function ExportToast({ msg, onClose }) {
     return () => clearTimeout(t);
   }, [msg, onClose]);
   return (
-    <div style={{
-      position: "fixed", bottom: 24, right: 24,
-      background: P.green500, color: P.white,
-      borderRadius: 12, padding: "11px 20px",
-      fontSize: 13, fontWeight: 600,
-      boxShadow: "0 8px 24px rgba(0,0,0,0.18)",
-      zIndex: 9999, display: "flex", alignItems: "center", gap: 10,
-      animation: "dashboard-slideUp 0.3s both",
-    }}>
-      ✓ {msg}
-      <button type="button" onClick={onClose} style={{ background: "none", border: "none", color: "rgba(255,255,255,0.7)", cursor: "pointer", fontSize: 18, padding: 0, lineHeight: 1 }}>×</button>
+    <div className="dashboard-export-toast-wrap">
+      <div
+        className="dashboard-export-toast"
+        style={{
+          background: P.green500,
+          color: P.white,
+          borderRadius: 12,
+          padding: "11px 20px",
+          fontSize: 13,
+          fontWeight: 600,
+          boxShadow: "0 8px 24px rgba(0,0,0,0.18)",
+          display: "flex",
+          alignItems: "center",
+          gap: 10,
+          animation: "dashboard-slideUp 0.3s both",
+        }}
+      >
+        ✓ {msg}
+        <button type="button" onClick={onClose} style={{ background: "none", border: "none", color: "rgba(255,255,255,0.7)", cursor: "pointer", fontSize: 18, padding: 0, lineHeight: 1 }}>×</button>
+      </div>
     </div>
   );
 }

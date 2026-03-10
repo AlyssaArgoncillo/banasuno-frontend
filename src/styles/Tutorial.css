@@ -1,6 +1,11 @@
-/* Tutorial – bottom sheet and trigger */
+/* Tutorial – bottom sheet and trigger (z-index 1300+ so above map loading overlay and mobile header) */
 * {
   box-sizing: border-box;
+}
+
+.tutorial-backdrop,
+.tutorial-sheet-wrapper {
+  pointer-events: auto;
 }
 
 .tutorial-sheet {

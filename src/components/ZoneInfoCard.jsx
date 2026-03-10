@@ -7,6 +7,9 @@ const ROUTE_PROFILES = [
   { value: 'cycling-regular', label: 'Cycling' },
 ];
 
+/** Mobile: max facilities shown before "Show more". */
+const MOBILE_FACILITIES_INITIAL = 5;
+
 /** Straight-line km from facility (distance_meters or distance_km). Display as ~X.X km. */
 function straightLineDisplay(fac) {
   if (fac == null) return null;
@@ -69,6 +72,11 @@ export default function ZoneInfoCard({
 }) {
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
   const profileDropdownRef = useRef(null);
+  const [facilitiesExpanded, setFacilitiesExpanded] = useState(false);
+  const [isMobile, setIsMobile] = useState(() =>
+    typeof window !== 'undefined' && window.matchMedia('(max-width: 768px)').matches
+  );
+
   useEffect(() => {
     if (!profileDropdownOpen) return;
     const close = (e) => {
@@ -77,6 +85,13 @@ export default function ZoneInfoCard({
     document.addEventListener('click', close);
     return () => document.removeEventListener('click', close);
   }, [profileDropdownOpen]);
+
+  useEffect(() => {
+    const mq = window.matchMedia('(max-width: 768px)');
+    const handle = () => setIsMobile(mq.matches);
+    mq.addEventListener('change', handle);
+    return () => mq.removeEventListener('change', handle);
+  }, []);
 
   const currentProfileLabel = ROUTE_PROFILES.find((p) => p.value === routeProfile)?.label ?? 'Driving';
 
@@ -232,7 +247,13 @@ export default function ZoneInfoCard({
           ) : facilities.length === 0 ? (
             <p className="zone-info-card-flist-empty">No facilities listed.</p>
           ) : (
-            facilities.map((fac) => {
+            (() => {
+              const showCollapsed = isMobile && facilities.length > MOBILE_FACILITIES_INITIAL && !facilitiesExpanded;
+              const visibleFacilities = showCollapsed ? facilities.slice(0, MOBILE_FACILITIES_INITIAL) : facilities;
+              const moreCount = facilities.length - MOBILE_FACILITIES_INITIAL;
+              return (
+                <>
+                  {visibleFacilities.map((fac) => {
               const isHighlighted = highlightedFacilityId != null && String(fac.id) === String(highlightedFacilityId);
               const routeSummaryForFacility = routeSummaryByFacilityId[String(fac.id)];
               const displayRoute = routeSummaryForFacility ? routeSummaryDisplay(routeSummaryForFacility) : null;
@@ -320,7 +341,30 @@ export default function ZoneInfoCard({
                   )}
                 </div>
               );
-            })
+            })}
+                  {isMobile && facilities.length > MOBILE_FACILITIES_INITIAL && (
+                    <div className="zone-info-card-show-more-wrap">
+                      <span className="zone-info-card-facilities-count">
+                        ({facilities.length} facilities)
+                      </span>
+                      <button
+                        type="button"
+                        className="zone-info-card-show-more-btn"
+                        onClick={() => setFacilitiesExpanded((e) => !e)}
+                        aria-expanded={facilitiesExpanded}
+                        aria-label={facilitiesExpanded ? 'Show less facilities' : `Show ${moreCount} more facilities`}
+                      >
+                        {facilitiesExpanded ? (
+                          <>△ Show less</>
+                        ) : (
+                          <>↯ Show {moreCount} more facilities</>
+                        )}
+                      </button>
+                    </div>
+                  )}
+                </>
+              );
+            })()
           )}
         </div>
 
