@@ -87,6 +87,12 @@
   transition: opacity 0.65s 1.2s;
 }
 
+@media (min-width: 769px) {
+  .local-hero-label {
+    font-size: 0.8rem;
+  }
+}
+
 .local-hero-content {
   display: grid;
   grid-template-columns: 1fr auto;

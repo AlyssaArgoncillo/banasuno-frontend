@@ -615,6 +615,17 @@ const HeatMap = ({ compact = false, selectedZone: propSelectedZone, onZoneSelect
     return () => clearTimeout(t);
   }, [compact, iotLayer, mapLoading]);
 
+  // When switching back to Official only (Heat Map), invalidate size so map fills full width and white strip disappears
+  useEffect(() => {
+    if (compact || iotLayer !== 'Official only') return;
+    const map = mapInstanceRef.current;
+    if (!map) return;
+    const t = setTimeout(() => {
+      map.invalidateSize();
+    }, 150);
+    return () => clearTimeout(t);
+  }, [compact, iotLayer]);
+
   // Bottom sheet snap points + drag (mobile/tablet).
   // We keep three states: collapsed (~70% hidden), half, and full (0% hidden).
   useEffect(() => {

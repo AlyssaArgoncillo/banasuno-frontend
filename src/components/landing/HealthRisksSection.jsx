@@ -113,7 +113,8 @@ function HealthRisksSection() {
               }
               const now = Date.now();
               const { time, index: lastIndex } = lastTapRef.current;
-              if (now - time < 500 && lastIndex === index) return;
+              // Short window only to dedupe touch+click on mobile; allow second click to collapse on desktop
+              if (now - time < 120 && lastIndex === index) return;
               lastTapRef.current = { time: now, index };
               toggleCard();
             };

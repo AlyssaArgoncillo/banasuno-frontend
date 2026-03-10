@@ -1152,6 +1152,11 @@
     width: 70%;
   }
 
+  /* When panel is not rendered (e.g. switched back to Heat Map), map uses full width – fixes white strip on right */
+  .heatmap-with-iot:not(:has(.heatmap-iot-panel-col)) .heatmap-iot-map-col {
+    width: 100%;
+  }
+
   .heatmap-with-iot .heatmap-iot-panel-col {
     width: 284px;
     min-width: 284px;

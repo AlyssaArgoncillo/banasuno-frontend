@@ -72,8 +72,17 @@ export async function getBarangayCentroid(psgc, options = {}) {
   return null;
 }
 
+/** Accuracy threshold in meters; we stop watching when we get a fix at least this good. */
+const GOOD_ACCURACY_METERS = 30;
+
+/** Max time to keep watching for a better fix (ms). */
+const WATCH_TIMEOUT_MS = 20000;
+
 /**
  * Get precise location via browser geolocation (GPS/Wi‑Fi).
+ * Uses watchPosition() so accuracy can improve over the first few seconds;
+ * resolves when accuracy < 30m or after 20s (returns best fix so far).
+ * Always cleans up with clearWatch().
  *
  * @returns {Promise<{ lat: number, lng: number, accuracy: number }>}
  */
@@ -85,23 +94,87 @@ function getLocationByGeolocation() {
       reject(err);
       return;
     }
-    console.log(LOG_PREFIX, 'Requesting high-accuracy geolocation...');
-    navigator.geolocation.getCurrentPosition(
+
+    let watchId = null;
+    let best = null; // { lat, lng, accuracy }
+    let settled = false;
+
+    const clearAndResolve = (result) => {
+      if (settled) return;
+      settled = true;
+      if (watchId != null) {
+        navigator.geolocation.clearWatch(watchId);
+        watchId = null;
+      }
+      resolve(result);
+    };
+
+    const clearAndReject = (err) => {
+      if (settled) return;
+      settled = true;
+      if (watchId != null) {
+        navigator.geolocation.clearWatch(watchId);
+        watchId = null;
+      }
+      reject(err);
+    };
+
+    console.log(LOG_PREFIX, 'Watching for high-accuracy geolocation (target <', GOOD_ACCURACY_METERS, 'm)...');
+
+    watchId = navigator.geolocation.watchPosition(
       (pos) => {
         const lat = pos.coords.latitude;
         const lng = pos.coords.longitude;
-        const accuracy = pos.coords.accuracy;
-        console.log(LOG_PREFIX, 'Geolocation success:', { lat, lng, accuracy: accuracy?.toFixed(0) + 'm' });
-        resolve({ lat, lng, accuracy: Number.isFinite(accuracy) ? accuracy : 0 });
+        const accuracy = Number.isFinite(pos.coords.accuracy) ? pos.coords.accuracy : Infinity;
+        if (!Number.isFinite(lat) || !Number.isFinite(lng)) return;
+
+        const isBetter = best == null || accuracy < best.accuracy;
+        if (isBetter) {
+          best = { lat, lng, accuracy };
+          console.log(LOG_PREFIX, 'Geolocation update:', { lat, lng, accuracy: accuracy.toFixed(0) + 'm' });
+        }
+
+        if (accuracy <= GOOD_ACCURACY_METERS) {
+          console.log(LOG_PREFIX, 'Good fix reached (<', GOOD_ACCURACY_METERS, 'm), stopping watch.');
+          clearAndResolve({
+            lat: best.lat,
+            lng: best.lng,
+            accuracy: best.accuracy,
+          });
+        }
       },
       (err) => {
         const code = err?.code ?? -1;
         const msg = err?.message ?? 'Unknown error';
-        console.warn(LOG_PREFIX, 'Geolocation failed:', { code, message: msg });
-        reject(err);
+        console.warn(LOG_PREFIX, 'Geolocation error:', { code, message: msg });
+        if (best != null) {
+          console.log(LOG_PREFIX, 'Returning best fix so far after error.');
+          clearAndResolve({
+            lat: best.lat,
+            lng: best.lng,
+            accuracy: best.accuracy,
+          });
+        } else {
+          clearAndReject(err);
+        }
       },
-      { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
+      { enableHighAccuracy: true, timeout: 20000, maximumAge: 0 }
     );
+
+    setTimeout(() => {
+      if (settled) return;
+      if (best != null) {
+        console.log(LOG_PREFIX, 'Watch timeout: returning best fix after', WATCH_TIMEOUT_MS / 1000, 's.');
+        clearAndResolve({
+          lat: best.lat,
+          lng: best.lng,
+          accuracy: best.accuracy,
+        });
+      } else {
+        console.warn(LOG_PREFIX, 'Watch timeout: no fix received.');
+        clearAndReject(new Error('Location request timed out; no position received.'));
+      }
+    }, WATCH_TIMEOUT_MS);
   });
 }
 
