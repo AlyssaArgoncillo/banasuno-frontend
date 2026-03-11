@@ -314,7 +314,7 @@ function AboutPage() {
                 <IconTarget />
               </div>
               <div>
-                <div style={{ fontSize: 8, fontWeight: 700, letterSpacing: '0.12em', color: P.gray500, marginBottom: 2 }}>SECTION 05 · SDG ALIGNMENT</div>
+                <div style={{ fontSize: 8, fontWeight: 700, letterSpacing: '0.12em', color: P.gray500, marginBottom: 2 }}>SECTION 04 · SDG ALIGNMENT</div>
                 <h2 style={{ fontWeight: 900, fontSize: 22, color: P.gray900, letterSpacing: '-0.02em', margin: 0 }}>Strategic Goals</h2>
               </div>
             </div>
