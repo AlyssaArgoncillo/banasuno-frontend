@@ -807,3 +807,199 @@
     font-size: 16px;
   }
 }
+
+/* "Your location" tag in the sub line (zone resolved from the user's live position) */
+.zone-info-card-you {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  margin-right: 6px;
+  padding: 1px 7px;
+  border-radius: 20px;
+  font-weight: 700;
+  color: #c44f00;
+  background: #fff4ed;
+  border: 1px solid #ffd4b8;
+}
+
+/* Tabs: Clinics | Risks | Remedies */
+.zone-info-card-tabs {
+  display: flex;
+  gap: 4px;
+  margin: -4px 0 12px;
+  border-bottom: 1px solid #eee;
+  flex-shrink: 0;
+}
+
+.zone-info-card-tab {
+  flex: 1 1 0;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  color: #94a3b8;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  padding: 8px 4px;
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s;
+}
+
+.zone-info-card-tab:hover {
+  color: #475569;
+}
+
+.zone-info-card-tab--active {
+  color: #0f172a;
+  border-bottom-color: #0f172a;
+}
+
+.zone-info-card-tab:focus-visible {
+  outline: 2px solid rgba(255, 107, 26, 0.5);
+  outline-offset: -2px;
+  border-radius: 6px 6px 0 0;
+}
+
+/* Panels fill the card body; Risks/Remedies scroll inside the panel like the facility list */
+.zone-info-card-tabpanel {
+  flex: 1 1 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+
+.zone-info-card-tabpanel--clinics {
+  overflow: hidden;
+}
+
+/* Risks / Remedies content */
+.zone-info-card-health {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-right: 4px;
+  font-size: 12px;
+  line-height: 1.5;
+  color: #334155;
+}
+
+.zone-info-card-health-summary {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 10px 12px;
+  background: #f7f8fa;
+  border: 1px solid #eee;
+  border-left: 4px solid #0f172a;
+  border-radius: 10px;
+}
+
+.zone-info-card-health-summary strong {
+  font-size: 13px;
+  color: #0f172a;
+}
+
+.zone-info-card-health-summary span {
+  color: #64748b;
+}
+
+.zone-info-card-health-subtitle {
+  margin-top: 4px;
+}
+
+.zone-info-card-health-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+}
+
+.zone-info-card-health-item {
+  padding: 10px 12px;
+  background: #f7f8fa;
+  border: 1px solid #eee;
+  border-radius: 10px;
+}
+
+.zone-info-card-health-item--emergency {
+  background: #fef2f2;
+  border-color: #fecaca;
+}
+
+.zone-info-card-health-item-name {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.zone-info-card-health-item-body {
+  margin-top: 2px;
+  color: #64748b;
+}
+
+.zone-info-card-health-tag {
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #fff;
+  background: #dc2626;
+  border-radius: 20px;
+  padding: 2px 7px;
+}
+
+.zone-info-card-health .zone-info-card-notice {
+  margin-bottom: 0;
+}
+
+.zone-info-card-health-disclaimer {
+  padding: 8px 10px;
+  font-size: 11px;
+  line-height: 1.5;
+  color: #1e3a8a;
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  border-radius: 8px;
+}
+
+.zone-info-card-health-checklist,
+.zone-info-card-health-steps {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.zone-info-card-health-checklist {
+  list-style: none;
+  padding: 0;
+}
+
+.zone-info-card-health-checklist li {
+  position: relative;
+  padding: 8px 10px 8px 30px;
+  background: #f0fdf6;
+  border: 1px solid #c3f0d8;
+  border-radius: 10px;
+}
+
+.zone-info-card-health-checklist li::before {
+  content: '✓';
+  position: absolute;
+  left: 11px;
+  top: 8px;
+  font-weight: 700;
+  color: #15803d;
+}
+
+.zone-info-card-health-steps {
+  padding-left: 20px;
+}

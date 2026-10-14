@@ -1227,6 +1227,8 @@
     padding: 12px 14px 16px;
   }
 
+  .heatmap-iot-map-col > .heatmap-barangay-card-section.zone-info-card-wrapper .zone-info-card-tabpanel,
+  .heatmap-wrapper > .heatmap-barangay-card-section.zone-info-card-wrapper .zone-info-card-tabpanel,
   .heatmap-iot-map-col > .heatmap-barangay-card-section.zone-info-card-wrapper .zone-info-card-flist,
   .heatmap-wrapper > .heatmap-barangay-card-section.zone-info-card-wrapper .zone-info-card-flist {
     flex: 0 0 auto;

@@ -1,10 +1,17 @@
 import React, { useState, useRef, useEffect } from 'react';
 import '../styles/ZoneInfoCard.css';
+import { HeatRemediesPanel, HeatRisksPanel } from './HeatHealthPanels.jsx';
 
 const ROUTE_PROFILES = [
   { value: 'foot-walking', label: 'Walking' },
   { value: 'driving-car', label: 'Driving' },
   { value: 'cycling-regular', label: 'Cycling' },
+];
+
+const TABS = [
+  { value: 'clinics', label: 'Clinics' },
+  { value: 'risks', label: 'Risks' },
+  { value: 'remedies', label: 'Remedies' },
 ];
 
 /** Mobile: max facilities shown before "Show more". */
@@ -69,7 +76,9 @@ export default function ZoneInfoCard({
   onRouteOriginChange = null,
   routeFromLabel = null,
   locationStatusForRoute = null,
+  isUserLocation = false,
 }) {
+  const [activeTab, setActiveTab] = useState('clinics');
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
   const profileDropdownRef = useRef(null);
   const [facilitiesExpanded, setFacilitiesExpanded] = useState(false);
@@ -149,224 +158,266 @@ export default function ZoneInfoCard({
           </div>
         </div>
       </div>
-      <div className="zone-info-card-sub">Barangay · Davao Region</div>
+      <div className="zone-info-card-sub">
+        {isUserLocation && (
+          <span className="zone-info-card-you">
+            <svg viewBox="0 0 24 24" width="10" height="10" fill="currentColor" aria-hidden>
+              <path d="M12 2a8 8 0 0 0-8 8c0 6 8 12 8 12s8-6 8-12a8 8 0 0 0-8-8Zm0 11a3 3 0 1 1 0-6 3 3 0 0 1 0 6Z" />
+            </svg>
+            Your location
+          </span>
+        )}
+        Barangay · Davao Region
+      </div>
 
       <div className="zone-info-card-divider" />
 
       {/* Body */}
       <div className="zone-info-card-body">
-        <div className="zone-info-card-section-hd">
-          <span className="zone-info-card-section-title">{sectionTitle}</span>
-          {facilitiesTotalLabel != null && facilitiesTotalLabel !== '' && (
-            <span className="zone-info-card-fcount">{facilitiesTotalLabel}</span>
-          )}
+        <div className="zone-info-card-tabs" role="tablist" aria-label="Zone details">
+          {TABS.map((t) => (
+            <button
+              key={t.value}
+              type="button"
+              role="tab"
+              id={`zone-info-tab-${t.value}`}
+              aria-selected={activeTab === t.value}
+              aria-controls={`zone-info-panel-${t.value}`}
+              className={`zone-info-card-tab${activeTab === t.value ? ' zone-info-card-tab--active' : ''}`}
+              style={activeTab === t.value && riskLevel?.color ? { borderBottomColor: riskLevel.color } : undefined}
+              onClick={() => setActiveTab(t.value)}
+            >
+              {t.label}
+            </button>
+          ))}
         </div>
 
-        {isNearbyFallback && (
-          <div className="zone-info-card-notice">
-            No facilities in barangay — showing closest nearby.
+        {activeTab === 'clinics' && (
+          <div className="zone-info-card-tabpanel zone-info-card-tabpanel--clinics" role="tabpanel" id="zone-info-panel-clinics" aria-labelledby="zone-info-tab-clinics">
+          <div className="zone-info-card-section-hd">
+            <span className="zone-info-card-section-title">{sectionTitle}</span>
+            {facilitiesTotalLabel != null && facilitiesTotalLabel !== '' && (
+              <span className="zone-info-card-fcount">{facilitiesTotalLabel}</span>
+            )}
           </div>
-        )}
 
-        {routeFromLabel && (
-          <div className="zone-info-card-route-from" role="status">
-            {routeFromLabel}
-          </div>
-        )}
+          {isNearbyFallback && (
+            <div className="zone-info-card-notice">
+              No facilities in barangay — showing closest nearby.
+            </div>
+          )}
 
-        {locationStatusForRoute && (
-          <div className={`zone-info-card-location-status zone-info-card-location-status--${locationStatusForRoute}`} role="status" aria-live="polite">
-            {locationStatusForRoute === 'on' && <span>Location on — routing from your position</span>}
-            {locationStatusForRoute === 'unavailable' && <span>Location unavailable — using barangay center</span>}
-            {locationStatusForRoute === 'using_barangay' && <span>Using barangay center as start</span>}
-          </div>
-        )}
+          {routeFromLabel && (
+            <div className="zone-info-card-route-from" role="status">
+              {routeFromLabel}
+            </div>
+          )}
 
-        {onShowRoute && onRouteProfileChange && (
-          <div className="zone-info-card-profile-row" ref={profileDropdownRef}>
-            <span className="zone-info-card-profile-label">Profile</span>
-            <div className="zone-info-card-profile-trigger-wrap">
-              <button
-                type="button"
-                className="zone-info-card-profile-trigger"
-                onClick={(e) => { e.stopPropagation(); setProfileDropdownOpen((o) => !o); }}
-                aria-haspopup="listbox"
-                aria-expanded={profileDropdownOpen}
-                aria-label="Route profile"
-              >
-                <span>{currentProfileLabel}</span>
-                <span className="zone-info-card-profile-chevron" aria-hidden>{profileDropdownOpen ? '▲' : '▼'}</span>
-              </button>
-              <div className="zone-info-card-profile-menu" role="listbox" hidden={!profileDropdownOpen}>
-                {ROUTE_PROFILES.map((p) => (
-                  <button
-                    key={p.value}
-                    type="button"
-                    role="option"
-                    aria-selected={routeProfile === p.value}
-                    className="zone-info-card-profile-option"
-                    onClick={(e) => { e.stopPropagation(); onRouteProfileChange(p.value); setProfileDropdownOpen(false); }}
-                  >
-                    {p.label}
-                  </button>
-                ))}
+          {locationStatusForRoute && (
+            <div className={`zone-info-card-location-status zone-info-card-location-status--${locationStatusForRoute}`} role="status" aria-live="polite">
+              {locationStatusForRoute === 'on' && <span>Location on — routing from your position</span>}
+              {locationStatusForRoute === 'unavailable' && <span>Location unavailable — using barangay center</span>}
+              {locationStatusForRoute === 'using_barangay' && <span>Using barangay center as start</span>}
+            </div>
+          )}
+
+          {onShowRoute && onRouteProfileChange && (
+            <div className="zone-info-card-profile-row" ref={profileDropdownRef}>
+              <span className="zone-info-card-profile-label">Profile</span>
+              <div className="zone-info-card-profile-trigger-wrap">
+                <button
+                  type="button"
+                  className="zone-info-card-profile-trigger"
+                  onClick={(e) => { e.stopPropagation(); setProfileDropdownOpen((o) => !o); }}
+                  aria-haspopup="listbox"
+                  aria-expanded={profileDropdownOpen}
+                  aria-label="Route profile"
+                >
+                  <span>{currentProfileLabel}</span>
+                  <span className="zone-info-card-profile-chevron" aria-hidden>{profileDropdownOpen ? '▲' : '▼'}</span>
+                </button>
+                <div className="zone-info-card-profile-menu" role="listbox" hidden={!profileDropdownOpen}>
+                  {ROUTE_PROFILES.map((p) => (
+                    <button
+                      key={p.value}
+                      type="button"
+                      role="option"
+                      aria-selected={routeProfile === p.value}
+                      className="zone-info-card-profile-option"
+                      onClick={(e) => { e.stopPropagation(); onRouteProfileChange(p.value); setProfileDropdownOpen(false); }}
+                    >
+                      {p.label}
+                    </button>
+                  ))}
+                </div>
               </div>
             </div>
-          </div>
-        )}
+          )}
 
-        {onShowRoute && onRouteOriginChange && (
-          <div className="zone-info-card-origin-row">
-            <span className="zone-info-card-origin-label">Start from</span>
-            <div className="zone-info-card-origin-options">
-              <button
-                type="button"
-                className={`zone-info-card-origin-btn ${routeOrigin === 'user' ? 'zone-info-card-origin-btn--active' : ''}`}
-                onClick={() => onRouteOriginChange('user')}
-                aria-pressed={routeOrigin === 'user'}
-                aria-label="Route from my location"
-              >
-                My location
-              </button>
-              <button
-                type="button"
-                className={`zone-info-card-origin-btn ${routeOrigin === 'barangay' ? 'zone-info-card-origin-btn--active' : ''}`}
-                onClick={() => onRouteOriginChange('barangay')}
-                aria-pressed={routeOrigin === 'barangay'}
-                aria-label={`Route from ${zoneName ?? 'Barangay'}`}
-              >
-                {zoneName ?? 'Barangay'}
-              </button>
+          {onShowRoute && onRouteOriginChange && (
+            <div className="zone-info-card-origin-row">
+              <span className="zone-info-card-origin-label">Start from</span>
+              <div className="zone-info-card-origin-options">
+                <button
+                  type="button"
+                  className={`zone-info-card-origin-btn ${routeOrigin === 'user' ? 'zone-info-card-origin-btn--active' : ''}`}
+                  onClick={() => onRouteOriginChange('user')}
+                  aria-pressed={routeOrigin === 'user'}
+                  aria-label="Route from my location"
+                >
+                  My location
+                </button>
+                <button
+                  type="button"
+                  className={`zone-info-card-origin-btn ${routeOrigin === 'barangay' ? 'zone-info-card-origin-btn--active' : ''}`}
+                  onClick={() => onRouteOriginChange('barangay')}
+                  aria-pressed={routeOrigin === 'barangay'}
+                  aria-label={`Route from ${zoneName ?? 'Barangay'}`}
+                >
+                  {zoneName ?? 'Barangay'}
+                </button>
+              </div>
             </div>
-          </div>
-        )}
+          )}
 
-        <div className="zone-info-card-flist">
-          {facilitiesLoading ? (
-            <p className="zone-info-card-flist-loading">Loading facilities…</p>
-          ) : facilities.length === 0 ? (
-            <p className="zone-info-card-flist-empty">No facilities listed.</p>
-          ) : (
-            (() => {
-              const showCollapsed = isMobile && facilities.length > MOBILE_FACILITIES_INITIAL && !facilitiesExpanded;
-              const visibleFacilities = showCollapsed ? facilities.slice(0, MOBILE_FACILITIES_INITIAL) : facilities;
-              const moreCount = facilities.length - MOBILE_FACILITIES_INITIAL;
-              return (
-                <>
-                  {visibleFacilities.map((fac) => {
-              const isHighlighted = highlightedFacilityId != null && String(fac.id) === String(highlightedFacilityId);
-              const routeSummaryForFacility = routeSummaryByFacilityId[String(fac.id)];
-              const displayRoute = routeSummaryForFacility ? routeSummaryDisplay(routeSummaryForFacility) : null;
-              const displayStraight = straightLineDisplay(fac);
-              const distanceLabel = displayRoute ?? displayStraight;
-              const routeErrorForFacility = routeErrorByFacilityId[String(fac.id)];
-              const isStraightLineOnly = Boolean(routeErrorForFacility) || (isHighlighted && !routeSummaryForFacility && !routeLoading);
-              const isNoRoute = isStraightLineOnly;
-
-              if (isNoRoute) {
+          <div className="zone-info-card-flist">
+            {facilitiesLoading ? (
+              <p className="zone-info-card-flist-loading">Loading facilities…</p>
+            ) : facilities.length === 0 ? (
+              <p className="zone-info-card-flist-empty">No facilities listed.</p>
+            ) : (
+              (() => {
+                const showCollapsed = isMobile && facilities.length > MOBILE_FACILITIES_INITIAL && !facilitiesExpanded;
+                const visibleFacilities = showCollapsed ? facilities.slice(0, MOBILE_FACILITIES_INITIAL) : facilities;
+                const moreCount = facilities.length - MOBILE_FACILITIES_INITIAL;
                 return (
-                  <div key={fac.id} className="zone-info-card-fitem-noroute">
-                    <div className="zone-info-card-nr-stripe" />
-                    <div className="zone-info-card-nr-content">
-                      <div className="zone-info-card-nr-text">
-                        <div className="zone-info-card-fname">{fac.name}</div>
-                        <div className="zone-info-card-fmeta">{displayStraight ?? '—'}</div>
-                        <div className="zone-info-card-nr-warning">
-                          <WarnIcon />
-                          No route found — straight-line only
+                  <>
+                    {visibleFacilities.map((fac) => {
+                const isHighlighted = highlightedFacilityId != null && String(fac.id) === String(highlightedFacilityId);
+                const routeSummaryForFacility = routeSummaryByFacilityId[String(fac.id)];
+                const displayRoute = routeSummaryForFacility ? routeSummaryDisplay(routeSummaryForFacility) : null;
+                const displayStraight = straightLineDisplay(fac);
+                const distanceLabel = displayRoute ?? displayStraight;
+                const routeErrorForFacility = routeErrorByFacilityId[String(fac.id)];
+                const isStraightLineOnly = Boolean(routeErrorForFacility) || (isHighlighted && !routeSummaryForFacility && !routeLoading);
+                const isNoRoute = isStraightLineOnly;
+
+                if (isNoRoute) {
+                  return (
+                    <div key={fac.id} className="zone-info-card-fitem-noroute">
+                      <div className="zone-info-card-nr-stripe" />
+                      <div className="zone-info-card-nr-content">
+                        <div className="zone-info-card-nr-text">
+                          <div className="zone-info-card-fname">{fac.name}</div>
+                          <div className="zone-info-card-fmeta">{displayStraight ?? '—'}</div>
+                          <div className="zone-info-card-nr-warning">
+                            <WarnIcon />
+                            No route found — straight-line only
+                          </div>
+                        </div>
+                        <div className="zone-info-card-nr-btn-wrap">
+                          {isHighlighted ? (
+                            <button
+                              type="button"
+                              className="zone-info-card-xbtn"
+                              onClick={(e) => { e.stopPropagation(); onExitRoute?.(); }}
+                              aria-label={`Exit route to ${fac.name ?? 'facility'}`}
+                            >
+                              ✕ Exit
+                            </button>
+                          ) : (
+                            <button
+                              type="button"
+                              className="zone-info-card-rbtn-amber"
+                              onClick={(e) => { e.stopPropagation(); onShowRoute?.(fac); }}
+                              disabled={routeLoading}
+                              aria-label={`Show route to ${fac.name ?? 'facility'}`}
+                            >
+                              Route →
+                            </button>
+                          )}
                         </div>
                       </div>
-                      <div className="zone-info-card-nr-btn-wrap">
-                        {isHighlighted ? (
-                          <button
-                            type="button"
-                            className="zone-info-card-xbtn"
-                            onClick={(e) => { e.stopPropagation(); onExitRoute?.(); }}
-                            aria-label={`Exit route to ${fac.name ?? 'facility'}`}
-                          >
-                            ✕ Exit
-                          </button>
-                        ) : (
-                          <button
-                            type="button"
-                            className="zone-info-card-rbtn-amber"
-                            onClick={(e) => { e.stopPropagation(); onShowRoute?.(fac); }}
-                            disabled={routeLoading}
-                            aria-label={`Show route to ${fac.name ?? 'facility'}`}
-                          >
-                            Route →
-                          </button>
-                        )}
+                    </div>
+                  );
+                }
+
+                return (
+                  <div
+                    key={fac.id}
+                    className={`zone-info-card-fitem${isHighlighted ? ' zone-info-card-fitem--active' : ''}`}
+                  >
+                    {isHighlighted && <span className="zone-info-card-active-bar" style={riskLevel?.color ? { background: riskLevel.color } : undefined} />}
+                    <div className="zone-info-card-finfo">
+                      <div className="zone-info-card-fname">{fac.name}</div>
+                      <div className="zone-info-card-fmeta">
+                        {distanceLabel ?? '—'}
                       </div>
                     </div>
+                    {(onShowRoute || onExitRoute) && (
+                      isHighlighted ? (
+                        <button
+                          type="button"
+                          className="zone-info-card-xbtn"
+                          onClick={(e) => { e.stopPropagation(); onExitRoute?.(); }}
+                          disabled={routeLoading}
+                          aria-label={`Exit route to ${fac.name ?? 'facility'}`}
+                        >
+                          ✕ Exit
+                        </button>
+                      ) : (
+                        <button
+                          type="button"
+                          className="zone-info-card-rbtn"
+                          style={showRouteBtnStyle}
+                          onClick={(e) => { e.stopPropagation(); onShowRoute?.(fac); }}
+                          disabled={routeLoading}
+                          aria-label={`Show route to ${fac.name ?? 'facility'}`}
+                        >
+                          Route →
+                        </button>
+                      )
+                    )}
                   </div>
                 );
-              }
-
-              return (
-                <div
-                  key={fac.id}
-                  className={`zone-info-card-fitem${isHighlighted ? ' zone-info-card-fitem--active' : ''}`}
-                >
-                  {isHighlighted && <span className="zone-info-card-active-bar" style={riskLevel?.color ? { background: riskLevel.color } : undefined} />}
-                  <div className="zone-info-card-finfo">
-                    <div className="zone-info-card-fname">{fac.name}</div>
-                    <div className="zone-info-card-fmeta">
-                      {distanceLabel ?? '—'}
-                    </div>
-                  </div>
-                  {(onShowRoute || onExitRoute) && (
-                    isHighlighted ? (
-                      <button
-                        type="button"
-                        className="zone-info-card-xbtn"
-                        onClick={(e) => { e.stopPropagation(); onExitRoute?.(); }}
-                        disabled={routeLoading}
-                        aria-label={`Exit route to ${fac.name ?? 'facility'}`}
-                      >
-                        ✕ Exit
-                      </button>
-                    ) : (
-                      <button
-                        type="button"
-                        className="zone-info-card-rbtn"
-                        style={showRouteBtnStyle}
-                        onClick={(e) => { e.stopPropagation(); onShowRoute?.(fac); }}
-                        disabled={routeLoading}
-                        aria-label={`Show route to ${fac.name ?? 'facility'}`}
-                      >
-                        Route →
-                      </button>
-                    )
-                  )}
-                </div>
-              );
-            })}
-                  {isMobile && facilities.length > MOBILE_FACILITIES_INITIAL && (
-                    <div className="zone-info-card-show-more-wrap">
-                      <span className="zone-info-card-facilities-count">
-                        ({facilities.length} facilities)
-                      </span>
-                      <button
-                        type="button"
-                        className="zone-info-card-show-more-btn"
-                        onClick={() => setFacilitiesExpanded((e) => !e)}
-                        aria-expanded={facilitiesExpanded}
-                        aria-label={facilitiesExpanded ? 'Show less facilities' : `Show ${moreCount} more facilities`}
-                      >
-                        {facilitiesExpanded ? (
-                          <>△ Show less</>
-                        ) : (
-                          <>↯ Show {moreCount} more facilities</>
-                        )}
-                      </button>
-                    </div>
-                  )}
-                </>
-              );
-            })()
-          )}
-        </div>
+              })}
+                    {isMobile && facilities.length > MOBILE_FACILITIES_INITIAL && (
+                      <div className="zone-info-card-show-more-wrap">
+                        <span className="zone-info-card-facilities-count">
+                          ({facilities.length} facilities)
+                        </span>
+                        <button
+                          type="button"
+                          className="zone-info-card-show-more-btn"
+                          onClick={() => setFacilitiesExpanded((e) => !e)}
+                          aria-expanded={facilitiesExpanded}
+                          aria-label={facilitiesExpanded ? 'Show less facilities' : `Show ${moreCount} more facilities`}
+                        >
+                          {facilitiesExpanded ? (
+                            <>△ Show less</>
+                          ) : (
+                            <>↯ Show {moreCount} more facilities</>
+                          )}
+                        </button>
+                      </div>
+                    )}
+                  </>
+                );
+              })()
+            )}
+          </div>
+          </div>
+        )}
+        {activeTab === 'risks' && (
+          <div className="zone-info-card-tabpanel" role="tabpanel" id="zone-info-panel-risks" aria-labelledby="zone-info-tab-risks">
+            <HeatRisksPanel riskLevel={riskLevel} />
+          </div>
+        )}
+        {activeTab === 'remedies' && (
+          <div className="zone-info-card-tabpanel" role="tabpanel" id="zone-info-panel-remedies" aria-labelledby="zone-info-tab-remedies">
+            <HeatRemediesPanel riskLevel={riskLevel} />
+          </div>
+        )}
 
         <button
           type="button"
