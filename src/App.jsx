@@ -2,7 +2,6 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { NavigationProvider } from './contexts/NavigationContext';
 import ScrollToTop from './components/ScrollToTop';
-import LandingPage from './pages/LandingPage';
 import HomePage from './pages/HomePage';
 import AboutPage from './pages/AboutPage';
 import Footer from './components/landing/Footer';
@@ -17,7 +16,8 @@ function App() {
           <NavigationProvider>
             <div className="app-main">
               <Routes>
-                <Route path="/" element={<LandingPage />} />
+                {/* No landing page: opening the site goes straight to the location prompt + map. */}
+                <Route path="/" element={<Navigate to="/home" replace />} />
                 <Route path="/home" element={<HomePage />} />
                 <Route path="/about" element={<AboutPage />} />
                 {/* SMS link target: location prompt + heat report now live on the map page. */}

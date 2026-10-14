@@ -34,6 +34,7 @@ function unsupportedReason() {
  *   status: 'checking'|'prompt'|'requesting'|'tracking'|'denied'|'unavailable'|'unsupported',
  *   position: { lat: number, lng: number, accuracy: number, timestamp: number } | null,
  *   errorMessage: string | null,
+ *   permissionGranted: boolean,
  *   start: () => void,
  *   stop: () => void,
  * }}
@@ -42,6 +43,8 @@ export default function useLocationTracking() {
   const [status, setStatus] = useState(() => (unsupportedReason() ? 'unsupported' : 'checking'));
   const [position, setPosition] = useState(null);
   const [errorMessage, setErrorMessage] = useState(unsupportedReason);
+  // True once the browser reports location permission as granted (before the first fix arrives).
+  const [permissionGranted, setPermissionGranted] = useState(false);
   const watchIdRef = useRef(null);
   const hasFixRef = useRef(false);
 
@@ -95,6 +98,7 @@ export default function useLocationTracking() {
 
     const apply = (state) => {
       if (cancelled) return;
+      setPermissionGranted(state === 'granted');
       if (state === 'granted') {
         if (watchIdRef.current == null) start();
       } else if (state === 'denied') {
@@ -128,5 +132,5 @@ export default function useLocationTracking() {
     };
   }, [start, stop]);
 
-  return { status, position, errorMessage, start, stop };
+  return { status, position, errorMessage, permissionGranted, start, stop };
 }

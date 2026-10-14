@@ -114,7 +114,7 @@ export function LocationShell({ children, footer }) {
   return (
     <main className="alert-page">
       <header className="alert-header">
-        <Link to="/" className="alert-brand" aria-label="BanasUno home">
+        <Link to="/home" className="alert-brand" aria-label="BanasUno home">
           <img src="/BanasUno Colored.svg" alt="" width="28" height="28" />
           <span>BANASUNO</span>
         </Link>

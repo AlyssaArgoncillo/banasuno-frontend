@@ -148,7 +148,7 @@ function MainInterface({ userLocation = null }) {
 
       {/* Mobile: header bar (logo + burger) */}
       <header className="main-interface-mobile-header">
-        <Link to="/" className="main-interface-mobile-logo" aria-label="BanasUno home">
+        <Link to="/home" className="main-interface-mobile-logo" aria-label="BanasUno home">
           <img src="/BanasUno Text Colored.png" alt="BanasUno" className="main-interface-mobile-logo-image" />
         </Link>
         <div className="main-interface-mobile-actions">

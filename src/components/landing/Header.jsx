@@ -89,7 +89,7 @@ function Header() {
   return (
     <header className="header">
       <div className="header-container">
-        <Link to="/" className="logo" onClick={closeMenu}>
+        <Link to="/home" className="logo" onClick={closeMenu}>
           <img src="/BanasUno Text Colored.png" alt="BanasUno" className="logo-image" />
         </Link>
 

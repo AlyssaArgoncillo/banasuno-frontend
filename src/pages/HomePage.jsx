@@ -29,7 +29,7 @@ function readSkipped() {
 }
 
 function HomePage() {
-  const { status, position, errorMessage, start, stop } = useLocationTracking();
+  const { status, position, errorMessage, permissionGranted, start, stop } = useLocationTracking();
   const [skipped, setSkipped] = useState(readSkipped);
   const [manualFeature, setManualFeature] = useState(null);
   const [features, setFeatures] = useState(null);
@@ -56,8 +56,9 @@ function HomePage() {
   const userLocation =
     manualLocation ?? (status === 'tracking' && position ? { ...position, source: 'device' } : null);
 
-  // Once the user is through the gate, keep them on the map even if location later drops.
-  if (!entered && (skipped || userLocation)) setEntered(true);
+  // Through the gate once location is allowed (the pin appears when the first fix arrives),
+  // a position/barangay is set, or the user skips. Stay on the map even if location later drops.
+  if (!entered && (skipped || userLocation || permissionGranted)) setEntered(true);
 
   const skip = () => {
     try {

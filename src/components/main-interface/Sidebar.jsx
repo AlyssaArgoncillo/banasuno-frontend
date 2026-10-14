@@ -46,7 +46,7 @@ function Sidebar({ activeView, onSelectView, onSelectCommunitySensors, onOpenTut
 
   return (
     <aside className="main-interface-sidebar">
-      <Link to="/" className="main-interface-logo" aria-label="Back to home">
+      <Link to="/home" className="main-interface-logo" aria-label="Back to home">
         <img src="/BanasUno Text Colored.png" alt="BanasUno" className="main-interface-logo-image" />
       </Link>
 
