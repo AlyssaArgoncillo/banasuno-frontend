@@ -10,19 +10,43 @@ const GRAY = "#8A8A8A";
 const team = [
   {
     id: 1,
-    name: "Alyssa Nicole A. Argoncillo",
-    role: "Backend & Frontend Designer",
-    bio: "Leads backend development (APIs, data sourcing, and core logic), frontend styling and branding, plus repository management, framework decisions, and integration oversight.",
-    image: "/Ar.jpg",
+    name: "Alyssa Nicole Argoncillo",
+    role: "Fullstack Developer",
+    bio: "3rd Year BS Computer Science student and Fullstack Developer, with a primary focus on backend development, system logic, and feature implementation.",
+    image: "/team/alyssa-nicole-argoncillo.jpg",
     github: "https://github.com/AlyssaArgoncillo",
   },
   {
     id: 2,
-    name: "Kisha Ann Joy M. Sanchez",
-    role: "UI/UX & Integration Developer",
-    bio: "Drives frontend and UI/UX implementation, AI integration and backend refinement, and documentation of sources, citations, and design choices for traceability.",
-    image: "/KS2.jpg",
-    github: "https://github.com/KishaSanchez",
+    name: "Angeline Kaquilala",
+    role: "Fullstack Developer",
+    bio: "3rd Year BS Information Systems student and Fullstack Developer, with a primary focus on frontend development, UI implementation, and system integration.",
+    image: "/team/angeline-kaquilala.jpg",
+    github: "https://github.com/angkql",
+  },
+  {
+    id: 3,
+    name: "Jann Elle Bacolod",
+    role: "Fullstack Developer & Pitching",
+    bio: "3rd Year BS Computer Science student and Fullstack Developer, with a primary focus on pitching, presentation, and communicating the system while also contributing to development.",
+    image: "/team/jann-elle-bacolod.jpg",
+    github: "https://github.com/doenotexist",
+  },
+  {
+    id: 4,
+    name: "Jermaine Beatriz Confesor",
+    role: "Fullstack Developer",
+    bio: "2nd Year BS Computer Science student and Fullstack Developer, with a primary focus on backend development, testing, and system feature implementation.",
+    image: "/team/jermaine-beatriz-confesor.jpg",
+    github: "https://github.com/Bea-beyy-beii",
+  },
+  {
+    id: 5,
+    name: "Micaela Ysabel B. Ganas",
+    role: "Fullstack Developer",
+    bio: "3rd Year BS Computer Science student and Fullstack Developer, with a primary focus on backend development, system functionality, and feature implementation.",
+    image: "/team/micaela-ysabel-ganas.jpg",
+    github: "https://github.com/MicaelaGanas",
   },
 ];
 
@@ -393,7 +417,7 @@ export default function ContactSection() {
                   transform: hovT === m.id ? "translateX(-4px)" : "none",
                 }}
               >
-                <div className="team-avatar-wrap" style={{ flexShrink: 0 }}>
+                <div className="team-avatar-wrap" style={{ width: 100, height: 100, flexShrink: 0 }}>
                   {m.image ? (
                     <img
                       src={m.image}
@@ -420,12 +444,15 @@ export default function ContactSection() {
                     borderRadius: 10,
                     fontSize: 13, color: GRAY, lineHeight: 1.6,
                   }}>{m.bio}</div>
-                  <button
-                    onClick={() => window.open(m.github, "_blank")}
-                    style={{ ...btnStyle, marginTop: 12, padding: "9px 20px", fontSize: 13 }}
+                  <a
+                    href={m.github}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label={`View ${m.name}'s GitHub profile`}
+                    style={{ ...btnStyle, display: "inline-block", textDecoration: "none", marginTop: 12, padding: "9px 20px", fontSize: 13 }}
                   >
                     Profile
-                  </button>
+                  </a>
                 </div>
               </div>
             ))}
