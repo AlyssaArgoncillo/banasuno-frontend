@@ -236,6 +236,11 @@ const HeatMap = ({ compact = false, selectedZone: propSelectedZone, onZoneSelect
     const heat = Number.isFinite(temp) ? tempToHeatRiskLevel(temp) : null;
     const color = heat?.color ?? USER_HALO_DEFAULT_COLOR;
     const title = heat ? `You are here · ${heat.label}` : 'You are here';
+    const bubbleHtml =
+      '<strong>You are here</strong>' +
+      (heat
+        ? `<span class="heatmap-user-bubble-heat" style="color:${color}">${Number(temp).toFixed(1)}°C · ${heat.label}</span>`
+        : '');
 
     // At least USER_HALO_MIN_M so it reads at street zoom; grows with poor GPS accuracy.
     const radius = Math.min(
@@ -251,7 +256,15 @@ const HeatMap = ({ compact = false, selectedZone: propSelectedZone, onZoneSelect
 
     if (!userMarkerRef.current) {
       userAccuracyRef.current = L.circle(latlng, { radius, ...haloStyle }).addTo(map);
-      userMarkerRef.current = L.marker(latlng, { icon: dotIcon, keyboard: false, zIndexOffset: 1000, title }).addTo(map);
+      userMarkerRef.current = L.marker(latlng, { icon: dotIcon, keyboard: false, zIndexOffset: 1000, title })
+        .bindTooltip(bubbleHtml, {
+          permanent: true,
+          direction: 'top',
+          offset: [0, -12],
+          className: 'heatmap-user-bubble',
+          interactive: false,
+        })
+        .addTo(map);
     } else {
       userAccuracyRef.current.setLatLng(latlng).setRadius(radius).setStyle(haloStyle);
       userMarkerRef.current.setLatLng(latlng);
@@ -260,6 +273,7 @@ const HeatMap = ({ compact = false, selectedZone: propSelectedZone, onZoneSelect
       }
       const el = userMarkerRef.current.getElement();
       if (el) el.title = title;
+      userMarkerRef.current.setTooltipContent(bubbleHtml);
     }
     if (!hasCenteredOnUserRef.current) {
       hasCenteredOnUserRef.current = true;
