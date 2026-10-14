@@ -23,6 +23,12 @@ import useScrollFade from './iot/useScrollFade.js';
 
 /* global L */
 
+/** User location circle: min/max radius (m), fallback color when the heat level is unknown, zoom on first fix. */
+const USER_HALO_MIN_M = 150;
+const USER_HALO_MAX_M = 1500;
+const USER_HALO_DEFAULT_COLOR = '#FF6B1A';
+const USER_ZOOM = 16;
+
 const HeatMap = ({ compact = false, selectedZone: propSelectedZone, onZoneSelected, onGoToDashboard, facilityToFocusOnMap, onClearFocusFacility, showTutorial: propShowTutorial, setShowTutorial: propSetShowTutorial, externalIotLayer, externalIotLayerKey, userLocation = null }) => {
   const mapRef = useRef(null);
   const mapInstanceRef = useRef(null);
@@ -157,9 +163,10 @@ const HeatMap = ({ compact = false, selectedZone: propSelectedZone, onZoneSelect
     return () => clearTimeout(t);
   }, [compact, mapLoading]);
 
-  // Mobile: when a barangay is selected, scroll the info panel into view so it is visible
+  // Mobile: when a barangay is selected, scroll the info panel into view so it is visible.
+  // Not for the auto-selected "your location" zone: keep the zoomed map + heat circle in view.
   useEffect(() => {
-    if (!selectedZone) return;
+    if (!selectedZone || selectedZone.isUserLocation) return;
     const isMobile = typeof window !== 'undefined' && window.matchMedia('(max-width: 768px)').matches;
     if (!isMobile) return;
     const id = setTimeout(() => {
@@ -202,7 +209,10 @@ const HeatMap = ({ compact = false, selectedZone: propSelectedZone, onZoneSelect
       : null;
   }, [userLocation?.lat, userLocation?.lng]);
 
-  /** Live user position (from the location gate): dot + accuracy circle, centered once on first fix. */
+  /**
+   * Live user position (from the location gate): a dot plus a circle filled with the heat category
+   * color of the barangay the user is in. Zooms in on the user once, on the first fix.
+   */
   const userLat = userLocation?.lat;
   const userLng = userLocation?.lng;
   const userAccuracy = userLocation?.accuracy;
@@ -217,31 +227,53 @@ const HeatMap = ({ compact = false, selectedZone: propSelectedZone, onZoneSelect
       return;
     }
     const latlng = [userLat, userLng];
-    const radius = Number.isFinite(userAccuracy) ? userAccuracy : 0;
+
+    // Heat category at the user's position = PAGASA level of the barangay they are in.
+    const match = findBarangayAt(barangayFeaturesRef.current, userLat, userLng);
+    const matchId = match ? getBarangayId(match.feature) : null;
+    const temps = heatDataRef.current.tempByBarangayId;
+    const temp = matchId != null && temps ? (temps[matchId] ?? temps[String(matchId)]) : null;
+    const heat = Number.isFinite(temp) ? tempToHeatRiskLevel(temp) : null;
+    const color = heat?.color ?? USER_HALO_DEFAULT_COLOR;
+    const title = heat ? `You are here · ${heat.label}` : 'You are here';
+
+    // At least USER_HALO_MIN_M so it reads at street zoom; grows with poor GPS accuracy.
+    const radius = Math.min(
+      USER_HALO_MAX_M,
+      Math.max(USER_HALO_MIN_M, Number.isFinite(userAccuracy) ? userAccuracy : 0)
+    );
+    const haloStyle = { color, weight: 3, fillColor: color, fillOpacity: 0.3, interactive: false };
+    const dotIcon = L.divIcon({
+      className: 'heatmap-user-dot',
+      html: `<span style="background:${color}"></span>`,
+      iconSize: [18, 18],
+    });
+
     if (!userMarkerRef.current) {
-      userAccuracyRef.current = L.circle(latlng, {
-        radius, color: '#FF6B1A', weight: 1, fillOpacity: 0.12, interactive: false,
-      }).addTo(map);
-      userMarkerRef.current = L.marker(latlng, {
-        icon: L.divIcon({ className: 'heatmap-user-dot', html: '<span></span>', iconSize: [18, 18] }),
-        keyboard: false,
-        zIndexOffset: 1000,
-        title: 'You are here',
-      }).addTo(map);
+      userAccuracyRef.current = L.circle(latlng, { radius, ...haloStyle }).addTo(map);
+      userMarkerRef.current = L.marker(latlng, { icon: dotIcon, keyboard: false, zIndexOffset: 1000, title }).addTo(map);
     } else {
+      userAccuracyRef.current.setLatLng(latlng).setRadius(radius).setStyle(haloStyle);
       userMarkerRef.current.setLatLng(latlng);
-      userAccuracyRef.current.setLatLng(latlng).setRadius(radius);
+      if (userMarkerRef.current.options.icon?.options.html !== dotIcon.options.html) {
+        userMarkerRef.current.setIcon(dotIcon);
+      }
+      const el = userMarkerRef.current.getElement();
+      if (el) el.title = title;
     }
     if (!hasCenteredOnUserRef.current) {
       hasCenteredOnUserRef.current = true;
-      map.flyTo(latlng, 15, { duration: 0.6 });
+      map.flyToBounds(userAccuracyRef.current.getBounds(), {
+        maxZoom: USER_ZOOM,
+        padding: [40, 40],
+        duration: 0.8,
+      });
     }
 
     // Open the zone card for the barangay the user is in (once), so temp, clinics,
     // risks and remedies for their location show without tapping the map.
     if (!hasAutoSelectedRef.current && !compact && barangayLayerRef.current) {
       hasAutoSelectedRef.current = true;
-      const match = findBarangayAt(barangayFeaturesRef.current, userLat, userLng);
       if (match) {
         const targetId = String(getBarangayId(match.feature));
         barangayLayerRef.current.eachLayer((layer) => {
