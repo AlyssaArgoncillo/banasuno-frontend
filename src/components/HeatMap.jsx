@@ -23,7 +23,7 @@ import useScrollFade from './iot/useScrollFade.js';
 
 /* global L */
 
-const HeatMap = ({ compact = false, selectedZone: propSelectedZone, onZoneSelected, onGoToDashboard, facilityToFocusOnMap, onClearFocusFacility, showTutorial: propShowTutorial, setShowTutorial: propSetShowTutorial, externalIotLayer, externalIotLayerKey }) => {
+const HeatMap = ({ compact = false, selectedZone: propSelectedZone, onZoneSelected, onGoToDashboard, facilityToFocusOnMap, onClearFocusFacility, showTutorial: propShowTutorial, setShowTutorial: propSetShowTutorial, externalIotLayer, externalIotLayerKey, userLocation = null }) => {
   const mapRef = useRef(null);
   const mapInstanceRef = useRef(null);
   const barangayLayerRef = useRef(null);
@@ -31,6 +31,9 @@ const HeatMap = ({ compact = false, selectedZone: propSelectedZone, onZoneSelect
   const barangayFeaturesRef = useRef([]);
   const locationMarkerRef = useRef(null);
   const focusFacilityMarkerRef = useRef(null);
+  const userMarkerRef = useRef(null);
+  const userAccuracyRef = useRef(null);
+  const hasCenteredOnUserRef = useRef(false);
   const facilitiesRequestSeqRef = useRef(0);
   const lastPolygonClickTimeRef = useRef(0);
   const cancelledRef = useRef(false);
@@ -190,6 +193,42 @@ const HeatMap = ({ compact = false, selectedZone: propSelectedZone, onZoneSelect
     setFocusFacilityMarkerVisible(true);
     onClearFocusFacility?.();
   }, [facilityToFocusOnMap, mapLoading, onClearFocusFacility]);
+
+  /** Live user position (from the location gate): dot + accuracy circle, centered once on first fix. */
+  const userLat = userLocation?.lat;
+  const userLng = userLocation?.lng;
+  const userAccuracy = userLocation?.accuracy;
+  useEffect(() => {
+    const map = mapInstanceRef.current;
+    if (!map || mapLoading) return;
+    if (!Number.isFinite(userLat) || !Number.isFinite(userLng)) {
+      if (userMarkerRef.current) map.removeLayer(userMarkerRef.current);
+      if (userAccuracyRef.current) map.removeLayer(userAccuracyRef.current);
+      userMarkerRef.current = null;
+      userAccuracyRef.current = null;
+      return;
+    }
+    const latlng = [userLat, userLng];
+    const radius = Number.isFinite(userAccuracy) ? userAccuracy : 0;
+    if (!userMarkerRef.current) {
+      userAccuracyRef.current = L.circle(latlng, {
+        radius, color: '#FF6B1A', weight: 1, fillOpacity: 0.12, interactive: false,
+      }).addTo(map);
+      userMarkerRef.current = L.marker(latlng, {
+        icon: L.divIcon({ className: 'heatmap-user-dot', html: '<span></span>', iconSize: [18, 18] }),
+        keyboard: false,
+        zIndexOffset: 1000,
+        title: 'You are here',
+      }).addTo(map);
+    } else {
+      userMarkerRef.current.setLatLng(latlng);
+      userAccuracyRef.current.setLatLng(latlng).setRadius(radius);
+    }
+    if (!hasCenteredOnUserRef.current) {
+      hasCenteredOnUserRef.current = true;
+      map.flyTo(latlng, 15, { duration: 0.6 });
+    }
+  }, [userLat, userLng, userAccuracy, mapLoading]);
 
   const handleExitFacilityFocus = () => {
     const map = mapInstanceRef.current;
@@ -531,6 +570,8 @@ const HeatMap = ({ compact = false, selectedZone: propSelectedZone, onZoneSelect
         mapInstanceRef.current.removeLayer(barangayLayerRef.current);
         barangayLayerRef.current = null;
       }
+      userMarkerRef.current = null;
+      userAccuracyRef.current = null;
       if (mapInstanceRef.current) {
         mapInstanceRef.current.remove();
         mapInstanceRef.current = null;

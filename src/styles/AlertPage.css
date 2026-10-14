@@ -407,3 +407,18 @@
     height: 280px;
   }
 }
+
+.alert-btn-link {
+  margin-top: 10px;
+  min-height: 44px;
+  font-family: var(--font-body);
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--primary-500);
+  background: transparent;
+  box-shadow: none;
+}
+
+.alert-btn-link:hover {
+  color: var(--primary-900);
+}

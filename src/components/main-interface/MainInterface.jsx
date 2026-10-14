@@ -4,7 +4,7 @@ import Sidebar from './Sidebar';
 import MainContent from './MainContent';
 import '../../styles/MainInterface.css';
 
-function MainInterface() {
+function MainInterface({ userLocation = null }) {
   const [activeView, setActiveView] = useState(() => {
     try {
       const saved = localStorage.getItem('activeView');
@@ -141,6 +141,7 @@ function MainInterface() {
             setShowTutorial={setShowTutorial}
             heatmapIotLayer={heatmapIotLayer}
             heatmapIotLayerKey={heatmapIotLayerKey}
+            userLocation={userLocation}
           />
         </main>
       </div>

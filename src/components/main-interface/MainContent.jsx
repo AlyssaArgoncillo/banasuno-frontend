@@ -15,6 +15,7 @@ function MainContent({
   setShowTutorial,
   heatmapIotLayer,
   heatmapIotLayerKey,
+  userLocation,
 }) {
   if (view === 'dashboard') {
     return (
@@ -40,6 +41,7 @@ function MainContent({
         setShowTutorial={setShowTutorial}
         externalIotLayer={heatmapIotLayer}
         externalIotLayerKey={heatmapIotLayerKey}
+        userLocation={userLocation}
       />
     </div>
   );

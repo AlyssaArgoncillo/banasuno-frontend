@@ -16,6 +16,11 @@ export function getBarangayId(feature) {
   return id != null ? id : null;
 }
 
+/** Display name of a barangay feature (PSGC GeoJSON uses adm4_en). */
+export function getBarangayName(feature) {
+  return feature?.properties?.adm4_en ?? feature?.properties?.name ?? 'Unknown barangay';
+}
+
 /** Default display range for temperature legend (°C). BACKEND: can be overridden by API response min/max. */
 export const DEFAULT_TEMP_MIN = 26;
 export const DEFAULT_TEMP_MAX = 39;
