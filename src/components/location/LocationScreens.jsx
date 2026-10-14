@@ -1,13 +1,13 @@
 /**
  * Shared location-permission screens: the "Allow location" explainer, the waiting state,
  * the denied/unavailable help with a manual barangay picker, and the page shell around them.
- * Used by the SMS landing page (/alert) and the location gate in front of the map (/home).
+ * Used by the location gate in front of the map (/home), which SMS links (/alert) redirect to.
  */
 
 import { useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { getBarangayId, getBarangayName } from '../../utils/heatMap.js';
-import '../../styles/AlertPage.css';
+import '../../styles/LocationScreens.css';
 
 export function PinIcon(props) {
   return (

@@ -6,7 +6,7 @@ import { fetchDavaoBoundaries } from '../services/boundariesService.js';
 import { getBarangayHeatData } from '../services/heatService.js';
 import { getHealthFacilitiesNearBarangay } from '../services/healthFacilitiesService.js';
 import { geocodeQuery } from '../services/geocodeService.js';
-import { getPolygonRing, ringCentroid } from '../utils/geo.js';
+import { findBarangayAt, getPolygonRing, ringCentroid } from '../utils/geo.js';
 import { getBarangayId, getColorForTemp, tempToHeatRiskLevel, HEAT_RISK_LEVELS } from '../utils/heatMap.js';
 import { getUserLocationWithFallback, setManualLocation } from '../api/location.js';
 import { fetchAccessibility, fetchDirections } from '../api/ors.js';
@@ -194,6 +194,14 @@ const HeatMap = ({ compact = false, selectedZone: propSelectedZone, onZoneSelect
     onClearFocusFacility?.();
   }, [facilityToFocusOnMap, mapLoading, onClearFocusFacility]);
 
+  const userLocationRef = useRef(null);
+  const hasAutoSelectedRef = useRef(false);
+  useEffect(() => {
+    userLocationRef.current = Number.isFinite(userLocation?.lat) && Number.isFinite(userLocation?.lng)
+      ? { lat: userLocation.lat, lng: userLocation.lng }
+      : null;
+  }, [userLocation?.lat, userLocation?.lng]);
+
   /** Live user position (from the location gate): dot + accuracy circle, centered once on first fix. */
   const userLat = userLocation?.lat;
   const userLng = userLocation?.lng;
@@ -228,7 +236,22 @@ const HeatMap = ({ compact = false, selectedZone: propSelectedZone, onZoneSelect
       hasCenteredOnUserRef.current = true;
       map.flyTo(latlng, 15, { duration: 0.6 });
     }
-  }, [userLat, userLng, userAccuracy, mapLoading]);
+
+    // Open the zone card for the barangay the user is in (once), so temp, clinics,
+    // risks and remedies for their location show without tapping the map.
+    if (!hasAutoSelectedRef.current && !compact && barangayLayerRef.current) {
+      hasAutoSelectedRef.current = true;
+      const match = findBarangayAt(barangayFeaturesRef.current, userLat, userLng);
+      if (match) {
+        const targetId = String(getBarangayId(match.feature));
+        barangayLayerRef.current.eachLayer((layer) => {
+          if (String(getBarangayId(layer.feature)) === targetId) {
+            layer.fire('click', { userCenter: { lat: userLat, lng: userLng } });
+          }
+        });
+      }
+    }
+  }, [userLat, userLng, userAccuracy, mapLoading, compact]);
 
   const handleExitFacilityFocus = () => {
     const map = mapInstanceRef.current;
@@ -430,8 +453,10 @@ const HeatMap = ({ compact = false, selectedZone: propSelectedZone, onZoneSelect
             };
           },
           onEachFeature: (feature, layer) => {
-            layer.on('click', () => {
+            layer.on('click', (e) => {
               if (iotLayerRef.current === 'Community only') return;
+              // Set when the map auto-selects the barangay the user is standing in.
+              const userCenter = e?.userCenter ?? null;
               const now = Date.now();
               if (now - lastPolygonClickTimeRef.current < 120) return;
               lastPolygonClickTimeRef.current = now;
@@ -453,6 +478,7 @@ const HeatMap = ({ compact = false, selectedZone: propSelectedZone, onZoneSelect
               const riskScore = riskLevel.level;
               const ring = getPolygonRing(feature.geometry);
               const [lng, lat] = ring ? ringCentroid(ring) : [125.4553, 7.1907];
+              const isUserLocation = userCenter != null;
               const requestSeq = ++facilitiesRequestSeqRef.current;
 
               if (!compactRef.current) {
@@ -468,14 +494,16 @@ const HeatMap = ({ compact = false, selectedZone: propSelectedZone, onZoneSelect
                     riskScore,
                     facilities: [],
                     isNearbyFallback: false,
-                    facilitiesLoading: true
+                    facilitiesLoading: true,
+                    isUserLocation
                   });
                 });
               }
 
               if (compactRef.current) return;
               setManualLocation({ lat, lon: lng, barangayId: id });
-              getHealthFacilitiesNearBarangay(id, { lat, lng })
+              // Nearest-first from the user when it's their barangay, else from the barangay center.
+              getHealthFacilitiesNearBarangay(id, userCenter ?? { lat, lng })
                 .then(async (result) => {
                   if (cancelledRef.current) return;
                   if (requestSeq !== facilitiesRequestSeqRef.current) return;
@@ -491,7 +519,8 @@ const HeatMap = ({ compact = false, selectedZone: propSelectedZone, onZoneSelect
                     facilities,
                     isNearbyFallback: result.isNearbyFallback ?? false,
                     facilitiesLoading: false,
-                    facilitiesTotalLabel: result.total_label ?? null
+                    facilitiesTotalLabel: result.total_label ?? null,
+                    isUserLocation
                   };
                   setSelectedZone(zoneData);
                   onZoneSelected?.(zoneData);
@@ -520,7 +549,8 @@ const HeatMap = ({ compact = false, selectedZone: propSelectedZone, onZoneSelect
                     temperature: temp,
                     riskLevel,
                     riskScore,
-                    facilities: []
+                    facilities: [],
+                    isUserLocation
                   };
                   setSelectedZone(zoneData);
                   onZoneSelected?.(zoneData);
@@ -727,15 +757,24 @@ const HeatMap = ({ compact = false, selectedZone: propSelectedZone, onZoneSelect
     setRouteSummary(null);
     setRouteSummaryByFacilityId({});
     setRouteErrorByFacilityId({});
-    setRouteOrigin('barangay');
-    setUserPositionForRoute(null);
-    setLocationStatusForRoute(null);
+    const live = selectedZone?.isUserLocation ? userLocationRef.current : null;
+    setRouteOrigin(live ? 'user' : 'barangay');
+    setUserPositionForRoute(live);
+    setLocationStatusForRoute(live ? 'on' : null);
     routeCacheRef.current = {};
   }, [selectedZone?.barangayId ?? 'none']);
 
   /** Get user position for routing (Geolocation API). Resolves to { lat, lng } or null; updates locationStatusForRoute. */
   const getUserPositionForRoute = () => {
     return new Promise((resolve) => {
+      // Already tracking the user (location gate): use the live position.
+      const live = userLocationRef.current;
+      if (live) {
+        setUserPositionForRoute(live);
+        setLocationStatusForRoute('on');
+        resolve(live);
+        return;
+      }
       if (!window.isSecureContext || !navigator.geolocation) {
         setLocationStatusForRoute('unavailable');
         resolve(null);
@@ -1288,6 +1327,7 @@ const HeatMap = ({ compact = false, selectedZone: propSelectedZone, onZoneSelect
             }}
             routeFromLabel={routeToFacility ? (routeOrigin === 'user' ? 'Routing from your location' : `Routing from ${selectedZone?.name ?? 'Barangay'}`) : null}
             locationStatusForRoute={locationStatusForRoute}
+            isUserLocation={Boolean(selectedZone.isUserLocation)}
           />
         </section>
       )}
